@@ -110,10 +110,14 @@ async function fetchApi<T>(
         // Show native dialog for all errors
         const method = options?.method || 'GET';
         const handle = `${method} ${endpoint}`;
-        await showAlert(
-            `${handle} - ${status ? `${status} - ` : ''}${message}`,
-            'Backend call failed'
-        );
+
+        if (!endpoint.includes('health')) {
+            // Don't show health check errors (will be catched by waitForBackend)
+            await showAlert(
+                `${handle} - ${status ? `${status} - ` : ''}${message}`,
+                'Backend call failed'
+            );
+        }
 
         if (error instanceof ApiError) {
             throw error;

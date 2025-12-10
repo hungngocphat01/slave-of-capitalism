@@ -609,7 +609,6 @@
     }
 </script>
 
-```html
 <div class="transaction-table-container">
     {#if selectionMode}
         <div class="table-actions">
