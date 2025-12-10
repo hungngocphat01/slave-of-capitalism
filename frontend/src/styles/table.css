@@ -1,0 +1,470 @@
+/* 
+ * Data Tables
+ * usage: <table>, .transaction-table
+ * definition: Clean data tables with sticky headers
+ */
+
+table {
+    width: 100%;
+    border-collapse: separate;
+    /* Allows border-radius on rows if needed, or stickiness */
+    border-spacing: 0;
+    font-size: var(--font-size-sm);
+}
+
+th {
+    text-align: left;
+    font-weight: var(--font-weight-medium);
+    color: var(--text-secondary);
+    padding: var(--space-2) var(--space-4);
+    border-bottom: 1px solid var(--border);
+    background-color: var(--surface-translucent, var(--surface));
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    height: 32px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 11px;
+}
+
+td {
+    padding: var(--space-2) var(--space-4);
+    border-bottom: 1px solid var(--border-light);
+    color: var(--text-primary);
+    height: 48px;
+    /* Consistent row height */
+    vertical-align: middle;
+}
+
+tr:hover td {
+    background-color: var(--surface);
+}
+
+
+tr.selected td {
+    background-color: rgba(0, 122, 255, 0.1);
+    color: var(--text-primary);
+    border-bottom-color: var(--accent);
+}
+
+
+tr.selected:hover td {
+    background-color: rgba(0, 122, 255, 0.15);
+    /* Keep it selected blue even on hover */
+}
+
+/* Alternate row styling if needed */
+/* tr:nth-child(even) { background-color: var(--surface-alt); } */
+
+/* Specific Table tweaks */
+.transaction-table th {
+    padding-left: var(--space-4);
+}
+
+/* Table Container (for sticky headers) */
+.table-container,
+.transaction-table-container {
+    height: 100%;
+    overflow: auto;
+    position: relative;
+}
+
+.transaction-table th {
+    padding-left: var(--space-4);
+    position: relative;
+    /* For filter dropdowns */
+}
+
+/* Header Content & Filters */
+.th-content {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    justify-content: space-between;
+}
+
+.filter-btn {
+    padding: 2px 4px;
+    background: transparent;
+    border: none;
+    color: var(--text-tertiary);
+    font-size: 10px;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-fast);
+    opacity: 0.5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.filter-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    opacity: 1;
+}
+
+.filter-btn.active {
+    color: var(--accent);
+    opacity: 1;
+    font-weight: bold;
+}
+
+/* Filter Dropdown */
+.filter-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 4px;
+    background-color: white;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    padding: var(--space-3);
+    min-width: 200px;
+    max-width: 280px;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.filter-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.filter-section label {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-secondary);
+}
+
+.filter-section input {
+    padding: var(--space-1) var(--space-2);
+    font-size: var(--font-size-sm);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    width: 100%;
+}
+
+.filter-search {
+    padding: var(--space-2);
+    font-size: var(--font-size-sm);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    width: 100%;
+}
+
+.filter-checkbox {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-1) var(--space-2);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: background-color var(--transition-fast);
+    user-select: none;
+    color: var(--text-primary);
+}
+
+.filter-checkbox:hover {
+    background-color: var(--surface);
+}
+
+.clear-filter-btn {
+    margin-top: var(--space-2);
+    padding: var(--space-1) var(--space-2);
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    width: 100%;
+    text-align: center;
+}
+
+.clear-filter-btn:hover {
+    background-color: var(--border-light);
+}
+
+/* Table Actions (Selection bar) */
+.table-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-4);
+    background-color: var(--surface);
+    border-bottom: 1px solid var(--border-light);
+}
+
+.selection-count {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    font-weight: var(--font-weight-medium);
+}
+
+
+/* Transaction Rows */
+.transaction-row {
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+}
+
+.transaction-row:hover {
+    background-color: var(--surface);
+}
+
+.transaction-row.selected {
+    background-color: rgba(0, 122, 255, 0.08);
+}
+
+.transaction-row.ignored {
+    opacity: 0.5;
+    font-style: italic;
+}
+
+.transaction-row.ignored:hover {
+    opacity: 0.7;
+}
+
+.transaction-row td {
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--border-light);
+    font-size: var(--font-size-base);
+    vertical-align: middle;
+}
+
+/* Cell Specifics */
+.date-cell {
+    font-weight: var(--font-weight-medium);
+    white-space: nowrap;
+}
+
+.date-cell-content {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.selection-checkbox {
+    display: flex;
+    align-items: center;
+}
+
+.selection-checkbox input {
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+}
+
+.time {
+    display: block;
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+}
+
+.calibration-symbol {
+    margin-left: var(--space-1);
+    font-size: var(--font-size-sm);
+}
+
+.description-cell {
+    max-width: 300px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.amount-cell {
+    font-weight: var(--font-weight-semibold);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.amount-cell.inflow {
+    color: var(--inflow);
+}
+
+.amount-cell.outflow {
+    color: var(--text-primary);
+}
+
+.amount-cell.transfer {
+    color: var(--transfer);
+}
+
+.amount-cell.split {
+    color: var(--split);
+}
+
+.amount-cell.loan {
+    color: var(--loan);
+}
+
+.amount-cell.debt {
+    color: var(--debt);
+}
+
+.split-amount-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.split-subtext {
+    font-size: 10px;
+    color: var(--text-tertiary);
+}
+
+/* Inputs in cells */
+.transaction-row input,
+.transaction-row select {
+    width: 100%;
+    padding: var(--space-1) var(--space-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-base);
+}
+
+.date-cell input,
+.amount-cell input {
+    width: 120px;
+}
+
+.amount-cell input {
+    text-align: right;
+}
+
+
+/* Context Menu */
+.context-menu {
+    position: fixed;
+    z-index: 1000;
+    background-color: var(--surface-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    padding: var(--space-2);
+    min-width: 220px;
+    animation: fadeIn var(--transition-fast);
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    width: 100%;
+    padding: var(--space-2) var(--space-3);
+    background-color: transparent;
+    color: var(--text-primary);
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    text-align: left;
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+}
+
+.menu-item:hover {
+    background-color: var(--surface);
+    transform: none;
+    box-shadow: none;
+}
+
+.menu-icon {
+    font-size: var(--font-size-base);
+    line-height: 1;
+}
+
+.menu-label {
+    flex: 1;
+}
+
+.menu-divider {
+    height: 1px;
+    background-color: var(--border-light);
+    margin: var(--space-2) 0;
+}
+/* Date Section Row */
+.date-section-row td {
+    background-color: var(--bg-body, #fff); /* Or keep transparent */
+    color: var(--text-tertiary);
+    font-weight: bold;
+    font-size: var(--font-size-sm);
+    pointer-events: none;
+    height: 48px;
+    border-bottom: none;
+}
+
+/* Enhanced Date Section Row */
+.date-section-row td {
+    background-color: #f9f9fab0;
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 14px;
+    height: 48px;
+    border-bottom: 1px solid var(--border-light);
+    pointer-events: none;
+    padding-left: 20px;
+}
+
+/* Date Input Section Row */
+.date-input-row td {
+    background-color: var(--surface-elevated);
+    padding: 8px 16px;
+    border-bottom: none;
+    height: 48px;
+}
+
+.date-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.date-input-wrapper span {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.date-input-wrapper input {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 4px 8px;
+    font-size: 13px;
+    color: var(--text-primary);
+    background: white;
+}
+
+/* Make date section row clickable */
+.date-section-row td {
+    pointer-events: auto !important; /* Override previous none rule */
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+}
+
+.date-section-row:hover td {
+    background-color: var(--border-light); /* Slightly darker on hover */
+    color: var(--text-primary);
+}
+
+/* Add a plus icon hint on hover using CSS pseudo-element if desired, or just color change */
+.date-section-row td::after {
+    content: "+";
+    float: right;
+    font-weight: bold;
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+.date-section-row:hover td::after {
+    opacity: 1;
+}

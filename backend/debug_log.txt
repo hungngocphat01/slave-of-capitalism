@@ -1,0 +1,21 @@
+INFO:transaction_update:Update Txn 4. Propagate: True. Data: date=None time=None wallet_id=None direction=None amount=Decimal('500.0') classification=None description=None category_id=None subcategory_id=None paired_transaction_id=None is_ignored=None is_calibration=None allow_large_cache_rebuild=False
+INFO:transaction_update:Txn found. Paired ID: 5
+INFO:transaction_update:Paired update data: {'amount': Decimal('500.0')}
+INFO:transaction_update:Recursively calling update for paired txn 5
+INFO:transaction_update:Update Txn 5. Propagate: False. Data: date=None time=None wallet_id=None direction=None amount=Decimal('500.0') classification=None description=None category_id=None subcategory_id=None paired_transaction_id=None is_ignored=None is_calibration=None allow_large_cache_rebuild=False
+INFO:transaction_update:Txn found. Paired ID: 4
+INFO:transaction_update:Skipping propagation (either disabled or no pair)
+INFO:transaction_update:Update Txn 4. Propagate: True. Data: date=None time=None wallet_id=None direction=None amount=Decimal('500.0') classification=None description=None category_id=None subcategory_id=None paired_transaction_id=None is_ignored=None is_calibration=None allow_large_cache_rebuild=False
+INFO:transaction_update:Txn found. Paired ID: 5
+INFO:transaction_update:Paired update data: {'amount': Decimal('500.0')}
+INFO:transaction_update:Recursively calling update for paired txn 5
+INFO:transaction_update:Update Txn 5. Propagate: False. Data: date=None time=None wallet_id=None direction=None amount=Decimal('500.0') classification=None description=None category_id=None subcategory_id=None paired_transaction_id=None is_ignored=None is_calibration=None allow_large_cache_rebuild=False
+INFO:transaction_update:Txn found. Paired ID: 4
+INFO:transaction_update:Skipping propagation (either disabled or no pair)
+INFO:transaction_update:Update Txn 4. Propagate: True. Data: date=None time=None wallet_id=None direction=None amount=Decimal('500.0') classification=None description=None category_id=None subcategory_id=None paired_transaction_id=None is_ignored=None is_calibration=None allow_large_cache_rebuild=False
+INFO:transaction_update:Txn found. Paired ID: 5
+INFO:transaction_update:Paired update data: {'amount': Decimal('500.0')}
+INFO:transaction_update:Recursively calling update for paired txn 5
+INFO:transaction_update:Update Txn 5. Propagate: False. Data: date=None time=None wallet_id=None direction=None amount=Decimal('500.0') classification=None description=None category_id=None subcategory_id=None paired_transaction_id=None is_ignored=None is_calibration=None allow_large_cache_rebuild=False
+INFO:transaction_update:Txn found. Paired ID: 4
+INFO:transaction_update:Skipping propagation (either disabled or no pair)

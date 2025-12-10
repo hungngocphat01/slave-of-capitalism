@@ -1,0 +1,331 @@
+/* 
+ * Layout & Panes
+ * usage: .app-layout, .sidebar, .split-view
+ * definition: Mac-style 3-pane or 2-pane layouts
+ */
+
+/* Main App Shell */
+.app-layout {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background-color: var(--background);
+}
+
+/* Sidebar (Leftmost) */
+.sidebar {
+    width: 250px;
+    height: 100%;
+    background-color: var(--surface);
+    /* Usually slightly gray */
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    backdrop-filter: blur(20px);
+}
+
+/* Main Content Area */
+.main-content {
+    flex: 1;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+    background-color: var(--background);
+    /* White */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Page Internal Layout */
+.page-layout,
+.mac-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    background-color: var(--surface);
+}
+
+/* Split View (e.g., Categories) */
+.split-view {
+    display: flex;
+    height: 100%;
+    width: 100%;
+}
+
+.sidebar-pane {
+    width: 260px;
+    background-color: #f5f5f7;
+    /* Mac sidebar-ish */
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+
+.detail-pane {
+    flex: 1;
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    /* Prevent overflow */
+}
+
+.detail-pane.alt-bg {
+    background-color: #fafafa;
+}
+
+/* Headers */
+.screen-header,
+.pane-header {
+    height: 52px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    padding: 0 var(--space-4);
+    border-bottom: 1px solid var(--border);
+    background-color: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    z-index: 5;
+}
+
+
+.screen-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: var(--space-6);
+    width: 100%;
+}
+
+/* Month Navigation */
+.month-selector {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-left: auto;
+}
+
+.month-nav-btn {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: var(--radius-md);
+    background-color: var(--surface-elevated);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    font-size: var(--font-size-lg);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.month-nav-btn:hover:not(:disabled) {
+    background-color: var(--accent);
+    color: white;
+    border-color: var(--accent);
+}
+
+.month-nav-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.month-display {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+    min-width: 180px;
+    text-align: center;
+}
+
+
+/* Pane Headers (Sub-headers) */
+.pane-header {
+    height: 52px;
+    justify-content: space-between;
+}
+
+.pane-header h2 {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+}
+
+
+
+.pane-content {
+    flex: 1;
+    overflow-y: auto;
+    position: relative;
+    padding: 0;
+}
+
+.pane-content.padded {
+    padding: 24px;
+}
+
+.list-group {
+    padding: 8px 0;
+}
+
+.list-row {
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    cursor: default;
+    font-size: var(--font-size-base);
+    height: 36px;
+    margin: 0 8px;
+    /* Inset look */
+    border-radius: 5px;
+    transition: background-color 0.1s;
+    color: var(--text-primary);
+}
+
+.list-row .row-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.sidebar-pane .list-row:not(.selected):hover {
+    background-color: rgba(0, 0, 0, 0.04);
+}
+
+.sidebar-pane .list-row.selected {
+    background-color: var(--accent);
+    /* Mac selection blue */
+    color: white;
+}
+
+.list-row .emoji {
+    font-size: 16px;
+}
+
+/* Inset List (e.g. Subcategories) */
+.list-group.inset {
+    margin: 16px;
+    padding: 0;
+}
+
+.list-group.inset .list-row {
+    height: 48px;
+    margin: 0;
+    padding: 0 12px 0 0;
+    border-radius: 0;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.list-group.inset .list-row:last-child {
+    border-bottom: none;
+}
+
+.list-group.inset .list-row .row-content {
+    padding-left: 12px;
+}
+
+/* List Actions (Hover) */
+.row-actions {
+    display: flex;
+    gap: 12px;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.list-row:hover .row-actions {
+    opacity: 1;
+}
+
+.action-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 13px;
+    color: var(--accent);
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.action-btn:hover {
+    text-decoration: underline;
+}
+
+.action-btn.delete {
+    color: var(--error);
+    /* Explicit delete color if needed, or rely on .danger class */
+}
+
+/* Header Actions */
+.header-actions {
+    display: flex;
+    gap: 16px;
+    font-size: 13px;
+}
+
+/* Global Layout Specifics */
+/* Global Sidebar (extends sidebar-pane generally but has specific footer) */
+.sidebar-footer {
+    padding: var(--space-4) 0;
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+.sidebar-nav {
+    flex: 1;
+    padding: var(--space-4) 0;
+    overflow-y: auto;
+}
+
+/* Global Nav Items (Primary Sidebar) */
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-4);
+    margin: 1px var(--space-2);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-medium);
+    transition: all var(--transition-base);
+    cursor: pointer;
+}
+
+.nav-item:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    /* Very light hover */
+}
+
+.nav-item.active {
+    background-color: var(--accent);
+    color: white;
+}
+
+.nav-icon {
+    font-size: var(--font-size-lg);
+    line-height: 1;
+    width: 24px;
+    text-align: center;
+}
+
+.nav-label {
+    flex: 1;
+}

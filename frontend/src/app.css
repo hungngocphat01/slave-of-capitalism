@@ -1,0 +1,301 @@
+/* Apple-inspired Design System */
+/* Core Variables */
+:root {
+  /* Colors - Light Mode */
+  --background: #ffffff;
+  --surface: #f5f5f7;
+  --surface-elevated: #ffffff;
+  --border: #d2d2d7;
+  --border-light: #e5e5ea;
+  --text-primary: #1d1d1f;
+  --text-secondary: #86868b;
+  --text-tertiary: #c7c7cc;
+
+  /* Accent Colors */
+  --accent: #007aff;
+  --accent-hover: #0051d5;
+  --success: #34c759;
+  --warning: #ff9500;
+  --error: #ff3b30;
+
+  /* Transaction Type Colors */
+  --inflow: #34c759;
+  --outflow: #ff3b30;
+  --transfer: #007aff;
+  --split: #ff9500;
+  --loan: #af52de;
+  --debt: #ff2d55;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+
+  /* Border Radius */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Layout */
+  --sidebar-width: 220px;
+  --header-height: 60px;
+}
+
+/* Reset & Base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Global Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn var(--transition-base);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
+}
+
+/* Modules */
+
+/* Modules are now imported in +layout.svelte */
+
+/* Transaction Type Utility Colors (kept here as they are domain specific) */
+.inflow {
+  color: var(--inflow);
+}
+
+.outflow {
+  color: var(--outflow);
+}
+
+.transfer {
+  color: var(--transfer);
+}
+
+.split {
+  color: var(--split);
+}
+
+.loan {
+  color: var(--loan);
+}
+
+.debt {
+  color: var(--debt);
+}
+
+/* Common Components */
+
+/* Loading State */
+.loading-state,
+.error-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  color: var(--text-secondary);
+  height: 100%;
+  min-height: 200px;
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--border-light);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Empty State */
+.empty-selection,
+.empty-list-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-tertiary);
+  font-size: var(--font-size-xl);
+  font-weight: 300;
+  text-align: center;
+  padding: var(--space-6);
+}
+
+.empty-list-message {
+  font-size: var(--font-size-base);
+  height: auto;
+  padding: var(--space-8) 0;
+}
+
+/* Banners */
+.system-banner {
+  background: #f2f8fd;
+  border: 1px solid #cfe6f8;
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  margin-bottom: var(--space-6);
+}
+
+
+.system-banner p {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+}
+
+.error-banner {
+  background: #fee2e2;
+  color: #ef4444;
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-4);
+}
+
+/* Badges */
+.badge {
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.badge.ignored {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.badge.calibration {
+  background: #eef2ff;
+  color: #4f46e5;
+}
+
+/* App Branding */
+.sidebar-header {
+  padding: var(--space-6) var(--space-4) var(--space-2) var(--space-6);
+  /* Top Right Bottom Left */
+}
+
+.app-title {
+  font-size: 28px;
+  font-weight: 900;
+  font-family: "Bebas Neue", "Impact", sans-serif;
+  letter-spacing: 3px;
+  background: linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+  line-height: 1.2;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+/* Transaction Type Badges */
+.type-badge {
+  display: inline-block;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.type-badge.inflow {
+  background-color: rgba(52, 199, 89, 0.1);
+  color: var(--inflow);
+}
+
+.type-badge.outflow {
+  background-color: rgba(255, 59, 48, 0.1);
+  color: var(--outflow);
+}
+
+.type-badge.transfer {
+  background-color: rgba(0, 122, 255, 0.1);
+  color: var(--transfer);
+}
+
+.type-badge.split {
+  background-color: rgba(255, 149, 0, 0.1);
+  color: var(--split);
+}
+
+.type-badge.loan {
+  background-color: rgba(175, 82, 222, 0.1);
+  color: var(--loan);
+}
+
+.type-badge.debt {
+  background-color: rgba(255, 45, 85, 0.1);
+  color: var(--debt);
+}

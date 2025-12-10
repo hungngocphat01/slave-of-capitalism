@@ -1,0 +1,178 @@
+/* 
+ * Form Components
+ * usage: input, select, textarea, .form-group
+ * definition: Consistent input styling matching system UI
+ */
+
+
+input:not([type="radio"]):not([type="checkbox"]),
+select,
+textarea {
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background-color: var(--surface);
+    color: var(--text-primary);
+    transition: all var(--transition-fast);
+    width: 100%;
+    /* Default to full width in containers usually */
+}
+
+/* Enforce consistent height for inputs and selects */
+input:not([type="radio"]):not([type="checkbox"]),
+select {
+    height: 40px;
+}
+
+textarea {
+    height: auto;
+    min-height: 80px;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15);
+    background-color: var(--background);
+}
+
+input::placeholder {
+    color: var(--text-tertiary);
+}
+
+/* Mac-style strict inputs */
+.mac-input,
+.mac-select {
+    background-color: #fff;
+    border: 1px solid #d1d1d6;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 13px;
+    /* Slightly smaller for dense mac UIs */
+}
+
+.mac-input:focus,
+.mac-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+}
+
+/* Form Layouts */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    margin-bottom: var(--space-3);
+}
+
+.form-group label {
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: default;
+}
+
+.form-row {
+    display: flex;
+    gap: var(--space-3);
+    margin-bottom: var(--space-3);
+}
+
+.form-row .form-group {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.form-row.vertical {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-2);
+}
+
+.form-row.vertical label {
+    width: auto;
+    text-align: left;
+    margin-right: 0;
+    margin-bottom: var(--space-1);
+}
+
+
+.mac-form {
+    max-width: 400px;
+}
+
+/* Actions */
+.form-actions {
+    display: flex;
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+    align-items: center;
+}
+
+.form-actions.right {
+    justify-content: flex-end;
+}
+
+.form-actions.spread {
+    justify-content: space-between;
+}
+
+/* Option Rows (Radio/Checkbox lists) */
+.option-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+
+.option-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-3);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    background-color: var(--surface);
+    /* Default to surface for "card" feel on white modal */
+}
+
+/* If the modal background is surface, we might want these to be white. 
+   Assuming modal is white, surface is good for contrast, or white with border. 
+   Let's try White + Border, as that's safer for "clean" look. 
+*/
+.option-row {
+    background-color: var(--background);
+    border-color: var(--border);
+}
+
+.option-row:hover {
+    border-color: var(--text-tertiary);
+    background-color: var(--surface);
+}
+
+.option-row.selected {
+    background-color: rgba(0, 122, 255, 0.03);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent) inset;
+    /* Make border look thicker without layout shift */
+}
+
+.option-row input[type="radio"],
+.option-row input[type="checkbox"] {
+    margin: 0;
+    width: auto;
+    /* Reset full width */
+}
+
+/* Text alignment helpers */
+.option-label {
+    flex: 1;
+    color: var(--text-primary);
+    font-weight: 500;
+}

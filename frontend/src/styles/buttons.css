@@ -1,0 +1,140 @@
+/* 
+ * Button Components
+ * usage: class="btn", class="btn-primary", class="btn-secondary", class="btn-icon"
+ * definition: Apple-style buttons with hover states and transitions
+ */
+
+button {
+    font-family: var(--font-family);
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.btn,
+button.btn-primary,
+button.btn-secondary,
+button.btn-danger,
+button.add-btn,
+button.mac-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-medium);
+    border: none;
+    line-height: 1.2;
+}
+
+/* Primary Button (Default accent) */
+/* Intentionally targeting just 'button' if it has no class or specific primary classes */
+button.btn-primary,
+button.add-btn:not(.secondary),
+button.mac-btn.primary {
+    background-color: var(--accent);
+    color: white;
+}
+
+button.btn-primary:active,
+button.add-btn:not(.secondary):active,
+button.mac-btn.primary:active {
+    background-color: var(--accent-hover);
+    transform: translateY(0);
+    /* Reset subtle lift if any */
+}
+
+button.btn-primary:disabled,
+button.add-btn:disabled,
+button.mac-btn.primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Secondary Button (Surface styling) */
+button.secondary,
+button.btn-secondary,
+button.mac-btn.secondary {
+    background-color: var(--surface);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+}
+
+button.secondary:hover,
+button.btn-secondary:hover,
+button.mac-btn.secondary:hover {
+    background-color: var(--border-light);
+}
+
+
+/* Destructive / Danger Button */
+button.danger,
+button.btn-danger,
+button.mac-btn.destructive {
+    background-color: var(--error);
+    color: white;
+}
+
+button.danger:hover,
+button.btn-danger:hover,
+button.mac-btn.destructive:hover {
+    background-color: #d70015;
+    /* Apple red hover */
+}
+
+/* Warning Button */
+button.warning,
+button.btn-warning {
+    background-color: var(--warning);
+    color: white;
+}
+
+button.warning:hover,
+button.btn-warning:hover {
+    background-color: #e08400;
+}
+
+/* Icon Button (Minimal) */
+.btn-icon {
+    background: transparent;
+    border: none;
+    padding: var(--space-1);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-icon:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: var(--text-primary);
+}
+
+/* Text Button (Ghost) */
+.btn-text {
+    background: transparent;
+    color: var(--accent);
+    border: none;
+    padding: var(--space-1) var(--space-2);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+}
+
+.btn-text:hover {
+    text-decoration: underline;
+}
+
+button.btn-text.danger,
+.btn-text.danger {
+    background: transparent !important;
+    color: var(--error) !important;
+}
+
+/* Floating Action / Round Buttons */
+.btn-round {
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+}

@@ -1,0 +1,198 @@
+/* 
+ * Modals & Sheets
+ * usage: .modal, .mac-sheet
+ * definition: Apple-style floating windows and slide-down sheets
+ */
+
+/* Backdrop */
+.modal-backdrop,
+.sheet-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    /* Center for standard modals */
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(2px);
+    transition: opacity 0.2s ease;
+}
+
+/* Standard Modal (Window style) */
+.modal {
+    background-color: var(--surface-elevated);
+    border-radius: var(--radius-xl);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+    width: 600px;
+    /* Increased from 500px */
+    max-width: 90vw;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    animation: slideUp var(--transition-base);
+    /* Ensure animation is present */
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.96);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modal-header {
+    padding: var(--space-4) var(--space-4);
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.8);
+}
+
+.modal-header h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* ... */
+
+.modal-content {
+    padding: var(--space-4);
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.modal-footer {
+    padding: var(--space-3) var(--space-4);
+    background-color: var(--surface);
+    border-top: 1px solid var(--border-light);
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: var(--space-3);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.modal-footer.spread {
+    justify-content: space-between;
+}
+
+/* Sheet Style (Drop from top or pop over) - Matches Categories "New" modal */
+.mac-sheet {
+    background-color: var(--surface-elevated);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    width: 400px;
+    max-width: 90vw;
+    border: 1px solid var(--border-light);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.sheet-header {
+    padding: var(--space-4);
+    text-align: center;
+    border-bottom: 1px solid var(--border-light);
+    background: var(--surface-elevated);
+}
+
+.sheet-header h3 {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.sheet-body {
+    padding: 20px;
+    gap: 16px;
+    display: flex;
+    flex-direction: column;
+}
+
+.sheet-footer {
+    padding: 12px 20px;
+    background-color: var(--surface);
+    border-top: 1px solid var(--border-light);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* =========================================
+   Common Modal Styles (Forms, Info Boxes)
+   ========================================= */
+
+/* Standard Modal Form Wrapper */
+.modal-form,
+.edit-form,
+.split-form,
+.calibration-form,
+.edit-fields {
+    /* Using multiple class names for backward compatibility during refactor, 
+       eventually consolidate to .modal-form */
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+/* Info Box (Standard Pattern) */
+.info-box {
+    padding: var(--space-4);
+    background-color: var(--surface);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.info-label {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.info-value {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.help-text {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin-top: var(--space-1);
+}
+
+.instruction-text {
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    margin: 0;
+}
+
+/* Error Banner */
+.error-banner {
+    background: #fee2e2;
+    color: #ef4444;
+    padding: var(--space-2);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+}
