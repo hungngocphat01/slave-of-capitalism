@@ -25,7 +25,8 @@
     let totalAvailable = $state(0);
     let totalCreditUsed = $state(0);
     let netPosition = $state(0);
-    let pendingDebts = $state(0);
+    let pendingDebts = $state(0); // I owe people
+    let pendingAmount = $state(0); // People owe me
     let selectedWalletId = $state<number | null>(null);
 
     // Modal State
@@ -81,6 +82,14 @@
                 .filter((e) => e.link_type === "debt")
                 .reduce((sum, e) => sum + (Number(e.pending_amount) || 0), 0);
 
+            pendingAmount = pendingEntries
+                .filter(
+                    (e) =>
+                        e.link_type === "split_payment" ||
+                        e.link_type === "loan",
+                )
+                .reduce((sum, e) => sum + (Number(e.pending_amount) || 0), 0);
+
             calculateStats();
         } catch (error) {
             console.error("Failed to load wallet data:", error);
@@ -92,6 +101,7 @@
     function calculateStats() {
         let available = 0;
         let creditUsed = 0;
+        let availableCredit = 0;
 
         for (const w of wallets) {
             if (w.wallet_type === "normal") {
@@ -99,14 +109,29 @@
             } else if (w.wallet_type === "credit") {
                 creditUsed += Number(w.current_balance);
                 if (w.available_credit !== undefined) {
-                    available += Number(w.available_credit);
+                    availableCredit += Number(w.available_credit);
                 }
             }
         }
 
-        totalAvailable = available;
+        totalAvailable = available + availableCredit;
         totalCreditUsed = creditUsed;
-        netPosition = totalAvailable - totalCreditUsed - pendingDebts;
+
+        // Available credit is not considered net position (I don't actually own the money)
+        netPosition =
+            available -
+            totalCreditUsed -
+            availableCredit -
+            pendingDebts +
+            pendingAmount;
+
+        console.log({
+            totalAvailable,
+            totalCreditUsed,
+            availableCredit,
+            pendingDebts,
+            netPosition,
+        });
     }
 
     function formatCurrency(amount: number): string {
@@ -258,7 +283,9 @@
                     </span>
                     {#if pendingDebts > 0}
                         <span class="sub-text debt-sub"
-                            >(- {formatCurrency(pendingDebts)} debts)</span
+                            >(- {formatCurrency(pendingDebts)} debts + {formatCurrency(
+                                pendingAmount,
+                            )} owed)</span
                         >
                     {/if}
                 </div>
@@ -472,7 +499,7 @@
 
     .debt-sub {
         font-size: 12px;
-        color: var(--text-tertiary);
+        color: var(--text-secondary);
         font-weight: normal;
     }
 

@@ -144,7 +144,7 @@ export const translations = {
             availableCredit: 'Available Credit',
             walletList: 'Wallet List',
             creditLimit: 'Credit Limit',
-            normal: 'Normal',
+            normal: 'Standard',
             credit: 'Credit Card',
             transfer: 'Transfer',
             transferMoney: 'Transfer Money',
