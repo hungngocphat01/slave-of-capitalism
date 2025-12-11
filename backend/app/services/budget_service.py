@@ -125,69 +125,55 @@ def upsert_budget(db: Session, category_id: int, year: int, month: int, amount: 
         return db_budget
 
 
-def calculate_monthly_summary(
+def calculate_daily_summary(
     db: Session,
     year: int,
-    month: int,
-    period_boundaries: list[int] = [7, 14, 21, 31]
+    month: int
 ) -> dict:
     """
-    Calculate monthly summary with budget vs actual for each category.
-    
-    Returns a dictionary with:
-    - categories: list of category summaries with budget, actual, and period breakdowns
-    - total_budget: sum of all budgets
-    - total_actual: sum of all actual expenses
+    Calculate daily expenses for each category.
+    Returns daily amounts day 1..N.
     """
+    from calendar import monthrange
+    from app.models.category import Category
+    from app.models.transaction import Transaction, TransactionClassification
+    from app.models.linked_entry import LinkedEntry, LinkType
+    from app.models.budget import Budget
     from sqlalchemy.orm import joinedload
+    from sqlalchemy import and_
     
-    # Get all categories with subcategories loaded
+    _, days_in_month = monthrange(year, month)
+    
+    # Pre-fetch categories with subcategories
     categories = db.query(Category).options(joinedload(Category.subcategories)).all()
-    
-    # Get all budgets for this month
+
+    # Pre-fetch budgets for this month
     budgets = db.query(Budget).filter(
-        and_(Budget.year == year, Budget.month == month)
+        and_(
+            Budget.year == year,
+            Budget.month == month
+        )
     ).all()
-    budget_map = {b.category_id: b.amount for b in budgets}
+    budget_map = {b.category_id: float(b.amount) for b in budgets}
     
-    # Calculate date range for the month
     start_date = date(year, month, 1)
     if month == 12:
         end_date = date(year + 1, 1, 1)
     else:
         end_date = date(year, month + 1, 1)
+        
+    category_data = []
     
-    category_summaries = []
-    total_budget = Decimal("0")
-    total_actual = Decimal("0")
-    
-    def get_period_index(d: date) -> int:
-        day = d.day
-        for i, boundary in enumerate(period_boundaries):
-            if day <= boundary:
-                return i
-        return len(period_boundaries) - 1
-
     for category in categories:
-        budget_amount = budget_map.get(category.id, Decimal("0"))
+        # Array for days 1..N (index 0 is day 1)
+        daily_amounts = [0.0] * days_in_month
         
-        # Initialize subcategory aggregators
-        # Map subcategory_id -> {actual: 0.0, periods: [0.0, ...]}
-        sub_map = {
-            sub.id: {
-                "name": sub.name, 
-                "actual": 0.0, 
-                "periods": [0.0] * len(period_boundaries)
-            } 
-            for sub in category.subcategories
-        }
-        
-        # Category aggregators
-        cat_actual = 0.0
-        cat_periods = [0.0] * len(period_boundaries)
-        
-        # 1. Fetch regular EXPENSE transactions
-        # Exclude ignored transactions
+        # Subcategory breakdown: {sub_id: [daily_array]}
+        sub_daily = {}
+        for sub in category.subcategories:
+            sub_daily[sub.id] = [0.0] * days_in_month
+
+        # 1. Regular Expenses
         expense_txns = db.query(Transaction).filter(
             and_(
                 Transaction.category_id == category.id,
@@ -199,19 +185,14 @@ def calculate_monthly_summary(
         ).all()
         
         for txn in expense_txns:
-            amount = float(txn.amount)
-            p_idx = get_period_index(txn.date)
-            
-            # Add to category total
-            cat_actual += amount
-            cat_periods[p_idx] += amount
-            
-            # Add to subcategory total if applicable
-            if txn.subcategory_id and txn.subcategory_id in sub_map:
-                sub_map[txn.subcategory_id]["actual"] += amount
-                sub_map[txn.subcategory_id]["periods"][p_idx] += amount
-
-        # 2. Fetch SPLIT_PAYMENT user shares
+            day_idx = txn.date.day - 1
+            if 0 <= day_idx < days_in_month:
+                val = float(txn.amount)
+                daily_amounts[day_idx] += val
+                if txn.subcategory_id and txn.subcategory_id in sub_daily:
+                    sub_daily[txn.subcategory_id][day_idx] += val
+                
+        # 2. Split Payments
         split_entries = db.query(LinkedEntry).join(
             Transaction, LinkedEntry.primary_transaction_id == Transaction.id
         ).filter(
@@ -227,66 +208,53 @@ def calculate_monthly_summary(
         for entry in split_entries:
             if entry.user_amount:
                 amount = float(entry.user_amount)
-                # Date comes from the primary transaction
-                # Accessing entry.primary_transaction should be safe if joined, 
-                # but explicit join above ensures filtering. 
-                # Ideally check if relationship is loaded, or use primary_transaction from join context if possible.
-                # entry.primary_transaction is lazy loaded if not eager.
-                # Using the date from filter query implies we should load it or it's implicitly available.
-                # Use entry.primary_transaction.date
+                # Use primary transaction date
                 txn_date = entry.primary_transaction.date
-                p_idx = get_period_index(txn_date)
-                
-                cat_actual += amount
-                cat_periods[p_idx] += amount
-                
-                sub_id = entry.primary_transaction.subcategory_id
-                if sub_id and sub_id in sub_map:
-                    sub_map[sub_id]["actual"] += amount
-                    sub_map[sub_id]["periods"][p_idx] += amount
+                day_idx = txn_date.day - 1
+                if 0 <= day_idx < days_in_month:
+                    daily_amounts[day_idx] += amount
+                    # Split entries might track subcategory via primary txn?
+                    # The LinkedEntry itself doesn't have subcategory_id usually, 
+                    # but the primary transaction does.
+                    sub_id = entry.primary_transaction.subcategory_id
+                    if sub_id and sub_id in sub_daily:
+                        sub_daily[sub_id][day_idx] += amount
+        
+        budget_val = budget_map.get(category.id, 0.0)
+        total_spent = sum(daily_amounts)
 
-        # Build subcategories list response
-        subcategories_list = []
-        for sub_id, data in sub_map.items():
-            # Only include if there's activity? Or always?
-            # User wants to expand to see details. Usually show all or only active.
-            # Showing all might be cluttered if many empty ones.
-            # But "details of the subcategories" suggests seeing the breakdown.
-            # Let's show all for now, or filter by actual > 0?
-            # "Excel-like" usually shows strict hierarchy. Let's show all.
-            subcategories_list.append({
-                "subcategory_id": sub_id,
-                "subcategory_name": data["name"],
-                "actual": data["actual"],
-                "periods": data["periods"]
+        # Include if budget exists OR money spent
+        if budget_val > 0 or total_spent > 0:
+            # Format subcategories
+            subs_formatted = []
+            for sub in category.subcategories:
+                s_amounts = sub_daily.get(sub.id)
+                if s_amounts and sum(s_amounts) > 0:
+                    subs_formatted.append({
+                        "subcategory_id": sub.id,
+                        "subcategory_name": sub.name,
+                        "daily_amounts": s_amounts
+                    })
+            
+            # Sort subcategories by spend
+            subs_formatted.sort(key=lambda x: sum(x["daily_amounts"]), reverse=True)
+
+            category_data.append({
+                "category_id": category.id,
+                "category_name": category.name,
+                "emoji": category.emoji,
+                "color": category.color,
+                "budget": budget_val,
+                "daily_amounts": daily_amounts,
+                "subcategories": subs_formatted
             })
-        
-        # Sort subcategories by name
-        subcategories_list.sort(key=lambda x: x["subcategory_name"])
-
-        percentage = 0.0
-        if budget_amount > 0:
-            percentage = (cat_actual / float(budget_amount)) * 100
-        
-        category_summaries.append({
-            "category_id": category.id,
-            "category_name": category.name,
-            "emoji": category.emoji,
-            "budget": float(budget_amount),
-            "actual": cat_actual,
-            "percentage": percentage,
-            "periods": cat_periods,
-            "subcategories": subcategories_list
-        })
-        
-        total_budget += budget_amount
-        total_actual += Decimal(str(cat_actual)) # Convert back to Decimal for precise total sum safe-ish
+            
+    # Sort by total amount descending
+    category_data.sort(key=lambda x: sum(x["daily_amounts"]), reverse=True)
     
     return {
         "year": year,
         "month": month,
-        "categories": category_summaries,
-        "total_budget": total_budget,
-        "total_actual": total_actual,
-        "period_boundaries": period_boundaries
+        "days_in_month": days_in_month,
+        "categories": category_data
     }

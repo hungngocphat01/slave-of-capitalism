@@ -8,7 +8,9 @@ from app.schemas.budget import (
     BudgetUpdate,
     BudgetResponse,
     BudgetWithCategory,
+    BudgetWithCategory,
     MonthlySummaryResponse,
+    DailySummaryResponse,
 )
 from app.services import budget_service
 
@@ -93,65 +95,19 @@ def delete_budget(budget_id: int, db: Session = Depends(get_db)):
 
 
 @router.get(
-    "/summary/{year}/{month}",
-    response_model=MonthlySummaryResponse,
-    summary="Get monthly budget summary",
-    description="""
-    Calculates budget vs actual spending for all categories in a given month.
-    
-    **What it returns:**
-    - Total budget vs total actual spending
-    - Per-category breakdown (budget, actual, remaining, percentage used)
-    - Period-by-period spending pace (to track if you're on track)
-    
-    **Period Boundaries:**
-    Divides the month into periods to track spending pace. Default: "7,14,21,31"
-    - Period 1: Days 1-7
-    - Period 2: Days 8-14
-    - Period 3: Days 15-21
-    - Period 4: Days 22-31
-    
-    **Example:** If your food budget is ¥30,000/month and you spent ¥10,000 by day 7:
-    - Expected: ¥7,500 (25% of month)
-    - Actual: ¥10,000 (33% of month)
-    - Status: Over pace by ¥2,500
-    
-    **Note:** Only counts EXPENSE transactions. Excludes TRANSFER, LEND, BORROW, DEBT_COLLECTION, LOAN_REPAYMENT.
-    """,
-    responses={
-        200: {"description": "Monthly summary calculated successfully"},
-        400: {"description": "Invalid period_boundaries format"}
-    }
+    "/daily-summary/{year}/{month}",
+    response_model=DailySummaryResponse,
+    summary="Get daily summary for chart",
 )
-def get_monthly_summary(
+def get_daily_summary(
     year: int,
     month: int,
-    period_boundaries: str = Query("7,14,21,31", description="Comma-separated period boundaries"),
     db: Session = Depends(get_db),
 ):
     """
-    Get monthly summary with budget vs actual for all categories.
-    
-    Args:
-        year: Year (e.g., 2025)
-        month: Month (1-12)
-        period_boundaries: Comma-separated day numbers defining period boundaries
-    
-    Returns:
-        MonthlySummaryResponse: Complete budget vs actual breakdown
-    
-    Example:
-        GET /budgets/summary/2025/12?period_boundaries=7,14,21,31
+    Get daily expense data for all categories.
+    Used for plotting area charts.
     """
-    # Parse period boundaries
-    try:
-        boundaries = [int(x.strip()) for x in period_boundaries.split(",")]
-    except ValueError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid period_boundaries format. Use comma-separated integers."
-        )
-    
-    summary = budget_service.calculate_monthly_summary(db, year, month, boundaries)
-    return MonthlySummaryResponse(**summary)
+    summary = budget_service.calculate_daily_summary(db, year, month)
+    return DailySummaryResponse(**summary)
 

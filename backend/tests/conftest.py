@@ -73,7 +73,7 @@ def client(test_db):
     test_app = FastAPI(
         title="Expense Manager API (Test)",
         description="Test instance",
-        version="0.1.0",
+        version="0.2.0",
     )
     
     # Configure CORS (same as main app)

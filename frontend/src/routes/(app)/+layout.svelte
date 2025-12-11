@@ -77,7 +77,9 @@
     <!-- Sidebar -->
     <aside class="sidebar">
         <div class="sidebar-header">
-            <h1 class="app-title">SLAVE OF<br />CAPITALISM</h1>
+            <h1 class="app-title">
+                {$t.appTitle.first}<br />{$t.appTitle.second}
+            </h1>
         </div>
 
         <nav class="sidebar-nav">

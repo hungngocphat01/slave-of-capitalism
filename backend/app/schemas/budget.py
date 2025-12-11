@@ -51,6 +51,7 @@ class CategorySummary(BaseModel):
     category_id: int
     category_name: str
     emoji: Optional[str]
+    color: Optional[str]
     budget: float
     actual: float
     percentage: float
@@ -65,3 +66,31 @@ class MonthlySummaryResponse(BaseModel):
     total_budget: Decimal
     total_actual: Decimal
     period_boundaries: list[int]  # e.g., [7, 14, 21, 31]
+
+
+class DailySubcategoryData(BaseModel):
+    """Schema for a single subcategory's daily data."""
+    subcategory_id: int
+    subcategory_name: str
+    daily_amounts: list[float]
+
+
+class DailyCategoryData(BaseModel):
+    """Schema for a single category's daily data."""
+    category_id: int
+    category_name: str
+    emoji: Optional[str]
+    color: Optional[str]
+    budget: float = 0.0
+    daily_amounts: list[float]  # Ordered by day 1..N
+    subcategories: list[DailySubcategoryData] = []
+
+
+
+class DailySummaryResponse(BaseModel):
+    """Schema for daily summary."""
+    year: int
+    month: int
+    days_in_month: int
+    categories: list[DailyCategoryData]
+

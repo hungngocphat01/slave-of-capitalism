@@ -76,8 +76,14 @@ fn get_config_file_path() -> Result<String, String> {
 
 #[tauri::command]
 fn get_database_path(state: State<'_, AppState>) -> Result<String, String> {
-    let config = state.config.lock().unwrap();
-    Ok(config.get_database_path())
+    #[cfg(debug_assertions)]
+    return Ok("(The client does not control the webserver in debug mode)".to_string());
+
+    #[cfg(not(debug_assertions))]
+    {
+        let config = state.config.lock().unwrap();
+        Ok(config.get_database_path())
+    }
 }
 
 #[tauri::command]

@@ -199,6 +199,7 @@ export interface CategorySummary {
     category_id: number;
     category_name: string;
     emoji?: string;
+    color?: string;
     budget: number;
     actual: number;
     percentage: number;
@@ -213,6 +214,29 @@ export interface MonthlySummaryResponse {
     total_budget: number;
     total_actual: number;
     period_boundaries: number[];
+}
+
+export interface DailySubcategoryData {
+    subcategory_id: number;
+    subcategory_name: string;
+    daily_amounts: number[];
+}
+
+export interface DailyCategoryData {
+    category_id: number;
+    category_name: string;
+    emoji?: string;
+    color?: string;
+    budget: number;
+    daily_amounts: number[];
+    subcategories: DailySubcategoryData[];
+}
+
+export interface DailySummaryResponse {
+    year: number;
+    month: number;
+    days_in_month: number;
+    categories: DailyCategoryData[];
 }
 
 // Populated types (with related data)

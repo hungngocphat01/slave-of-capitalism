@@ -2,15 +2,18 @@
     import { onMount } from "svelte";
     import { api } from "$lib/api/client";
     import { t } from "$lib/i18n";
+    import DailyUsageChart from "$lib/components/charts/DailyUsageChart.svelte";
     import type {
         MonthlySummaryResponse,
         CategorySummary,
+        DailySummaryResponse,
     } from "$lib/api/types";
     import { showAlert } from "$lib/utils/dialog";
 
     let currentYear = $state(new Date().getFullYear());
     let currentMonth = $state(new Date().getMonth() + 1);
     let summary = $state<MonthlySummaryResponse | null>(null);
+    let dailySummary = $state<DailySummaryResponse | null>(null);
     let loading = $state(true);
     let error = $state<string | null>(null);
     let editingBudget = $state<number | null>(null);
@@ -44,10 +47,89 @@
         error = null;
 
         try {
-            summary = await api.budgets.getMonthlySummary(
+            // Fetch ONLY daily summary
+            dailySummary = await api.budgets.getDailySummary(
                 currentYear,
                 currentMonth,
             );
+
+            // Process it into the format expected by the table (MonthlySummaryResponse)
+            const daysInMonth = dailySummary.days_in_month;
+            const periodBoundaries = [7, 14, 21, daysInMonth];
+
+            let totalBudget = 0;
+            let totalActual = 0;
+
+            const categories: CategorySummary[] = dailySummary.categories.map(
+                (cat) => {
+                    const actual = cat.daily_amounts.reduce((a, b) => a + b, 0);
+                    totalBudget += cat.budget;
+                    totalActual += actual;
+
+                    // Calculate periods
+                    const periods = periodBoundaries.map((boundary, index) => {
+                        const startDay =
+                            index === 0 ? 0 : periodBoundaries[index - 1];
+                        const endDay = boundary;
+                        // slice is [start, end), so we need 0-based indices
+                        // daily_amounts is 0-indexed (day 1 is index 0)
+                        // boundary 7 means day 7 (index 6).
+                        // Actually, if boundary is 7, we want days 1-7 (indices 0-6).
+                        // So slice(0, 7) works.
+                        return cat.daily_amounts
+                            .slice(startDay, endDay)
+                            .reduce((a, b) => a + b, 0);
+                    });
+
+                    // Process subcategories
+                    const subcategories = cat.subcategories.map((sub) => {
+                        const subActual = sub.daily_amounts.reduce(
+                            (a, b) => a + b,
+                            0,
+                        );
+                        const subPeriods = periodBoundaries.map(
+                            (boundary, index) => {
+                                const startDay =
+                                    index === 0
+                                        ? 0
+                                        : periodBoundaries[index - 1];
+                                const endDay = boundary;
+                                return sub.daily_amounts
+                                    .slice(startDay, endDay)
+                                    .reduce((a, b) => a + b, 0);
+                            },
+                        );
+                        return {
+                            subcategory_id: sub.subcategory_id,
+                            subcategory_name: sub.subcategory_name,
+                            actual: subActual,
+                            periods: subPeriods,
+                        };
+                    });
+
+                    return {
+                        category_id: cat.category_id,
+                        category_name: cat.category_name,
+                        emoji: cat.emoji,
+                        color: cat.color,
+                        budget: cat.budget,
+                        actual: actual,
+                        percentage:
+                            cat.budget > 0 ? (actual / cat.budget) * 100 : 0,
+                        periods: periods,
+                        subcategories: subcategories,
+                    };
+                },
+            );
+
+            summary = {
+                year: dailySummary.year,
+                month: dailySummary.month,
+                categories: categories,
+                total_budget: totalBudget,
+                total_actual: totalActual,
+                period_boundaries: periodBoundaries,
+            };
         } catch (err) {
             error =
                 err instanceof Error ? err.message : "Failed to load summary";
@@ -355,6 +437,19 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- Chart Section -->
+            <div class="chart-section-wrapper">
+                <div
+                    class="pane-header"
+                    style="background: transparent; border: none; padding-left: 0; padding-right: 0; margin-bottom: var(--space-2);"
+                >
+                    <h2>{$t.summary.cumulativeUsage}</h2>
+                </div>
+                <div class="chart-section">
+                    <DailyUsageChart data={dailySummary} isLoading={loading} />
+                </div>
+            </div>
         {/if}
     </div>
 </div>
@@ -375,6 +470,9 @@
         flex: 1;
         overflow: auto;
         padding: var(--space-6);
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-6);
     }
 
     .loading-state,
@@ -429,6 +527,19 @@
         border-radius: var(--radius-lg);
         overflow: hidden;
         box-shadow: var(--shadow-sm);
+        flex-shrink: 0;
+    }
+
+    .chart-section-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+        flex-shrink: 0;
+    }
+
+    .chart-section {
+        height: 400px;
+        flex-shrink: 0;
     }
 
     .summary-table {

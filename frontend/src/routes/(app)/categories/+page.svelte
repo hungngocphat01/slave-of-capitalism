@@ -22,6 +22,21 @@
     let editingCategory = $state(false);
     let categoryName = $state("");
     let categoryEmoji = $state("");
+    let categoryColor = $state("");
+
+    // Apple System Colors (Light Mode) for selection
+    const PALETTE_COLORS = [
+        "#007AFF", // Blue
+        "#34C759", // Green
+        "#FFCC00", // Yellow
+        "#FF9500", // Orange
+        "#AF52DE", // Purple
+        "#5AC8FA", // Teal
+        "#5856D6", // Indigo
+        "#FF2D55", // Pink
+        "#FF3B30", // Red
+        "#8E8E93", // Gray
+    ];
 
     // Deletion modal state
     let showDeleteModal = $state(false);
@@ -39,7 +54,9 @@
     let showNewSubcategoryModal = $state(false);
     let editingSubcategory = $state<Subcategory | null>(null);
     let newName = $state("");
+
     let newEmoji = $state("");
+    let newColor = $state(PALETTE_COLORS[0]);
 
     // Load categories
     async function loadCategories() {
@@ -74,6 +91,7 @@
         editingCategory = false;
         categoryName = category.name;
         categoryEmoji = category.emoji || "";
+        categoryColor = category.color || PALETTE_COLORS[0];
     }
 
     // Start editing category
@@ -90,6 +108,7 @@
             await api.categories.update(selectedCategory.id, {
                 name: categoryName.trim(),
                 emoji: categoryEmoji.trim() || undefined,
+                color: categoryColor,
             });
             editingCategory = false;
             await loadCategories();
@@ -103,6 +122,7 @@
         if (selectedCategory) {
             categoryName = selectedCategory.name;
             categoryEmoji = selectedCategory.emoji || "";
+            categoryColor = selectedCategory.color || PALETTE_COLORS[0];
         }
         editingCategory = false;
     }
@@ -176,10 +196,12 @@
             await api.categories.create({
                 name: newName.trim(),
                 emoji: newEmoji.trim() || undefined,
+                color: newColor,
             });
             showNewCategoryModal = false;
             newName = "";
             newEmoji = "";
+            newColor = PALETTE_COLORS[0];
             await loadCategories();
         } catch (e) {
             console.error("Failed to create category:", e);
@@ -374,6 +396,33 @@
                                     maxlength="10"
                                 />
                             </div>
+
+                            <div class="form-row">
+                                <span class="label-text">Color</span>
+                                <div class="color-options">
+                                    {#if editingCategory}
+                                        <div class="palette-grid">
+                                            {#each PALETTE_COLORS as color}
+                                                <button
+                                                    class="color-swatch {categoryColor ===
+                                                    color
+                                                        ? 'selected'
+                                                        : ''}"
+                                                    style="background-color: {color};"
+                                                    onclick={() =>
+                                                        (categoryColor = color)}
+                                                    aria-label="Select color {color}"
+                                                ></button>
+                                            {/each}
+                                        </div>
+                                    {:else}
+                                        <div
+                                            class="color-swatch display-only"
+                                            style="background-color: {categoryColor};"
+                                        ></div>
+                                    {/if}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 {:else}
@@ -562,6 +611,22 @@
                         maxlength="10"
                     />
                 </div>
+
+                <div class="form-row vertical">
+                    <label>Color</label>
+                    <div class="palette-grid">
+                        {#each PALETTE_COLORS as color}
+                            <button
+                                class="color-swatch {newColor === color
+                                    ? 'selected'
+                                    : ''}"
+                                style="background-color: {color};"
+                                onclick={() => (newColor = color)}
+                                type="button"
+                            ></button>
+                        {/each}
+                    </div>
+                </div>
             {/if}
         </div>
 
@@ -573,6 +638,7 @@
                     showNewSubcategoryModal = false;
                     newName = "";
                     newEmoji = "";
+                    newColor = PALETTE_COLORS[0];
                     editingSubcategory = null;
                 }}>Cancel</button
             >
@@ -591,11 +657,55 @@
     /* Specific overrides */
     .mac-form .form-row {
         align-items: center;
+        min-height: 40px;
     }
 
-    .mac-form .form-row label {
+    .mac-form .form-row label,
+    .mac-form .form-row .label-text {
         width: 60px; /* Reduced width to minimize gap */
         flex-shrink: 0;
+        font-size: 13px;
+        color: var(--text-secondary);
+    }
+
+    /* Color Picker Styles */
+    .palette-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .color-options {
+        display: flex;
+        align-items: center;
+    }
+
+    .color-swatch {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition:
+            transform 0.1s,
+            border-color 0.2s;
+        padding: 0;
+    }
+
+    .color-swatch.display-only {
+        cursor: default;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .color-swatch:not(.display-only):hover {
+        transform: scale(1.1);
+    }
+
+    .color-swatch.selected {
+        border-color: var(--text-primary);
+        box-shadow:
+            0 0 0 1px var(--bg-primary),
+            0 0 0 2px var(--text-primary);
     }
 
     .mac-input.short {

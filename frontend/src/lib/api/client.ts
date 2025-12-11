@@ -20,6 +20,7 @@ import type {
     CreateBudgetRequest,
     UpdateBudgetRequest,
     MonthlySummaryResponse,
+    DailySummaryResponse,
     TransactionMergeRequest,
 } from './types';
 import { invoke } from '@tauri-apps/api/core';
@@ -531,6 +532,11 @@ export const budgetApi = {
         return fetchApi<MonthlySummaryResponse>(
             `/budgets/summary/${year}/${month}?period_boundaries=${boundaries}`
         );
+    },
+
+    // Get daily summary for charts
+    getDailySummary: async (year: number, month: number): Promise<DailySummaryResponse> => {
+        return fetchApi<DailySummaryResponse>(`/budgets/daily-summary/${year}/${month}`);
     },
 };
 

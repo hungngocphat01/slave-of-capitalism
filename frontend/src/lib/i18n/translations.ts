@@ -1,5 +1,9 @@
 export const translations = {
     en: {
+        appTitle: {
+            first: 'SLAVE OF',
+            second: 'CAPITALISM'
+        },
         // Navigation
         nav: {
             entry: 'Entry',
@@ -204,7 +208,8 @@ export const translations = {
             overBudget: 'Over budget',
             onTrack: 'On track',
             period: 'Period',
-            noBudgets: 'No budgets set for this month'
+            noBudgets: 'No budgets set for this month',
+            cumulativeUsage: 'Cumulative daily usage'
         },
 
         // Settings
@@ -330,6 +335,10 @@ export const translations = {
     },
 
     vi: {
+        appTitle: {
+            first: 'NO LE',
+            second: 'TU BAN'
+        },
         // Navigation
         nav: {
             entry: 'Giao dịch',
@@ -534,7 +543,8 @@ export const translations = {
             overBudget: 'Vượt ngân sách',
             onTrack: 'Đúng kế hoạch',
             period: 'Kỳ',
-            noBudgets: 'Chưa có ngân sách cho tháng này'
+            noBudgets: 'Chưa có ngân sách cho tháng này',
+            cumulativeUsage: 'Tổng tích luỹ chi tiêu theo ngày'
         },
 
         // Settings
