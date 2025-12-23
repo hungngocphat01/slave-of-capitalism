@@ -380,3 +380,102 @@ def get_rolling_balance_history(
         
     return history
 
+
+def get_balance_audits(db: Session, skip: int = 0, limit: int = 100):
+    """
+    Get all balance audits.
+    """
+    from app.models.balance_audit import BalanceAudit
+    return db.query(BalanceAudit).order_by(BalanceAudit.date.desc()).offset(skip).limit(limit).all()
+
+
+def create_balance_audit(db: Session, audit_data):
+    """
+    Create or update a balance audit.
+    Overwrite if exists for the same day.
+    """
+    from app.models.balance_audit import BalanceAudit
+    
+    existing = db.query(BalanceAudit).filter(BalanceAudit.date == audit_data.date).first()
+    if existing:
+        existing.balances = audit_data.balances
+        existing.debts = audit_data.debts
+        existing.owed = audit_data.owed
+        existing.net_position = getattr(audit_data, 'net_position', Decimal("0.00"))
+        db.commit()
+        db.refresh(existing)
+        return existing
+    else:
+        db_audit = BalanceAudit(
+            date=audit_data.date,
+            balances=audit_data.balances,
+            debts=audit_data.debts,
+            owed=audit_data.owed,
+            net_position=getattr(audit_data, 'net_position', Decimal("0.00"))
+        )
+        db.add(db_audit)
+        db.commit()
+        db.refresh(db_audit)
+        return db_audit
+
+
+def perform_balance_audit(db: Session, audit_date: date):
+    """
+    Perform a server-side balance audit.
+    
+    1. Calculate all wallet balances
+    2. Calculate total debts/owed
+    3. Save BalanceAudit record
+    """
+    from app.services import linked_entry_service
+    
+    # 1. Calculate balances
+    wallets = get_wallets(db)
+    balances = {}
+    
+    total_assets = Decimal("0.00")
+    total_liabilities = Decimal("0.00")
+    
+    from app.models.wallet import WalletType
+    
+    for w in wallets:
+        # Use calculate_wallet_balance service method
+        bal = calculate_wallet_balance(
+            db, 
+            w.id, 
+            for_date=audit_date, 
+            trigger_lazy_snapshot=False 
+        )
+        balances[str(w.id)] = float(bal)
+        
+        # Aggregate for Net Position
+        if w.wallet_type == WalletType.CREDIT:
+            total_liabilities += bal
+        else:
+            total_assets += bal
+        
+    # 2. Debts and Owed
+    # Use linked_entry_service
+    total_debts = linked_entry_service.calculate_total_debt(db)
+    total_owed = linked_entry_service.calculate_total_owed(db)
+    
+    # 3. Calculate Net Position
+    # Net = (Assets + Owed) - (Liabilities + Debts)
+    # Assets = Normal Wallets
+    # Liabilities = Credit Wallets
+    net_position = (total_assets + total_owed) - (total_liabilities + total_debts)
+    
+    # 4. Create Record
+    # We can reuse create_balance_audit logic or inline.
+    # Let's create a DTO-like object for create_balance_audit
+    class AuditData:
+        def __init__(self, date, balances, debts, owed, net_position):
+            self.date = date
+            self.balances = balances
+            self.debts = debts
+            self.owed = owed
+            self.net_position = net_position
+            
+    data = AuditData(audit_date, balances, total_debts, total_owed, net_position)
+    return create_balance_audit(db, data)
+

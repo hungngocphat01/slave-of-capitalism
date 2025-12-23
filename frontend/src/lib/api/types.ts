@@ -256,3 +256,14 @@ export interface TransactionMergeRequest {
     category_id?: number | null;
     subcategory_id?: number | null;
 }
+
+export interface BalanceAudit {
+    id: number;
+    date: string;
+    balances: Record<string, number>;
+    debts: number;
+    owed: number;
+    net_position: number;
+    created_at: string;
+    updated_at: string;
+}

@@ -22,6 +22,7 @@ import type {
     MonthlySummaryResponse,
     DailySummaryResponse,
     TransactionMergeRequest,
+    BalanceAudit,
 } from './types';
 import { invoke } from '@tauri-apps/api/core';
 import { showAlert } from '$lib/utils/dialog';
@@ -89,7 +90,11 @@ async function fetchApi<T>(
 
         if (!response.ok) {
             const error = await response.json().catch(() => ({ detail: 'Unknown error' }));
-            throw new ApiError(response.status, error.detail || `HTTP ${response.status}`);
+            let detail = error.detail || `HTTP ${response.status}`;
+            if (typeof detail === 'object') {
+                detail = JSON.stringify(detail);
+            }
+            throw new ApiError(response.status, detail);
         }
 
         if (response.status === 204) {
@@ -371,6 +376,19 @@ export const walletApi = {
                 correct_balance: correctBalance,
                 misc_category_id: miscCategoryId,
             }),
+        });
+    },
+
+    // Get balance audits
+    getAudits: async (): Promise<BalanceAudit[]> => {
+        return fetchApi<BalanceAudit[]>('/wallets/audits');
+    },
+
+    // Create balance audit
+    createAudit: async (data: { date: string; balances?: Record<string, number>; debts?: number; owed?: number }): Promise<BalanceAudit> => {
+        return fetchApi<BalanceAudit>('/wallets/audits', {
+            method: 'POST',
+            body: JSON.stringify(data),
         });
     },
 };

@@ -9,6 +9,7 @@ from app.schemas.wallet import (
     WalletUpdate,
     WalletWithBalance,
 )
+from app.schemas.balance_audit import BalanceAuditResponse, BalanceAuditCreate
 from app.services import wallet_service
 
 router = APIRouter()
@@ -37,6 +38,31 @@ def list_wallets(skip: int = 0, limit: int = 100, db: Session = Depends(get_db))
         wallets_with_balance.append(WalletWithBalance(**wallet_dict))
     
     return wallets_with_balance
+
+
+@router.get("/audits", response_model=list[BalanceAuditResponse])
+def get_audits(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    """Get all balance audits."""
+    return wallet_service.get_balance_audits(db, skip=skip, limit=limit)
+
+
+@router.post("/audits", response_model=BalanceAuditResponse)
+def create_audit(audit: BalanceAuditCreate, db: Session = Depends(get_db)):
+    """
+    Create or update a balance audit.
+    
+    If 'balances' is not provided in the body, the server will calculate the snapshot 
+    (server-side audit). This is the recommended way.
+    
+    If 'balances' is provided (legacy mode), it will be used as-is.
+    """
+    if audit.balances is None:
+        # Server-side audit
+        return wallet_service.perform_balance_audit(db, audit.date)
+    else:
+        # Client-side audit (legacy support or manual override)
+        return wallet_service.create_balance_audit(db, audit)
+
 
 
 @router.get("/{wallet_id}", response_model=WalletWithBalance)
@@ -235,5 +261,7 @@ def create_transfer(transfer_data: dict, db: Session = Depends(get_db)):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e)
         )
+
+
 
 

@@ -1,6 +1,7 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import { fade, slide } from "svelte/transition";
+    import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
     import { api } from "$lib/api/client";
     import { t } from "$lib/i18n";
     import type {
@@ -245,15 +246,32 @@
             showTransferModal = true;
         }
     }
+
+    async function openAuditWindow() {
+        const webview = new WebviewWindow("balance-audit", {
+            url: "/audit",
+            title: "Balance Audit",
+            width: 1000,
+            height: 700,
+            resizable: true,
+            minimizable: false,
+            maximizable: false,
+        });
+    }
 </script>
 
 <div class="mac-layout">
     <header class="screen-header">
         <div class="header-content">
             <h1 class="screen-title">{$t.wallets.title}</h1>
-            <button class="add-btn" onclick={openAddModal}
-                >+ {$t.wallets.addWallet}</button
-            >
+            <div class="header-actions">
+                <button class="btn-secondary" onclick={openAuditWindow}
+                    >Audit</button
+                >
+                <button class="add-btn" onclick={openAddModal}
+                    >+ {$t.wallets.addWallet}</button
+                >
+            </div>
         </div>
     </header>
 
@@ -511,6 +529,12 @@
 
     .add-btn {
         margin-left: auto;
+    }
+
+    .header-actions {
+        display: flex;
+        margin-left: auto;
+        gap: var(--space-3);
     }
 
     /* Section Titles */

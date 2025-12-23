@@ -5,7 +5,9 @@ from app.models.subcategory import Subcategory
 from app.models.transaction import Transaction, TransactionDirection, TransactionClassification
 from app.models.linked_entry import LinkedEntry, LinkedTransaction, LinkType, LinkStatus
 from app.models.snapshot import WalletSnapshot
+from app.models.balance_audit import BalanceAudit
 from app.models.system_metadata import SystemMetadata
+from app.models.budget import Budget
 
 __all__ = [
     "Wallet",
@@ -21,5 +23,8 @@ __all__ = [
     "LinkType",
     "LinkStatus",
     "WalletSnapshot",
+    "BalanceAudit",
     "SystemMetadata",
+    "Budget",
+
 ]
