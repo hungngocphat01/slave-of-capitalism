@@ -100,6 +100,7 @@ def list_transactions(
     for txn in transactions:
         txn_dict = TransactionResponse.model_validate(txn).model_dump()
         txn_dict["wallet_name"] = txn.wallet.name if txn.wallet else None
+        txn_dict["wallet_type"] = txn.wallet.wallet_type.value if txn.wallet else None
         txn_dict["category_name"] = txn.category.name if txn.category else None
         txn_dict["subcategory_name"] = txn.subcategory.name if txn.subcategory else None
         txn_dict["has_linked_entry"] = txn.linked_entry_primary is not None
@@ -135,7 +136,11 @@ def get_transaction(transaction_id: int, db: Session = Depends(get_db)):
             detail=f"Transaction {transaction_id} not found"
         )
     
+    
     txn_dict = TransactionResponse.model_validate(txn).model_dump()
+    txn_dict["wallet_name"] = txn.wallet.name if txn.wallet else None
+    txn_dict["wallet_type"] = txn.wallet.wallet_type.value if txn.wallet else None
+    txn_dict["category_name"] = txn.category.name if txn.category else None
     txn_dict["subcategory_name"] = txn.subcategory.name if txn.subcategory else None
     txn_dict["has_linked_entry"] = txn.linked_entry_primary is not None
     txn_dict["is_linked_to_entry"] = len(txn.linked_transactions) > 0
@@ -348,15 +353,12 @@ def mark_transaction_as_split(
         LinkedEntryResponse: The created linked entry with pending amount
     """
     try:
-        entry_create = LinkedEntryCreate(
-            primary_transaction_id=transaction_id,
-            link_type=LinkType.SPLIT_PAYMENT,
-            counterparty_name=request.counterparty_name,
-            user_amount=request.user_amount,
-            notes=request.notes
+        return transaction_service.mark_as_split(db, transaction_id, request)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
         )
-        entry = linked_entry_service.create_linked_entry(db, entry_create)
-        return LinkedEntryResponse.model_validate(entry)
     except linked_entry_service.LinkedEntryError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -454,6 +456,59 @@ def mark_transaction_as_debt(
     """
     try:
         return transaction_service.mark_as_debt(db, transaction_id, request)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except linked_entry_service.LinkedEntryError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+
+
+@router.post(
+    "/{transaction_id}/mark-installment",
+    response_model=LinkedEntryResponse,
+    summary="Mark transaction as installment",
+    description="""
+    Marks an OUTFLOW transaction as an installment plan for a credit card purchase.
+    
+    **What it does:**
+    - Changes transaction classification to INSTALLMENT (placeholder)
+    - Creates a LinkedEntry tracking the installment plan
+    - Sets pending_amount = total_amount (unrealized charges)
+    - Does NOT count toward current balance (placeholder only)
+    - Reserves credit limit but doesn't increase debt
+    
+    **Example:** ¥30,000 laptop paid over 3 months.
+    - total_amount: ¥30,000 (placeholder)
+    - pending_amount: ¥30,000 (to be charged later)
+    - Each ¥10,000 charge links to this entry as INSTALLMT_CHRGE
+    - Only actual charges count toward monthly expenses
+    """,
+    responses={
+        200: {"description": "Installment plan created successfully"},
+        400: {"description": "Invalid request (e.g., not an OUTFLOW, already linked)"},
+        404: {"description": "Transaction not found"}
+    }
+)
+def mark_transaction_as_installment(
+    transaction_id: int, request: MarkAsLoanRequest, db: Session = Depends(get_db)
+):
+    """
+    Mark a transaction as an installment plan.
+    
+    Args:
+        transaction_id: ID of the transaction to mark
+        request: Contains counterparty_name and optional notes
+    
+    Returns:
+        LinkedEntryResponse: The created linked entry
+    """
+    try:
+        return transaction_service.mark_as_installment(db, transaction_id, request)
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

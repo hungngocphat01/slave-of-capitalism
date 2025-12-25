@@ -14,6 +14,7 @@
     import ConfirmDialog from "../modals/ConfirmDialog.svelte";
     import MarkAsSplitModal from "../modals/MarkAsSplitModal.svelte";
     import MarkAsLoanModal from "../modals/MarkAsLoanModal.svelte";
+    import MarkAsInstallmentModal from "../modals/MarkAsInstallmentModal.svelte";
     import LinkToEntryModal from "../modals/LinkToEntryModal.svelte";
     import ReclassifyModal from "../modals/ReclassifyModal.svelte";
     import ReimbursementsListModal from "../modals/ReimbursementsListModal.svelte";
@@ -67,6 +68,7 @@
     let showSplitModal = $state(false);
     let showLoanModal = $state(false);
     let showDebtModal = $state(false); // For Mark as Debt
+    let showInstallmentModal = $state(false); // For Mark as Installment
     let showLinkModal = $state(false);
     let showReclassifyModal = $state(false);
     let showReimbursementModal = $state(false);
@@ -221,6 +223,11 @@
     function handleMarkAsDebt(transaction: PopulatedTransaction) {
         transactionForModal = transaction;
         showDebtModal = true;
+    }
+
+    function handleMarkAsInstallment(transaction: PopulatedTransaction) {
+        transactionForModal = transaction;
+        showInstallmentModal = true;
     }
 
     async function handleDelete(transaction: PopulatedTransaction) {
@@ -940,6 +947,10 @@
             contextMenu.transaction
                 ? handleMarkAsDebt(contextMenu.transaction)
                 : null}
+        onMarkAsInstallment={() =>
+            contextMenu.transaction
+                ? handleMarkAsInstallment(contextMenu.transaction)
+                : null}
         onLinkToEntry={() =>
             contextMenu.transaction
                 ? handleLinkToEntry(contextMenu.transaction)
@@ -1026,6 +1037,21 @@
         }}
         onSave={() => {
             showDebtModal = false;
+            transactionForModal = null;
+            onUpdate();
+        }}
+    />
+{/if}
+
+{#if showInstallmentModal && transactionForModal && !Array.isArray(transactionForModal)}
+    <MarkAsInstallmentModal
+        transaction={transactionForModal}
+        onClose={() => {
+            showInstallmentModal = false;
+            transactionForModal = null;
+        }}
+        onSave={() => {
+            showInstallmentModal = false;
             transactionForModal = null;
             onUpdate();
         }}

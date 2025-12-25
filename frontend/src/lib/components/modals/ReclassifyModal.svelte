@@ -34,6 +34,10 @@
                       value: "loan_repayment",
                       label: $t.transactionTypes.reclassify.loanRepayment,
                   },
+                  {
+                      value: "installmt_chrge",
+                      label: $t.transactionTypes.reclassify.installmentCharge,
+                  },
               ] as const)
             : ([
                   {

@@ -49,6 +49,8 @@
                 return `💸 ${$t.pending.loan}`;
             case "debt":
                 return `🏦 ${$t.pending.debt}`;
+            case "installment":
+                return `💳 ${$t.pending.installment}`;
             default:
                 return linkType;
         }
@@ -93,6 +95,10 @@
         pendingEntries.filter((entry) => entry.link_type === "debt"),
     );
 
+    let installmentPlans = $derived(
+        pendingEntries.filter((entry) => entry.link_type === "installment"),
+    );
+
     let totalOwedToMe = $derived(
         peopleOweMe.reduce(
             (sum: number, entry) => sum + (Number(entry.pending_amount) || 0),
@@ -102,6 +108,13 @@
 
     let totalIOwe = $derived(
         iOwe.reduce(
+            (sum: number, entry) => sum + (Number(entry.pending_amount) || 0),
+            0,
+        ),
+    );
+
+    let totalInstallments = $derived(
+        installmentPlans.reduce(
             (sum: number, entry) => sum + (Number(entry.pending_amount) || 0),
             0,
         ),
@@ -291,6 +304,89 @@
                                     <div class="payments-received">
                                         <div class="payments-header">
                                             {$t.pending.repaymentsMade}:
+                                        </div>
+                                        {#each entry.linked_transactions as payment}
+                                            <div class="payment-item">
+                                                ✅ {payment.date
+                                                    ? formatDate(payment.date)
+                                                    : "N/A"} - {formatAmount(
+                                                    payment.amount,
+                                                )}
+                                                {#if payment.description}
+                                                    <span class="payment-desc"
+                                                        >({payment.description})</span
+                                                    >
+                                                {/if}
+                                            </div>
+                                        {/each}
+                                    </div>
+                                {/if}
+                            </div>
+                        {/each}
+                    </div>
+                {/if}
+            </section>
+
+            <!-- Installment Plans Section -->
+            <section class="pending-section">
+                <div class="section-header">
+                    <h2 class="section-title">{$t.pending.installmentPlans}</h2>
+                    <div class="section-total" style="color: var(--warning)">
+                        {formatAmount(totalInstallments)}
+                    </div>
+                </div>
+
+                {#if installmentPlans.length === 0}
+                    <div class="empty-state">
+                        <p>{$t.pending.noActiveInstallments}</p>
+                    </div>
+                {:else}
+                    <div class="entries-list">
+                        {#each installmentPlans as entry}
+                            <div class="entry-card">
+                                <div class="entry-header">
+                                    <div class="entry-info">
+                                        <div class="counterparty-name">
+                                            {entry.counterparty_name}
+                                        </div>
+                                        {#if entry.primary_transaction_description}
+                                            <div class="entry-description">
+                                                {entry.primary_transaction_description}
+                                            </div>
+                                        {/if}
+                                    </div>
+                                    <div
+                                        class="entry-amount"
+                                        style="color: var(--warning)"
+                                    >
+                                        {formatAmount(entry.pending_amount)}
+                                    </div>
+                                </div>
+                                <div class="entry-details">
+                                    <span class="entry-type"
+                                        >{getLinkTypeLabel(
+                                            entry.link_type,
+                                        )}</span
+                                    >
+                                    <span class="entry-date">
+                                        {formatDate(entry.created_at)}
+                                    </span>
+                                    <span
+                                        class="entry-status"
+                                        style="color: {getStatusColor(
+                                            entry.status,
+                                        )}"
+                                    >
+                                        {getStatusLabel(entry.status)}
+                                    </span>
+                                </div>
+                                {#if entry.notes}
+                                    <div class="entry-notes">{entry.notes}</div>
+                                {/if}
+                                {#if entry.linked_transactions && entry.linked_transactions.length > 0}
+                                    <div class="payments-received">
+                                        <div class="payments-header">
+                                            {$t.pending.chargesReceived}:
                                         </div>
                                         {#each entry.linked_transactions as payment}
                                             <div class="payment-item">

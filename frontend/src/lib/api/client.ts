@@ -209,6 +209,14 @@ export const transactionApi = {
         });
     },
 
+    // Mark transaction as installment
+    markAsInstallment: async (id: number, data: MarkAsLoanRequest): Promise<LinkedEntry> => {
+        return fetchApi<LinkedEntry>(`/transactions/${id}/mark-installment`, {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    },
+
     // Unclassify transaction (remove split/loan/debt)
     unclassify: async (id: number): Promise<void> => {
         return fetchApi<void>(`/transactions/${id}/unclassify`, {

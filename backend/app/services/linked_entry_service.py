@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.models.transaction import Transaction, TransactionDirection, TransactionClassification
 from app.models.linked_entry import LinkedEntry, LinkedTransaction, LinkType, LinkStatus
 from app.schemas.linked_entry import LinkedEntryCreate, LinkedEntryUpdate
+from app.services import snapshot_service
 
 
 class LinkedEntryError(Exception):
@@ -76,8 +77,9 @@ def create_linked_entry(db: Session, entry: LinkedEntryCreate) -> LinkedEntry:
         if txn.direction != TransactionDirection.OUTFLOW:
             raise LinkedEntryError("Split payment must be an OUTFLOW transaction")
         
-        # Update transaction classification
-        txn.classification = TransactionClassification.SPLIT_PAYMENT
+        # Validate classification is already set
+        if txn.classification != TransactionClassification.SPLIT_PAYMENT:
+            raise LinkedEntryError("Transaction must be classified as SPLIT_PAYMENT before creating linked entry")
         
         # Calculate pending amount (what others owe)
         pending_amount = txn.amount - entry.user_amount
@@ -97,6 +99,17 @@ def create_linked_entry(db: Session, entry: LinkedEntryCreate) -> LinkedEntry:
             raise LinkedEntryError("Debt transaction must have BORROW classification")
         
         pending_amount = txn.amount
+    
+    elif entry.link_type == LinkType.INSTALLMENT:
+        # Validate transaction state - must already be configured
+        if txn.direction != TransactionDirection.RESERVED:
+            raise LinkedEntryError("Installment transaction must have RESERVED direction")
+        if txn.classification != TransactionClassification.INSTALLMENT:
+            raise LinkedEntryError("Installment transaction must have INSTALLMENT classification")
+
+        # Full amount is pending (no user_amount for installments)
+        pending_amount = txn.amount
+
     
     # Create linked entry
     db_entry = LinkedEntry(
@@ -188,6 +201,20 @@ def link_transactions(
                 db.add(txn)
             elif txn.classification != TransactionClassification.LOAN_REPAYMENT:
                 raise LinkedEntryError(f"Transaction {txn.id} must use correct classification")
+        
+        elif entry.link_type == LinkType.INSTALLMENT:
+            # Installment charges must be OUTFLOW (same direction as parent)
+            if txn.direction != TransactionDirection.OUTFLOW:
+                raise LinkedEntryError(f"Installment charge {txn.id} must be OUTFLOW")
+            
+            # Auto-classify as INSTALLMT_CHRGE if it's regular EXPENSE
+            if txn.classification == TransactionClassification.EXPENSE:
+                txn.classification = TransactionClassification.INSTALLMT_CHRGE
+                db.add(txn)
+            elif txn.classification != TransactionClassification.INSTALLMT_CHRGE:
+                raise LinkedEntryError(
+                    f"Transaction {txn.id} must be EXPENSE or INSTALLMT_CHRGE"
+                )
                 
         # Create link
         link = LinkedTransaction(
@@ -195,6 +222,11 @@ def link_transactions(
             transaction_id=txn.id
         )
         db.add(link)
+        
+        # Invalidate wallet snapshots if classification changed
+        # This ensures balance recalculation reflects the new classification
+        if txn.classification in [TransactionClassification.LOAN_REPAYMENT, TransactionClassification.INSTALLMT_CHRGE]:
+            snapshot_service.invalidate_snapshots(db, txn.wallet_id, txn.date)
         
     # Update entry
     entry.pending_amount -= total_amount
@@ -225,8 +257,10 @@ def unlink_transaction(db: Session, link_id: int) -> LinkedEntry:
     entry.pending_amount += link.amount
     
     # Update status
-    if entry.pending_amount == entry.total_amount - (entry.user_amount or Decimal("0.00")):
+    if entry.pending_amount >= entry.total_amount:
         entry.status = LinkStatus.PENDING
+    elif entry.pending_amount <= Decimal("0.01"):
+        entry.status = LinkStatus.SETTLED
     else:
         entry.status = LinkStatus.PARTIAL
     
@@ -283,6 +317,38 @@ def calculate_total_debt(db: Session) -> Decimal:
     return sum(entry.pending_amount for entry in entries)
 
 
+def calculate_pending_installments(db: Session, wallet_id: int | None = None) -> Decimal:
+    """
+    Calculate total pending installment amounts.
+    
+    This represents committed future charges that haven't been realized yet.
+    These amounts reserve credit limit but haven't incurred actual debt.
+    
+    Args:
+        db: Database session
+        wallet_id: Optional wallet ID to filter by
+        
+    Returns:
+        Total pending installment amount
+    """
+    from app.models.transaction import Transaction
+    
+    query = db.query(LinkedEntry).join(
+        Transaction, LinkedEntry.primary_transaction_id == Transaction.id
+    ).filter(
+        LinkedEntry.link_type == LinkType.INSTALLMENT,
+        LinkedEntry.status.in_([LinkStatus.PENDING, LinkStatus.PARTIAL])
+    )
+    
+    if wallet_id:
+        query = query.filter(Transaction.wallet_id == wallet_id)
+    
+    entries = query.all()
+    
+    return sum(entry.pending_amount for entry in entries)
+
+
+
 def unclassify_transaction(db: Session, transaction_id: int) -> bool:
     """
     Unclassify a transaction (remove split/loan/debt status).
@@ -319,6 +385,9 @@ def unclassify_transaction(db: Session, transaction_id: int) -> bool:
         txn.classification = TransactionClassification.EXPENSE
     elif txn.classification == TransactionClassification.BORROW:
         txn.classification = TransactionClassification.INCOME
+    elif txn.classification == TransactionClassification.INSTALLMENT:
+        txn.classification = TransactionClassification.EXPENSE
+        txn.direction = TransactionDirection.OUTFLOW
         
     db.commit()
     return True

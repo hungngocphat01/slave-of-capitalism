@@ -242,7 +242,7 @@ class TestMarkAsLoan:
                 wallet_id=sample_wallet.id,
                 direction=TransactionDirection.OUTFLOW,
                 amount=Decimal("5000.00"),
-                classification=TransactionClassification.EXPENSE,
+                classification=TransactionClassification.SPLIT_PAYMENT,
                 description="Split dinner"
             )
         )
@@ -348,14 +348,14 @@ class TestMarkAsDebt:
         
         request = MarkAsDebtRequest(counterparty_name="Alice")
         
-        with pytest.raises(ValueError, match="Debt must be an INFLOW transaction"):
+        with pytest.raises(ValueError, match="Only INFLOW transactions can be marked as debt"):
             transaction_service.mark_as_debt(test_db, txn.id, request)
     
     def test_mark_as_debt_fail_not_found(self, test_db):
         """Should fail if transaction doesn't exist."""
         request = MarkAsDebtRequest(counterparty_name="Alice")
         
-        with pytest.raises(ValueError, match="Transaction not found"):
+        with pytest.raises(ValueError, match="Transaction 99999 not found"):
             transaction_service.mark_as_debt(test_db, 99999, request)
     
     def test_mark_as_debt_rollback_on_error(self, test_db, sample_wallet):

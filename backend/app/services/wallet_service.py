@@ -5,7 +5,7 @@ from decimal import Decimal
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.models.transaction import Transaction
+from app.models.transaction import Transaction, TransactionClassification
 from app.models.wallet import Wallet
 from app.schemas.wallet import WalletCreate, WalletUpdate
 
@@ -267,6 +267,43 @@ def calculate_wallet_balance(
         return final_balance
 
 
+def calculate_available_credit(db: Session, wallet_id: int) -> Decimal:
+    """
+    Calculate available credit for a credit wallet.
+    
+    Formula:
+        available = credit_limit - actual_balance - pending_installments
+    
+    Args:
+        db: Database session
+        wallet_id: Credit wallet ID
+        
+    Returns:
+        Available credit amount
+    """
+    from app.models.wallet import WalletType
+    from app.services import linked_entry_service
+    
+    wallet = get_wallet(db, wallet_id)
+    if not wallet or wallet.wallet_type != WalletType.CREDIT:
+        return Decimal("0.00")
+    
+    # Calculate actual debt (INCLUDES INSTALLMT_CHRGE, EXCLUDES INSTALLMENT)
+    actual_balance = calculate_wallet_balance(db, wallet_id)
+    
+    # Calculate committed but unrealized installments (The "Remaining Plan")
+    pending_installments = linked_entry_service.calculate_pending_installments(db, wallet_id)
+    
+    # Available = Limit - Used - Reserved
+    # If a charge happens:
+    # 1. actual_balance increases by 2M
+    # 2. pending_installments decreases by 2M
+    # available remains constant. Correct.
+    available = wallet.credit_limit - actual_balance - pending_installments
+    
+    return max(available, Decimal("0.00"))  # Never negative
+
+
 def calibrate_wallet(
     db: Session,
     wallet_id: int,
@@ -460,10 +497,14 @@ def perform_balance_audit(db: Session, audit_date: date):
     total_owed = linked_entry_service.calculate_total_owed(db)
     
     # 3. Calculate Net Position
-    # Net = (Assets + Owed) - (Liabilities + Debts)
+    # Net = (Assets + Owed) - (Liabilities + Debts + Pending Installments)
     # Assets = Normal Wallets
     # Liabilities = Credit Wallets
-    net_position = (total_assets + total_owed) - (total_liabilities + total_debts)
+    
+    # Calculate pending installments (Reserved Liability)
+    total_pending_installments = linked_entry_service.calculate_pending_installments(db)
+    
+    net_position = (total_assets + total_owed) - (total_liabilities + total_debts + total_pending_installments)
     
     # 4. Create Record
     # We can reuse create_balance_audit logic or inline.

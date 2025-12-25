@@ -20,7 +20,8 @@ from app.schemas.linked_entry import (
     LinkedEntryCreate,
     LinkedEntryResponse,
     MarkAsLoanRequest,
-    MarkAsDebtRequest
+    MarkAsDebtRequest,
+    MarkAsSplitRequest
 )
 
 
@@ -706,6 +707,41 @@ def calculate_category_breakdown(db: Session, month: date) -> dict[str, Decimal]
     return breakdown
 
 
+def mark_as_split(db: Session, transaction_id: int, request: MarkAsSplitRequest) -> LinkedEntryResponse:
+    """
+    Mark an OUTFLOW transaction as a SPLIT PAYMENT.
+    
+    This updates the transaction classification to SPLIT_PAYMENT, then creates a linked entry.
+    """
+    txn = get_transaction(db, transaction_id)
+    if not txn:
+        raise ValueError(f"Transaction {transaction_id} not found")
+    
+    # Validate direction
+    if txn.direction != TransactionDirection.OUTFLOW:
+        raise ValueError("Only OUTFLOW transactions can be marked as split payment")
+    
+    # Modify transaction BEFORE creating linked entry (explicit side effect)
+    txn.classification = TransactionClassification.SPLIT_PAYMENT
+    db.add(txn)
+    
+    # Create linked entry
+    from app.services import linked_entry_service
+    entry = linked_entry_service.create_linked_entry(db, LinkedEntryCreate(
+        primary_transaction_id=transaction_id,
+        link_type=LinkType.SPLIT_PAYMENT,
+        counterparty_name=request.counterparty_name,
+        user_amount=request.user_amount,
+        notes=request.notes
+    ))
+    
+    db.commit()
+    db.refresh(txn)
+    db.refresh(entry)
+    
+    return LinkedEntryResponse.model_validate(entry)
+
+
 def mark_as_loan(db: Session, transaction_id: int, request: MarkAsLoanRequest) -> LinkedEntryResponse:
     """
     Mark an OUTFLOW transaction as a LOAN.
@@ -752,25 +788,64 @@ def mark_as_debt(db: Session, transaction_id: int, request: MarkAsDebtRequest) -
     """
     txn = get_transaction(db, transaction_id)
     if not txn:
-        raise ValueError("Transaction not found")
-        
+        raise ValueError(f"Transaction {transaction_id} not found")
+    
+    # Validate direction
     if txn.direction != TransactionDirection.INFLOW:
-        raise ValueError("Debt must be an INFLOW transaction")
-
+        raise ValueError("Only INFLOW transactions can be marked as debt")
+    
     # Update classification
     txn.classification = TransactionClassification.BORROW
     
-    try:
-        from app.services import linked_entry_service
-        entry_create = LinkedEntryCreate(
-            primary_transaction_id=transaction_id,
-            link_type=LinkType.DEBT,
-            counterparty_name=request.counterparty_name,
-            notes=request.notes
-        )
-        entry = linked_entry_service.create_linked_entry(db, entry_create)
-        return LinkedEntryResponse.model_validate(entry)
-        
-    except Exception as e:
-        db.rollback()
-        raise e
+    # Create linked entry
+    from app.services import linked_entry_service
+    entry = linked_entry_service.create_linked_entry(db, LinkedEntryCreate(
+        primary_transaction_id=transaction_id,
+        link_type=LinkType.DEBT,
+        counterparty_name=request.counterparty_name,
+        notes=request.notes,
+        user_amount=None  # Not used for debts
+    ))
+    
+    db.commit()
+    db.refresh(txn)
+    db.refresh(entry)
+    
+    return LinkedEntryResponse.model_validate(entry)
+
+
+def mark_as_installment(db: Session, transaction_id: int, request: MarkAsLoanRequest) -> LinkedEntryResponse:
+    """
+    Mark an OUTFLOW transaction as an INSTALLMENT PLAN.
+    
+    This updates the transaction classification to INSTALLMENT and direction to RESERVED
+    (so it doesn't affect wallet balance until charges occur), then creates a linked entry.
+    """
+    txn = get_transaction(db, transaction_id)
+    if not txn:
+        raise ValueError(f"Transaction {transaction_id} not found")
+    
+    # Validate direction
+    if txn.direction != TransactionDirection.OUTFLOW:
+        raise ValueError("Only OUTFLOW transactions can be marked as installment")
+    
+    # Modify transaction BEFORE creating linked entry (explicit side effect)
+    txn.classification = TransactionClassification.INSTALLMENT
+    txn.direction = TransactionDirection.RESERVED
+    db.add(txn)
+    
+    # Create linked entry
+    from app.services import linked_entry_service
+    entry = linked_entry_service.create_linked_entry(db, LinkedEntryCreate(
+        primary_transaction_id=transaction_id,
+        link_type=LinkType.INSTALLMENT,
+        counterparty_name=request.counterparty_name,
+        notes=request.notes,
+        user_amount=None  # Not used for installments
+    ))
+    
+    db.commit()
+    db.refresh(txn)
+    db.refresh(entry)
+    
+    return LinkedEntryResponse.model_validate(entry)

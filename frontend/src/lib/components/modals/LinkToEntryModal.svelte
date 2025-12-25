@@ -44,7 +44,11 @@
             } else {
                 // If we are paying money, we can link to:
                 // 1. Debts (we borrowed money, we are paying it back)
-                pendingEntries = entries.filter((e) => e.link_type === "debt");
+                // 2. Installments (monthly charges on credit card installment plans)
+                pendingEntries = entries.filter(
+                    (e) =>
+                        e.link_type === "debt" || e.link_type === "installment",
+                );
             }
         } catch (err) {
             console.error("Error loading pending entries:", err);
@@ -168,9 +172,15 @@
                                     </div>
                                     <div class="entry-meta">
                                         <span class="entry-type">
-                                            {entry.link_type === "split_payment"
-                                                ? "💰" + $t.pending.splitPayment
-                                                : "💸" + $t.pending.loan}
+                                            {#if entry.link_type === "split_payment"}
+                                                💰 {$t.pending.splitPayment}
+                                            {:else if entry.link_type === "loan"}
+                                                💸 {$t.pending.loan}
+                                            {:else if entry.link_type === "installment"}
+                                                💳 {$t.pending.installment}
+                                            {:else}
+                                                🏦 {$t.pending.debt}
+                                            {/if}
                                         </span>
                                         <span class="entry-status"
                                             >{entry.status == "partial"

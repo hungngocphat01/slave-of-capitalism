@@ -391,7 +391,7 @@ class TestBulkOperations:
                 wallet_id=sample_wallet.id,
                 direction=TransactionDirection.OUTFLOW,
                 amount=Decimal("5000.00"),
-                classification=TransactionClassification.EXPENSE,
+                classification=TransactionClassification.SPLIT_PAYMENT,
                 description="Dinner Bill"
             )
         )

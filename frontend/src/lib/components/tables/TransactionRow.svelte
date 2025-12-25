@@ -94,13 +94,15 @@
         if (t.classification === "split_payment") return "split";
         if (
             t.classification === "lend" ||
-            t.classification === "loan_repayment"
+            t.classification === "loan_repayment" ||
+            t.classification === "installmt_chrge"
         )
             return "loan";
         if (t.classification === "borrow") return "debt";
         // Debt collection is money coming back, so it shouldn't be red (debt color).
         // specific check or just fall through to inflow/outflow
         if (t.classification === "debt_collection") return "inflow";
+        if (t.direction === "reserved") return "outflow"; // Placeholder style handles the gray color
         return t.direction === "inflow" ? "inflow" : "outflow";
     }
 
@@ -170,6 +172,7 @@
     class="transaction-row"
     class:selected={isSelected}
     class:ignored={transaction.is_ignored}
+    class:placeholder={transaction.classification === "installment"}
     onclick={onSelect}
     oncontextmenu={onContextMenu}
     role="button"
@@ -268,20 +271,30 @@
                 onkeydown={handleKeyDown}
                 autofocus
             />
-        {:else if transaction.classification === "split_payment" && transaction.linked_entry && transaction.linked_entry.user_amount}
+        {:else if (transaction.classification === "split_payment" || transaction.classification === "installment") && transaction.linked_entry}
             <div class="split-amount-container">
-                <span>{formatAmount(transaction.linked_entry.user_amount)}</span
-                >
+                <span>{formatAmount(transaction.amount)}</span>
                 <span
                     class="split-subtext"
-                    title="Total Paid: {formatAmount(transaction.amount)}"
+                    title="Status: {transaction.linked_entry.status}"
                     >({transaction.linked_entry.status === "settled"
                         ? $t.pending.statusSettled
-                        : $t.pending.statusPartial})</span
+                        : transaction.linked_entry.status === "partial"
+                          ? $t.pending.statusPartial
+                          : $t.pending.statusPending})</span
                 >
             </div>
+        {:else if transaction.classification === "installmt_chrge" && transaction.is_linked_to_entry}
+            <div class="split-amount-container">
+                <span
+                    >{transaction.direction === "outflow"
+                        ? ""
+                        : "+"}{formatAmount(transaction.amount)}</span
+                >
+                <span class="split-subtext">({$t.pending.linked})</span>
+            </div>
         {:else}
-            {transaction.direction === "outflow" ? "" : "+"}{formatAmount(
+            {transaction.direction === "inflow" ? "+" : ""}{formatAmount(
                 transaction.amount,
             )}
         {/if}

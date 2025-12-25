@@ -1,5 +1,13 @@
 # Expense Manager - Business Requirements & User Stories
 
+> **⚠️ DEPRECATION NOTICE**  
+> This file is being replaced by modular documentation for easier maintenance.  
+> **New location**: See [README.md](./README.md) for the documentation index.  
+> 
+> **Quick links**:
+> - [installment_feature.md](./installment_feature.md) - Credit card installment plans (NEW)
+> - User stories, transaction models, and other specs will be split into separate files soon
+
 This document defines the **User Stories** (what the user wants to achieve) and the corresponding **Technical Specifications** (how the system supports it).
 
 ---

@@ -61,6 +61,7 @@ class TransactionResponse(TransactionBase):
 class TransactionWithDetails(TransactionResponse):
     """Schema for transaction response with nested category/wallet details."""
     wallet_name: Optional[str] = None
+    wallet_type: Optional[str] = None
     category_name: Optional[str] = None
     subcategory_name: Optional[str] = None
     has_linked_entry: bool = Field(default=False, description="Whether this has a linked entry")

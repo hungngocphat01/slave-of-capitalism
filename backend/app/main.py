@@ -23,6 +23,11 @@ from app.routers import (
 from app.utils.seed_data import seed_categories, seed_sample_wallets
 
 
+# Global flag for wallet seeding (set by CLI)
+# Note: Using env var instead of global because lifespan runs before main()
+def should_skip_wallet_seed():
+    return os.getenv("SKIP_WALLET_SEED", "0") == "1"
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
@@ -31,6 +36,7 @@ async def lifespan(app: FastAPI):
     Handles startup and shutdown tasks:
     - Initialize database tables
     - Seed initial categories
+    - Optionally seed sample wallets (can be disabled with --no-seed-wallets)
     """
     # Startup: Initialize database
     print("🚀 Starting Expense Manager Backend...")
@@ -42,7 +48,10 @@ async def lifespan(app: FastAPI):
     db = next(get_db())
     try:
         seed_categories(db)
-        seed_sample_wallets(db)
+        if not should_skip_wallet_seed():
+            seed_sample_wallets(db)
+        else:
+            print("⏭️  Skipping wallet seed (--no-seed-wallets)")
     finally:
         db.close()
     
@@ -127,8 +136,17 @@ def main():
         default=int(os.getenv("PORT", "8000")),
         help="Port to bind to (default: 8000)"
     )
+    parser.add_argument(
+        "--no-seed-wallets",
+        action="store_true",
+        help="Skip seeding sample wallets on startup (useful for integration tests)"
+    )
     
     args = parser.parse_args()
+    
+    # Set environment variable for wallet seeding (checked in lifespan)
+    if args.no_seed_wallets:
+        os.environ["SKIP_WALLET_SEED"] = "1"
     
     # Set database path if provided
     if args.database:

@@ -341,7 +341,7 @@
                                                 onclick={cancelEdit}>✗</button
                                             >
                                         </div>
-                                    {:else}
+                                    {:else if cat.category_id > 0}
                                         <button
                                             class="budget-value"
                                             onclick={() =>
@@ -352,6 +352,10 @@
                                         >
                                             {formatAmount(cat.budget)}
                                         </button>
+                                    {:else}
+                                        <span class="budget-value-readonly">
+                                            {formatAmount(cat.budget)}
+                                        </span>
                                     {/if}
                                 </td>
                                 <td class="number-cell"
@@ -627,6 +631,13 @@
 
     .budget-value:hover {
         background-color: var(--border-light);
+    }
+
+    .budget-value-readonly {
+        color: var(--text-secondary);
+        padding: 2px 4px;
+        font-size: var(--font-size-base);
+        font-variant-numeric: tabular-nums;
     }
 
     .budget-input {

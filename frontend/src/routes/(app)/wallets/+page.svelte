@@ -28,6 +28,7 @@
     let netPosition = $state(0);
     let pendingDebts = $state(0); // I owe people
     let pendingAmount = $state(0); // People owe me
+    let pendingInstallments = $state(0); // Reserved credit for installment plans
     let selectedWalletId = $state<number | null>(null);
 
     // Modal State
@@ -91,6 +92,11 @@
                 )
                 .reduce((sum, e) => sum + (Number(e.pending_amount) || 0), 0);
 
+            // Calculate pending installments (reserved credit)
+            pendingInstallments = pendingEntries
+                .filter((e) => e.link_type === "installment")
+                .reduce((sum, e) => sum + (Number(e.pending_amount) || 0), 0);
+
             calculateStats();
         } catch (error) {
             console.error("Failed to load wallet data:", error);
@@ -118,12 +124,16 @@
         totalAvailable = available + availableCredit;
         totalCreditUsed = creditUsed;
 
-        // Available credit is not considered net position (I don't actually own the money)
+        // Net Position = Assets - Liabilities
+        // Assets: cash + bank balances (available)
+        // Liabilities: credit card debt (totalCreditUsed) + money you owe (pendingDebts) + reserved installments (pendingInstallments)
+        // Receivables: money owed to you (pendingAmount)
+        // Note: availableCredit is NOT included - it's borrowing capacity, not actual money
         netPosition =
             available -
             totalCreditUsed -
-            availableCredit -
-            pendingDebts +
+            pendingDebts -
+            pendingInstallments +
             pendingAmount;
 
         console.log({
@@ -131,6 +141,7 @@
             totalCreditUsed,
             availableCredit,
             pendingDebts,
+            pendingInstallments,
             netPosition,
         });
     }

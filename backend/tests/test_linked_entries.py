@@ -16,13 +16,13 @@ class TestSplitPayment:
         """Should create split payment entry."""
         from app.schemas.linked_entry import LinkedEntryCreate
         
-        # Create expense
+        # Create expense and set classification
         txn = Transaction(
             date=date(2025, 12, 6),
             wallet_id=sample_wallet.id,
             direction=TransactionDirection.OUTFLOW,
             amount=Decimal("3000.00"),
-            classification=TransactionClassification.EXPENSE,  # Will be updated
+            classification=TransactionClassification.SPLIT_PAYMENT,
             description="Dinner with Bob",
             category_id=sample_category.id
         )
@@ -336,13 +336,13 @@ class TestLinkedEntryValidation:
     
     def test_cannot_link_same_transaction_twice(self, test_db, sample_wallet):
         """Should prevent linking same transaction twice."""
-        # Create expense
+        # Create expense and set classification
         expense = Transaction(
             date=date(2025, 12, 6),
             wallet_id=sample_wallet.id,
             direction=TransactionDirection.OUTFLOW,
             amount=Decimal("3000.00"),
-            classification=TransactionClassification.EXPENSE,
+            classification=TransactionClassification.SPLIT_PAYMENT,
             description="Expense"
         )
         test_db.add(expense)
@@ -368,7 +368,7 @@ class TestLinkedEntryValidation:
             wallet_id=sample_wallet.id,
             direction=TransactionDirection.OUTFLOW,
             amount=Decimal("3000.00"),
-            classification=TransactionClassification.EXPENSE,
+            classification=TransactionClassification.SPLIT_PAYMENT,
             description="Expense"
         )
         test_db.add(expense)

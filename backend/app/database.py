@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.pool import StaticPool
 
 # Database path - can be set via set_database_path() or DATABASE_PATH env var
 DATABASE_PATH = os.getenv("DATABASE_PATH", "./expense.db")
@@ -42,33 +43,47 @@ def set_database_path(path: str) -> None:
     """
     global engine, SessionLocal, SQLALCHEMY_DATABASE_URL, _database_path
     
-    # Validate path
-    db_path = Path(path).resolve()
-    parent_dir = db_path.parent
-    
-    # Create parent directory if it doesn't exist
-    if not parent_dir.exists():
-        try:
-            parent_dir.mkdir(parents=True, exist_ok=True)
-            print(f"✓ Created database directory: {parent_dir}")
-        except Exception as e:
-            raise ValueError(f"Cannot create database directory {parent_dir}: {e}")
-    
-    if not parent_dir.is_dir():
-        raise ValueError(f"Parent path is not a directory: {parent_dir}")
-    
-    # Update global variables
-    _database_path = str(db_path)
-    SQLALCHEMY_DATABASE_URL = f"sqlite:///{_database_path}"
-    
-    print(f"✓ Database path set to: {_database_path}")
+    # Handle in-memory database
+    if path == ":memory:":
+        _database_path = ":memory:"
+        SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
+        print("✓ Database set to in-memory mode")
+    else:
+        # Validate path
+        db_path = Path(path).resolve()
+        parent_dir = db_path.parent
+        
+        # Create parent directory if it doesn't exist
+        if not parent_dir.exists():
+            try:
+                parent_dir.mkdir(parents=True, exist_ok=True)
+                print(f"✓ Created database directory: {parent_dir}")
+            except Exception as e:
+                raise ValueError(f"Cannot create database directory {parent_dir}: {e}")
+        
+        if not parent_dir.is_dir():
+            raise ValueError(f"Parent path is not a directory: {parent_dir}")
+        
+        # Update global variables
+        _database_path = str(db_path)
+        SQLALCHEMY_DATABASE_URL = f"sqlite:///{_database_path}"
+        
+        print(f"✓ Database path set to: {_database_path}")
     
     # Recreate engine with new path
-    engine = create_engine(
-        SQLALCHEMY_DATABASE_URL,
-        connect_args={"check_same_thread": False},
-        echo=False,
-    )
+    if path == ":memory:":
+         engine = create_engine(
+            SQLALCHEMY_DATABASE_URL,
+            connect_args={"check_same_thread": False},
+            poolclass=StaticPool,
+            echo=False,
+        )
+    else:
+        engine = create_engine(
+            SQLALCHEMY_DATABASE_URL,
+            connect_args={"check_same_thread": False},
+            echo=False,
+        )
     
     # Re-register SQLite pragma listener
     @event.listens_for(engine, "connect")
@@ -131,7 +146,7 @@ def init_db():
             # New database, set initial version
             new_meta = system_metadata.SystemMetadata(
                 app_version=APP_VERSION,
-                schema_version=1
+                schema_version=2  # Updated for installment feature
             )
             db.add(new_meta)
             db.commit()
@@ -140,14 +155,16 @@ def init_db():
         else:
             print(f"🔍 Found existing database (Schema v{metadata.schema_version})")
             # Verify version
-            if metadata.schema_version != 1:
+            if metadata.schema_version not in [1, 2]:
                 # In real app, we would run migrations here
                 error_msg = (
-                    f"❌ Schema version mismatch! Expected 1, found {metadata.schema_version}. "
-                    "Automatic migrations are not yet implemented."
+                    f"❌ Schema version mismatch! Expected 1 or 2, found {metadata.schema_version}. "
+                    "Please run migration script."
                 )
                 print(error_msg)
                 raise Exception(error_msg)
+            elif metadata.schema_version == 1:
+                print("⚠️  Schema version 1 detected. Consider running migration to v2 for installment feature support.")
                 
     except Exception as e:
         print(f"❌ Database initialization failed: {e}")

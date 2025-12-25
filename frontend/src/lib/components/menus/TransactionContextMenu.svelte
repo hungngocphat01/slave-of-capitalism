@@ -18,6 +18,8 @@
         Scale,
         Check,
         NoSymbol,
+        CreditCard,
+        ChevronRight,
     } from "svelte-heros-v2";
 
     interface Props {
@@ -30,6 +32,7 @@
         onMarkAsSplit: () => void;
         onMarkAsLoan: () => void;
         onMarkAsDebt: () => void;
+        onMarkAsInstallment: () => void;
         onLinkToEntry: () => void;
         onUnclassify: () => void;
         onViewDetails: () => void;
@@ -52,6 +55,7 @@
         onMarkAsSplit,
         onMarkAsLoan,
         onMarkAsDebt,
+        onMarkAsInstallment,
         onLinkToEntry,
         onUnclassify,
         onViewDetails,
@@ -107,14 +111,25 @@
                 transaction.classification === "income"),
     );
 
+    const canMarkAsInstallment = $derived(
+        !multipleSelected &&
+            transaction.direction === "outflow" &&
+            transaction.wallet_type === "credit" &&
+            transaction.classification === "expense",
+    );
+
     const canLinkToEntry = $derived(
         transaction.classification === "debt_collection" ||
             transaction.classification === "loan_repayment" ||
+            transaction.classification === "installmt_chrge" ||
             transaction.classification === "income", // Allow linking regular income (reimbursement)
     );
 
     const hasSpecialActions = $derived(
-        canMarkAsSplit || canMarkAsLoan || canMarkAsDebt,
+        canMarkAsSplit ||
+            canMarkAsLoan ||
+            canMarkAsDebt ||
+            canMarkAsInstallment,
     );
 
     const hasLinkedEntry = $derived(!!transaction.linked_entry);
@@ -165,49 +180,90 @@
         <div class="menu-divider"></div>
     {/if}
 
-    {#if canMarkAsSplit}
-        <button
-            class="menu-item"
-            onclick={() => {
-                onMarkAsSplit();
-                onClose();
-            }}
-        >
-            <span class="menu-icon">
-                <ArrowsRightLeft size="16" />
-            </span>
-            <span class="menu-label">{$t.transactions.markAsSplit}</span>
-        </button>
-    {/if}
+    {#if hasSpecialActions}
+        <div class="menu-divider"></div>
 
-    {#if canMarkAsLoan}
-        <button
-            class="menu-item"
-            onclick={() => {
-                onMarkAsLoan();
-                onClose();
-            }}
-        >
+        <!-- Submenu Parent -->
+        <div class="menu-item has-submenu">
             <span class="menu-icon">
-                <Banknotes size="16" />
+                <Tag size="16" />
             </span>
-            <span class="menu-label">{$t.transactions.markAsLoan}</span>
-        </button>
-    {/if}
+            <span class="menu-label">{$t.transactions.markAs}</span>
+            <span class="submenu-arrow">
+                <ChevronRight size="14" />
+            </span>
 
-    {#if canMarkAsDebt}
-        <button
-            class="menu-item"
-            onclick={() => {
-                onMarkAsDebt();
-                onClose();
-            }}
-        >
-            <span class="menu-icon">
-                <BuildingLibrary size="16" />
-            </span>
-            <span class="menu-label">{$t.transactions.markAsDebt}</span>
-        </button>
+            <!-- Submenu Content -->
+            <div class="submenu">
+                {#if canMarkAsSplit}
+                    <button
+                        class="menu-item"
+                        onclick={() => {
+                            onMarkAsSplit();
+                            onClose();
+                        }}
+                    >
+                        <span class="menu-icon">
+                            <ArrowsRightLeft size="16" />
+                        </span>
+                        <span class="menu-label"
+                            >{$t.transactions.markAsSplit}</span
+                        >
+                    </button>
+                {/if}
+
+                {#if canMarkAsLoan}
+                    <button
+                        class="menu-item"
+                        onclick={() => {
+                            onMarkAsLoan();
+                            onClose();
+                        }}
+                    >
+                        <span class="menu-icon">
+                            <Banknotes size="16" />
+                        </span>
+                        <span class="menu-label"
+                            >{$t.transactions.markAsLoan}</span
+                        >
+                    </button>
+                {/if}
+
+                {#if canMarkAsDebt}
+                    <button
+                        class="menu-item"
+                        onclick={() => {
+                            onMarkAsDebt();
+                            onClose();
+                        }}
+                    >
+                        <span class="menu-icon">
+                            <BuildingLibrary size="16" />
+                        </span>
+                        <span class="menu-label"
+                            >{$t.transactions.markAsDebt}</span
+                        >
+                    </button>
+                {/if}
+
+                {#if canMarkAsInstallment}
+                    <button
+                        class="menu-item"
+                        onclick={() => {
+                            onMarkAsInstallment();
+                            onClose();
+                        }}
+                    >
+                        <span class="menu-icon">
+                            <CreditCard size="16" />
+                        </span>
+                        <span class="menu-label"
+                            >{$t.transactions.markAsInstallment}</span
+                        >
+                    </button>
+                {/if}
+            </div>
+        </div>
     {/if}
 
     {#if (canLinkToEntry || hasLinkedEntry) && hasSpecialActions}
@@ -349,4 +405,32 @@
      * If they were internal to the old ContextMenu, I should move them to global or the new ContextMenu.
      * Let's check if they were in the old file... looks like they were NOT in the old file "Styles are now in src/styles/table.css"
      */
+    .has-submenu {
+        position: relative;
+    }
+
+    .submenu {
+        display: none;
+        position: absolute;
+        left: 100%;
+        top: -4px;
+        background-color: var(--surface-elevated);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-lg);
+        padding: var(--space-2);
+        min-width: 220px;
+        z-index: 1001;
+    }
+
+    .has-submenu:hover .submenu {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .submenu-arrow {
+        color: var(--text-tertiary);
+        display: flex;
+        align-items: center;
+    }
 </style>

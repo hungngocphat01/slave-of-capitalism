@@ -120,15 +120,39 @@ def test_server_side_audit_calculation(db, client):
     db.add_all([owed_entry, debt_entry])
     db.commit()
     
+    
+    # 3b. Add Installment Plan (Reserved Liability)
+    # Buy 500M Item on Installment
+    # 500 Outflow (Installment Plan) -> Reserved direction
+    t_plan = Transaction(
+        date=today, wallet_id=wallet_credit.id, direction=TransactionDirection.RESERVED,
+        amount=Decimal("500"), classification=TransactionClassification.INSTALLMENT, description="Big Purchase"
+    )
+    db.add(t_plan)
+    db.commit()
+    
+    plan_entry = LinkedEntry(
+        link_type=LinkType.INSTALLMENT,
+        primary_transaction_id=t_plan.id,
+        counterparty_name="Store",
+        total_amount=Decimal("500"),
+        pending_amount=Decimal("500"),
+        status=LinkStatus.PENDING
+    )
+    db.add(plan_entry)
+    db.commit()
+
     # Balances Update:
     # Normal: 1000 (In) - 100 (Split Out) + 50 (Borrow In) = 950
-    # Credit: 300
+    # Credit: 300 (Used)
+    # Note: Installment Plan (RESERVED) does NOT affect Wallet Balance
     
     # Expected Audit Values:
     # Owed: 100
     # Debts: 50
-    # Net Position = (Normal - Credit) - Debts + Owed
-    # Net Position = (950 - 300) - 50 + 100 = 650 - 50 + 100 = 700
+    # Pending Installments: 500
+    # Net Position = (Normal - Credit) - Debts + Owed - Pending Installments
+    # Net Position = (950 - 300) - 50 + 100 - 500 = 200
     
     # 4. Trigger Server-Side Audit
     audit_date = today.isoformat()
@@ -150,7 +174,8 @@ def test_server_side_audit_calculation(db, client):
     assert float(data["owed"]) == 100.0
     
     # Verify Net Position
-    expected_net = (950 - 300) - 50 + 100
+    expected_net = (950 - 300) - 50 + 100 - 500
     assert float(data["net_position"]) == float(expected_net)
     
     print("Test Passed: Server-side audit calculation is correct.")
+

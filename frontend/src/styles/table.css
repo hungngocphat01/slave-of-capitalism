@@ -233,6 +233,20 @@ tr.selected:hover td {
     opacity: 0.7;
 }
 
+/* Placeholder installment transactions - only grey the amount and badge */
+.transaction-row.placeholder .amount-cell {
+    color: #999 !important;
+    font-style: italic;
+}
+
+.transaction-row.placeholder .type-badge {
+    background-color: #f0f0f0;
+    color: #999;
+    border-color: #ddd;
+}
+
+
+
 .transaction-row td {
     padding: var(--space-3) var(--space-4);
     border-bottom: 1px solid var(--border-light);
@@ -392,9 +406,11 @@ tr.selected:hover td {
     background-color: var(--border-light);
     margin: var(--space-2) 0;
 }
+
 /* Date Section Row */
 .date-section-row td {
-    background-color: var(--bg-body, #fff); /* Or keep transparent */
+    background-color: var(--bg-body, #fff);
+    /* Or keep transparent */
     color: var(--text-tertiary);
     font-weight: bold;
     font-size: var(--font-size-sm);
@@ -446,13 +462,15 @@ tr.selected:hover td {
 
 /* Make date section row clickable */
 .date-section-row td {
-    pointer-events: auto !important; /* Override previous none rule */
+    pointer-events: auto !important;
+    /* Override previous none rule */
     cursor: pointer;
     transition: background-color var(--transition-fast);
 }
 
 .date-section-row:hover td {
-    background-color: var(--border-light); /* Slightly darker on hover */
+    background-color: var(--border-light);
+    /* Slightly darker on hover */
     color: var(--text-primary);
 }
 

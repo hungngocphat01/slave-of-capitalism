@@ -23,3 +23,13 @@ description: Coding guidelines and best practices for this project
 ## general
 
 *   **Accessibility**: Ensure all interactive elements have labels or aria-labels.
+
+## Business Logic Reference
+
+For understanding the application's business logic, see the modular documentation:
+
+*   **[README.md](./README.md)** - Documentation index and navigation
+*   **[installment_feature.md](./installment_feature.md)** - Credit card installment plans
+*   **[BUSINESS_LOGIC_SPECS.md](./BUSINESS_LOGIC_SPECS.md)** - Legacy (being deprecated)
+
+When implementing new features, document them in separate focused files following the pattern in `installment_feature.md`.

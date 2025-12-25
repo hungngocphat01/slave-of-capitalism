@@ -29,9 +29,9 @@ def list_wallets(skip: int = 0, limit: int = 100, db: Session = Depends(get_db))
         wallet_dict = WalletResponse.model_validate(wallet).model_dump()
         wallet_dict["current_balance"] = balance
         
-        # For credit wallets, calculate available credit
+        # For credit wallets, calculate available credit (includes pending installments)
         if wallet.wallet_type == WalletType.CREDIT:
-            wallet_dict["available_credit"] = wallet.credit_limit - balance
+            wallet_dict["available_credit"] = wallet_service.calculate_available_credit(db, wallet.id)
         else:
             wallet_dict["available_credit"] = None
         
@@ -81,9 +81,9 @@ def get_wallet(wallet_id: int, db: Session = Depends(get_db)):
     wallet_dict = WalletResponse.model_validate(wallet).model_dump()
     wallet_dict["current_balance"] = balance
     
-    # For credit wallets, calculate available credit
+    # For credit wallets, calculate available credit (includes pending installments)
     if wallet.wallet_type == WalletType.CREDIT:
-        wallet_dict["available_credit"] = wallet.credit_limit - balance
+        wallet_dict["available_credit"] = wallet_service.calculate_available_credit(db, wallet.id)
     else:
         wallet_dict["available_credit"] = None
     

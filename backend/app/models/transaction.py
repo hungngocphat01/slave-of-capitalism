@@ -14,6 +14,7 @@ class TransactionDirection(PyEnum):
     """Physical direction of money movement."""
     INFLOW = "inflow"    # Money enters wallet
     OUTFLOW = "outflow"  # Money leaves wallet
+    RESERVED = "reserved"  # For future liabilities (Installment Plans) money movement
 
 
 class TransactionClassification(PyEnum):
@@ -26,6 +27,8 @@ class TransactionClassification(PyEnum):
     LOAN_REPAYMENT = "loan_repayment"      # Paying back borrowed money
     SPLIT_PAYMENT = "split_payment"        # Paid for others
     TRANSFER = "transfer"                  # Between own wallets
+    INSTALLMENT = "installment"            # Installment plan placeholder
+    INSTALLMT_CHRGE = "installmt_chrge"    # Actual installment charge
 
 
 class Transaction(Base):

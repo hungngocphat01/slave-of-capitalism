@@ -1,6 +1,6 @@
 // API Types based on backend models
 
-export type Direction = 'inflow' | 'outflow';
+export type Direction = 'inflow' | 'outflow' | 'reserved';
 
 export type Classification =
     | 'expense'
@@ -10,9 +10,11 @@ export type Classification =
     | 'debt_collection'
     | 'loan_repayment'
     | 'split_payment'
-    | 'transfer';
+    | 'transfer'
+    | 'installment'
+    | 'installmt_chrge';
 
-export type LinkType = 'split_payment' | 'loan' | 'debt';
+export type LinkType = 'split_payment' | 'loan' | 'debt' | 'installment';
 
 export type LinkedEntryStatus = 'pending' | 'partial' | 'settled';
 
@@ -243,10 +245,15 @@ export interface DailySummaryResponse {
 
 export interface PopulatedTransaction extends Transaction {
     wallet?: Wallet;
+    wallet_name?: string;
+    wallet_type?: WalletType;
+    category_name?: string;
     category?: Category;
     subcategory?: Subcategory;
+    subcategory_name?: string;
     paired_transaction?: Transaction;
     linked_entry?: LinkedEntry;
+    has_linked_entry?: boolean;
 }
 
 export interface TransactionMergeRequest {

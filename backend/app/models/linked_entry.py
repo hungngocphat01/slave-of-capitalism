@@ -14,6 +14,7 @@ class LinkType(PyEnum):
     SPLIT_PAYMENT = "split_payment"  # Pay on behalf, expect reimbursement
     LOAN = "loan"                    # Lent money, expect payback
     DEBT = "debt"                    # Borrowed money, must repay
+    INSTALLMENT = "installment"      # Credit card installment plan
 
 
 class LinkStatus(PyEnum):

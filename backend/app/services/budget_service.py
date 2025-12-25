@@ -173,13 +173,16 @@ def calculate_daily_summary(
         for sub in category.subcategories:
             sub_daily[sub.id] = [0.0] * days_in_month
 
-        # 1. Regular Expenses
+        # 1. Regular Expenses (including installment charges)
         expense_txns = db.query(Transaction).filter(
             and_(
                 Transaction.category_id == category.id,
                 Transaction.date >= start_date,
                 Transaction.date < end_date,
-                Transaction.classification == TransactionClassification.EXPENSE,
+                Transaction.classification.in_([
+                    TransactionClassification.EXPENSE,
+                    TransactionClassification.INSTALLMT_CHRGE
+                ]),
                 Transaction.is_ignored == False
             )
         ).all()
@@ -248,6 +251,59 @@ def calculate_daily_summary(
                 "daily_amounts": daily_amounts,
                 "subcategories": subs_formatted
             })
+
+    # === HANDLE UNCLASSIFIED TRANSACTIONS ===
+    # Fetch all expenses/installments with NO category
+    unclassified_daily = [0.0] * days_in_month
+    unclassified_txns = db.query(Transaction).filter(
+        and_(
+            Transaction.category_id == None,
+            Transaction.date >= start_date,
+            Transaction.date < end_date,
+            Transaction.classification.in_([
+                TransactionClassification.EXPENSE,
+                TransactionClassification.INSTALLMT_CHRGE
+            ]),
+            Transaction.is_ignored == False
+        )
+    ).all()
+    
+    for txn in unclassified_txns:
+        day_idx = txn.date.day - 1
+        if 0 <= day_idx < days_in_month:
+            unclassified_daily[day_idx] += float(txn.amount)
+
+    # Check for unclassified split payments (rare but possible if primary txn has no category)
+    unclassified_splits = db.query(LinkedEntry).join(
+        Transaction, LinkedEntry.primary_transaction_id == Transaction.id
+    ).filter(
+        and_(
+            Transaction.category_id == None,
+            Transaction.date >= start_date,
+            Transaction.date < end_date,
+            LinkedEntry.link_type == LinkType.SPLIT_PAYMENT,
+            Transaction.is_ignored == False
+        )
+    ).all()
+
+    for entry in unclassified_splits:
+        if entry.user_amount:
+            # Use primary transaction date
+            txn_date = entry.primary_transaction.date
+            day_idx = txn_date.day - 1
+            if 0 <= day_idx < days_in_month:
+                unclassified_daily[day_idx] += float(entry.user_amount)
+
+    if sum(unclassified_daily) > 0:
+        category_data.append({
+            "category_id": 0,  # ID 0 for unclassified
+            "category_name": "Unclassified",
+            "emoji": "❓",
+            "color": "#808080",  # Grey
+            "budget": 0.0,
+            "daily_amounts": unclassified_daily,
+            "subcategories": []
+        })
             
     # Sort by total amount descending
     category_data.sort(key=lambda x: sum(x["daily_amounts"]), reverse=True)
