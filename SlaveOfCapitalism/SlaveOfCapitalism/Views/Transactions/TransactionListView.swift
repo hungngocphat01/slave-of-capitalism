@@ -9,6 +9,8 @@ struct TransactionListView: View {
     @State private var isShowingAddSheet = false
     @State private var selectedTransaction: TransactionWithDetails?
     @State private var didRefreshReferenceData = false
+    @State private var pendingDeleteIds: Set<Int> = []
+    @State private var isShowingDeleteConfirmation = false
 
     var body: some View {
         Group {
@@ -146,6 +148,20 @@ struct TransactionListView: View {
             didRefreshReferenceData = true
             await refreshReferenceDataIfNeeded()
         }
+        .confirmationDialog(
+            pendingDeleteIds.count > 1 ? "Delete \(pendingDeleteIds.count) transactions?" : "Delete transaction?",
+            isPresented: $isShowingDeleteConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Delete", role: .destructive) {
+                Task {
+                    await performConfirmedDelete(viewModel)
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This action cannot be undone.")
+        }
     }
 
     @ViewBuilder
@@ -158,7 +174,7 @@ struct TransactionListView: View {
             .contextMenu {
                 rowContextMenu(for: transaction)
             }
-            .onTapGesture(count: 2) {
+            .onTapGesture {
                 selectedTransaction = transaction
             }
     }
@@ -182,11 +198,7 @@ struct TransactionListView: View {
         }
 
         Button("Delete", role: .destructive) {
-            Task {
-                viewModel?.selectedIds = [transaction.id]
-                await viewModel?.deleteSelected()
-                await walletStore.refresh()
-            }
+            requestDelete(ids: [transaction.id])
         }
 
         Divider()
@@ -225,10 +237,7 @@ struct TransactionListView: View {
             .disabled(viewModel.isLoading)
 
             Button("Delete", role: .destructive) {
-                Task {
-                    await viewModel.deleteSelected()
-                    await walletStore.refresh()
-                }
+                requestDelete(ids: viewModel.selectedIds)
             }
             .disabled(viewModel.isLoading)
 
@@ -304,5 +313,21 @@ struct TransactionListView: View {
 
     private func categoryTitle(for transaction: TransactionWithDetails) -> String {
         transaction.subcategoryName ?? transaction.categoryName ?? "Uncategorized"
+    }
+
+    private func requestDelete(ids: Set<Int>) {
+        guard !ids.isEmpty else { return }
+        pendingDeleteIds = ids
+        isShowingDeleteConfirmation = true
+    }
+
+    private func performConfirmedDelete(_ viewModel: TransactionViewModel) async {
+        let ids = pendingDeleteIds
+        pendingDeleteIds = []
+        guard !ids.isEmpty else { return }
+
+        viewModel.selectedIds = ids
+        await viewModel.deleteSelected()
+        await walletStore.refresh()
     }
 }

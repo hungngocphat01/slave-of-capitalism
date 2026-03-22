@@ -39,6 +39,8 @@ final class TransactionViewModel {
             error = nil
         } catch let apiError as APIError {
             error = apiError
+        } catch is CancellationError {
+            // Ignore task cancellations (e.g., rapid month changes).
         } catch {
             self.error = .networkError(error)
         }
