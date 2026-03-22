@@ -13,6 +13,7 @@ enum Screen: String, Hashable, CaseIterable {
 
 struct ContentView: View {
     @Environment(BackendManager.self) private var backendManager
+    @Environment(AppSettings.self) private var appSettings
     @State private var selectedScreen: Screen = .transactions
 
     var body: some View {
@@ -23,8 +24,8 @@ struct ContentView: View {
             case .error(let message), .crashed(let message):
                 ErrorView(
                     message: message,
-                    onRetry: { Task { await backendManager.restart() } },
-                    onOpenSettings: { selectedScreen = .settings }
+                    onRetry: { restartBackend(openSettings: false) },
+                    onOpenSettings: { restartBackend(openSettings: true) }
                 )
             case .ready:
                 NavigationSplitView {
@@ -55,6 +56,17 @@ struct ContentView: View {
             Text("Audit - Task 15")
         case .settings:
             Text("Settings - Task 16")
+        }
+    }
+
+    private func restartBackend(openSettings: Bool) {
+        if openSettings {
+            selectedScreen = .settings
+        }
+
+        let dbPath = appSettings.databasePath.isEmpty ? nil : appSettings.databasePath
+        Task {
+            await backendManager.restart(dbPath: dbPath)
         }
     }
 }
