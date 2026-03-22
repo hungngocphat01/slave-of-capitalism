@@ -9,9 +9,9 @@ final class CategoryStore {
     private(set) var isLoading = false
     private(set) var lastErrorMessage: String?
 
-    private var apiClient: APIClient?
+    private var apiClient: (any APIClientProtocol)?
 
-    func configure(apiClient: APIClient) {
+    func configure(apiClient: any APIClientProtocol) {
         self.apiClient = apiClient
     }
 
