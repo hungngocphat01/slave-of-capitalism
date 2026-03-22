@@ -1,11 +1,13 @@
 import Foundation
 import Observation
 
+@MainActor
 @Observable
 final class CategoryStore {
 
     private(set) var categories: [CategoryWithSubcategories] = []
     private(set) var isLoading = false
+    private(set) var lastErrorMessage: String?
 
     private var apiClient: APIClient?
 
@@ -21,7 +23,9 @@ final class CategoryStore {
 
         do {
             categories = try await apiClient.listCategories()
+            lastErrorMessage = nil
         } catch {
+            lastErrorMessage = error.localizedDescription
             print("Failed to refresh categories: \(error)")
         }
     }

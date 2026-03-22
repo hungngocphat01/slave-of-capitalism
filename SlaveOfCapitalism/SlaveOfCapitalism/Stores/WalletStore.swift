@@ -1,11 +1,13 @@
 import Foundation
 import Observation
 
+@MainActor
 @Observable
 final class WalletStore {
 
     private(set) var wallets: [WalletWithBalance] = []
     private(set) var isLoading = false
+    private(set) var lastErrorMessage: String?
 
     private var apiClient: APIClient?
 
@@ -21,7 +23,9 @@ final class WalletStore {
 
         do {
             wallets = try await apiClient.listWallets()
+            lastErrorMessage = nil
         } catch {
+            lastErrorMessage = error.localizedDescription
             print("Failed to refresh wallets: \(error)")
         }
     }

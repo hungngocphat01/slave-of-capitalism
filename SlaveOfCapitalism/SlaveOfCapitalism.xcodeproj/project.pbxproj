@@ -24,6 +24,7 @@
 		AF84B3492AC244F68392C99F /* ErrorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13108ECAB820152C35FDE0F9 /* ErrorView.swift */; };
 		B4E342B38304677E041A4C31 /* Transaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 296D3AC02C481EA765B0106E /* Transaction.swift */; };
 		D1A123AAF2D6936ECB43EAB5 /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05AA8AEED2243A1AD0386D85 /* LoadingView.swift */; };
+		EDC55B0BA10DA74BA9117037 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6894AB73FF7E11DD5F39E63B /* ContentView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -47,6 +48,7 @@
 		4921CD260D206705C0F7B0EF /* WalletStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletStore.swift; sourceTree = "<group>"; };
 		5A5D3A3C94BF9C982B9D47B4 /* SlaveOfCapitalismApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlaveOfCapitalismApp.swift; sourceTree = "<group>"; };
 		605487BEA7E026DE87A69E86 /* SlaveOfCapitalism.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SlaveOfCapitalism.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		6894AB73FF7E11DD5F39E63B /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		6AC423DCE6B7EF89D5C41027 /* BackendManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackendManager.swift; sourceTree = "<group>"; };
 		7C5C37C1052E765D856F6BC2 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
 		8B1D5F5359B0D5DC71536B5A /* Wallet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Wallet.swift; sourceTree = "<group>"; };
@@ -97,6 +99,7 @@
 		312E007E805B43E1EAAF0BEB /* SlaveOfCapitalism */ = {
 			isa = PBXGroup;
 			children = (
+				6894AB73FF7E11DD5F39E63B /* ContentView.swift */,
 				F272D7D9F5EDEFC98E5FD8DA /* SlaveOfCapitalism.entitlements */,
 				5A5D3A3C94BF9C982B9D47B4 /* SlaveOfCapitalismApp.swift */,
 				FA5AB17BD3E2228DA527BB37 /* Backend */,
@@ -255,6 +258,7 @@
 				621B48E1B8FEF3A7DB1979BA /* Budget.swift in Sources */,
 				A71C7A799320FF37C98BB306 /* Category.swift in Sources */,
 				A012E94A234B19E9F826BDF0 /* CategoryStore.swift in Sources */,
+				EDC55B0BA10DA74BA9117037 /* ContentView.swift in Sources */,
 				84D726CEED705BD2C0DD8608 /* Enums.swift in Sources */,
 				AF84B3492AC244F68392C99F /* ErrorView.swift in Sources */,
 				1C801D2D0975D6CC9EC84316 /* Formatters.swift in Sources */,
