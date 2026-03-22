@@ -1,0 +1,441 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1A8488E8937808ED70A844CC /* LinkedEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = F12C5E5D7024E7E566E6B646 /* LinkedEntry.swift */; };
+		2A7A1B22C4E0A3CF36355EED /* BalanceAudit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B6C1CA3902A01152E4F703B /* BalanceAudit.swift */; };
+		56BB42C8FCFCEABA4908A35B /* Wallet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B1D5F5359B0D5DC71536B5A /* Wallet.swift */; };
+		621B48E1B8FEF3A7DB1979BA /* Budget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02F383BB4E93148F976289F4 /* Budget.swift */; };
+		701BCDD0AD0C5C930B4EC140 /* SlaveOfCapitalismTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF649340089E8EDA1FD97642 /* SlaveOfCapitalismTests.swift */; };
+		824A4563137933F94D1337B9 /* SlaveOfCapitalismApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A5D3A3C94BF9C982B9D47B4 /* SlaveOfCapitalismApp.swift */; };
+		84D726CEED705BD2C0DD8608 /* Enums.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05082C1E5304917D0993484E /* Enums.swift */; };
+		A71C7A799320FF37C98BB306 /* Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = F89735236A40BA9B70CEB2A9 /* Category.swift */; };
+		B4E342B38304677E041A4C31 /* Transaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 296D3AC02C481EA765B0106E /* Transaction.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		0FED901D84DF8740F483DE75 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D23CB349CCBC604EFF484620 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 55191AB7568A79100D1FDE90;
+			remoteInfo = SlaveOfCapitalism;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		02F383BB4E93148F976289F4 /* Budget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Budget.swift; sourceTree = "<group>"; };
+		05082C1E5304917D0993484E /* Enums.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Enums.swift; sourceTree = "<group>"; };
+		1B6C1CA3902A01152E4F703B /* BalanceAudit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalanceAudit.swift; sourceTree = "<group>"; };
+		296D3AC02C481EA765B0106E /* Transaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transaction.swift; sourceTree = "<group>"; };
+		5A5D3A3C94BF9C982B9D47B4 /* SlaveOfCapitalismApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlaveOfCapitalismApp.swift; sourceTree = "<group>"; };
+		605487BEA7E026DE87A69E86 /* SlaveOfCapitalism.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SlaveOfCapitalism.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8B1D5F5359B0D5DC71536B5A /* Wallet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Wallet.swift; sourceTree = "<group>"; };
+		AF649340089E8EDA1FD97642 /* SlaveOfCapitalismTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlaveOfCapitalismTests.swift; sourceTree = "<group>"; };
+		D989A14558B1A43A910AA4E9 /* SlaveOfCapitalismTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SlaveOfCapitalismTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		F12C5E5D7024E7E566E6B646 /* LinkedEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkedEntry.swift; sourceTree = "<group>"; };
+		F272D7D9F5EDEFC98E5FD8DA /* SlaveOfCapitalism.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SlaveOfCapitalism.entitlements; sourceTree = "<group>"; };
+		F89735236A40BA9B70CEB2A9 /* Category.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Category.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		165D5671EF6C9349740A3D76 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				1B6C1CA3902A01152E4F703B /* BalanceAudit.swift */,
+				02F383BB4E93148F976289F4 /* Budget.swift */,
+				F89735236A40BA9B70CEB2A9 /* Category.swift */,
+				05082C1E5304917D0993484E /* Enums.swift */,
+				F12C5E5D7024E7E566E6B646 /* LinkedEntry.swift */,
+				296D3AC02C481EA765B0106E /* Transaction.swift */,
+				8B1D5F5359B0D5DC71536B5A /* Wallet.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		1B46416A03FC54A63AD0DF78 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				CBBEF7052BAD182826D2E8D9 /* Data */,
+				D8016FA4A324A76342C0CDD5 /* Shared */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		1DF72B87FEF98B06B946461C = {
+			isa = PBXGroup;
+			children = (
+				312E007E805B43E1EAAF0BEB /* SlaveOfCapitalism */,
+				D8A443783F51D7FF729A452F /* SlaveOfCapitalismTests */,
+				CE9CCCAE1253689D8A457025 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		312E007E805B43E1EAAF0BEB /* SlaveOfCapitalism */ = {
+			isa = PBXGroup;
+			children = (
+				F272D7D9F5EDEFC98E5FD8DA /* SlaveOfCapitalism.entitlements */,
+				5A5D3A3C94BF9C982B9D47B4 /* SlaveOfCapitalismApp.swift */,
+				165D5671EF6C9349740A3D76 /* Models */,
+				1B46416A03FC54A63AD0DF78 /* Views */,
+			);
+			path = SlaveOfCapitalism;
+			sourceTree = "<group>";
+		};
+		CBBEF7052BAD182826D2E8D9 /* Data */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
+		CE9CCCAE1253689D8A457025 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				605487BEA7E026DE87A69E86 /* SlaveOfCapitalism.app */,
+				D989A14558B1A43A910AA4E9 /* SlaveOfCapitalismTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		D8016FA4A324A76342C0CDD5 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		D8A443783F51D7FF729A452F /* SlaveOfCapitalismTests */ = {
+			isa = PBXGroup;
+			children = (
+				AF649340089E8EDA1FD97642 /* SlaveOfCapitalismTests.swift */,
+			);
+			path = SlaveOfCapitalismTests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		55191AB7568A79100D1FDE90 /* SlaveOfCapitalism */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C75EC2CF36D2EC04F63F705C /* Build configuration list for PBXNativeTarget "SlaveOfCapitalism" */;
+			buildPhases = (
+				C3AB7105DD7DA1075EA013F1 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SlaveOfCapitalism;
+			packageProductDependencies = (
+			);
+			productName = SlaveOfCapitalism;
+			productReference = 605487BEA7E026DE87A69E86 /* SlaveOfCapitalism.app */;
+			productType = "com.apple.product-type.application";
+		};
+		5F20C21938CD1EDFB82E110F /* SlaveOfCapitalismTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 587A682C6C7F04C12308CCA8 /* Build configuration list for PBXNativeTarget "SlaveOfCapitalismTests" */;
+			buildPhases = (
+				324E0A758CAA3F7D0F735918 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A4A9D6D8326B91752C31E57F /* PBXTargetDependency */,
+			);
+			name = SlaveOfCapitalismTests;
+			packageProductDependencies = (
+			);
+			productName = SlaveOfCapitalismTests;
+			productReference = D989A14558B1A43A910AA4E9 /* SlaveOfCapitalismTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		D23CB349CCBC604EFF484620 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+				};
+			};
+			buildConfigurationList = B337011826C291FDD7C0DDA1 /* Build configuration list for PBXProject "SlaveOfCapitalism" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 1DF72B87FEF98B06B946461C;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = CE9CCCAE1253689D8A457025 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				55191AB7568A79100D1FDE90 /* SlaveOfCapitalism */,
+				5F20C21938CD1EDFB82E110F /* SlaveOfCapitalismTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		324E0A758CAA3F7D0F735918 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				701BCDD0AD0C5C930B4EC140 /* SlaveOfCapitalismTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C3AB7105DD7DA1075EA013F1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2A7A1B22C4E0A3CF36355EED /* BalanceAudit.swift in Sources */,
+				621B48E1B8FEF3A7DB1979BA /* Budget.swift in Sources */,
+				A71C7A799320FF37C98BB306 /* Category.swift in Sources */,
+				84D726CEED705BD2C0DD8608 /* Enums.swift in Sources */,
+				1A8488E8937808ED70A844CC /* LinkedEntry.swift in Sources */,
+				824A4563137933F94D1337B9 /* SlaveOfCapitalismApp.swift in Sources */,
+				B4E342B38304677E041A4C31 /* Transaction.swift in Sources */,
+				56BB42C8FCFCEABA4908A35B /* Wallet.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		A4A9D6D8326B91752C31E57F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 55191AB7568A79100D1FDE90 /* SlaveOfCapitalism */;
+			targetProxy = 0FED901D84DF8740F483DE75 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		219F720DDED7998978F628DA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Debug;
+		};
+		3570FEE92FAC4033C0A1662A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = SlaveOfCapitalism/SlaveOfCapitalism.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.slaveofcapitalism.app;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		440D45C9395796DC394667A5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Release;
+		};
+		52A1DBD9E9A40E2705CB9120 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.slaveofcapitalism.tests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SlaveOfCapitalism.app/Contents/MacOS/SlaveOfCapitalism";
+			};
+			name = Release;
+		};
+		81BE341BBB6603F38B464591 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = SlaveOfCapitalism/SlaveOfCapitalism.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.slaveofcapitalism.app;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		DC40302E16ACB4CE0DECF33E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.slaveofcapitalism.tests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SlaveOfCapitalism.app/Contents/MacOS/SlaveOfCapitalism";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		587A682C6C7F04C12308CCA8 /* Build configuration list for PBXNativeTarget "SlaveOfCapitalismTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DC40302E16ACB4CE0DECF33E /* Debug */,
+				52A1DBD9E9A40E2705CB9120 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		B337011826C291FDD7C0DDA1 /* Build configuration list for PBXProject "SlaveOfCapitalism" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				219F720DDED7998978F628DA /* Debug */,
+				440D45C9395796DC394667A5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		C75EC2CF36D2EC04F63F705C /* Build configuration list for PBXNativeTarget "SlaveOfCapitalism" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3570FEE92FAC4033C0A1662A /* Debug */,
+				81BE341BBB6603F38B464591 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = D23CB349CCBC604EFF484620 /* Project object */;
+}

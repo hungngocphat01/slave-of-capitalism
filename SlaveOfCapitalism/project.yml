@@ -1,0 +1,32 @@
+name: SlaveOfCapitalism
+options:
+  bundleIdPrefix: com.slaveofcapitalism
+  deploymentTarget:
+    macOS: "14.0"
+  xcodeVersion: "16.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    MACOSX_DEPLOYMENT_TARGET: "14.0"
+targets:
+  SlaveOfCapitalism:
+    type: application
+    platform: macOS
+    sources:
+      - path: SlaveOfCapitalism
+    settings:
+      base:
+        CODE_SIGN_ENTITLEMENTS: SlaveOfCapitalism/SlaveOfCapitalism.entitlements
+        PRODUCT_BUNDLE_IDENTIFIER: com.slaveofcapitalism.app
+        INFOPLIST_KEY_LSApplicationCategoryType: "public.app-category.finance"
+  SlaveOfCapitalismTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: SlaveOfCapitalismTests
+    dependencies:
+      - target: SlaveOfCapitalism
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.slaveofcapitalism.tests
