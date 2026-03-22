@@ -1,5 +1,77 @@
 import SwiftUI
 
+enum TransferSheetRequestBuilder {
+    static func makeRequest(
+        fromWalletId: Int,
+        toWalletId: Int,
+        amountText: String,
+        description: String,
+        date: Date
+    ) throws -> WalletTransferRequest {
+        guard fromWalletId != 0, toWalletId != 0 else {
+            throw WalletSheetValidationError.missingWalletSelection
+        }
+
+        guard fromWalletId != toWalletId else {
+            throw WalletSheetValidationError.sameWallet
+        }
+
+        guard let amount = decimalValue(from: amountText), amount > 0 else {
+            throw WalletSheetValidationError.invalidAmount
+        }
+
+        let trimmedDescription = description.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        return WalletTransferRequest(
+            fromWalletId: fromWalletId,
+            toWalletId: toWalletId,
+            amount: amount,
+            description: trimmedDescription.isEmpty ? "Transfer" : trimmedDescription,
+            date: isoDateString(from: date),
+            time: nil
+        )
+    }
+
+    private static func decimalValue(from text: String) -> Decimal? {
+        let normalized = text
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: ",", with: "")
+        guard !normalized.isEmpty else { return nil }
+        return Decimal(string: normalized)
+    }
+
+    private static func isoDateString(from date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.string(from: date)
+    }
+}
+
+enum WalletSheetValidationError: LocalizedError {
+    case missingWalletSelection
+    case sameWallet
+    case invalidAmount
+    case invalidBalance
+    case missingCategory
+
+    var errorDescription: String? {
+        switch self {
+        case .missingWalletSelection:
+            return "Choose both wallets."
+        case .sameWallet:
+            return "Source and destination wallets must be different."
+        case .invalidAmount:
+            return "Enter a valid transfer amount."
+        case .invalidBalance:
+            return "Enter a valid balance."
+        case .missingCategory:
+            return "Select a category."
+        }
+    }
+}
+
 struct TransferSheet: View {
     private let apiClient: any APIClientProtocol
     private let wallets: [WalletWithBalance]
@@ -93,32 +165,16 @@ struct TransferSheet: View {
     }
 
     private func submitTransfer() async {
-        guard fromWalletId != 0, toWalletId != 0 else {
-            errorMessage = "Choose both wallets."
-            return
-        }
-
-        guard fromWalletId != toWalletId else {
-            errorMessage = "Source and destination wallets must be different."
-            return
-        }
-
-        guard let amount = decimalValue(from: amountText), amount > 0 else {
-            errorMessage = "Enter a valid transfer amount."
-            return
-        }
-
         isSaving = true
         defer { isSaving = false }
 
         do {
-            let request = WalletTransferRequest(
+            let request = try TransferSheetRequestBuilder.makeRequest(
                 fromWalletId: fromWalletId,
                 toWalletId: toWalletId,
-                amount: amount,
-                description: descriptionText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Transfer" : descriptionText,
-                date: isoDateString(from: transferDate),
-                time: nil
+                amountText: amountText,
+                description: descriptionText,
+                date: transferDate
             )
             _ = try await apiClient.transfer(request)
             errorMessage = nil
@@ -127,21 +183,5 @@ struct TransferSheet: View {
         } catch {
             errorMessage = error.localizedDescription
         }
-    }
-
-    private func decimalValue(from text: String) -> Decimal? {
-        let normalized = text
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-            .replacingOccurrences(of: ",", with: "")
-        guard !normalized.isEmpty else { return nil }
-        return Decimal(string: normalized)
-    }
-
-    private func isoDateString(from date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.calendar = Calendar(identifier: .gregorian)
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.dateFormat = "yyyy-MM-dd"
-        return formatter.string(from: date)
     }
 }

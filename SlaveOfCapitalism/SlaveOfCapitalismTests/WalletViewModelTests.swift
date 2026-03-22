@@ -68,6 +68,39 @@ final class WalletViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.netPosition, 850)
     }
 
+    func testDeleteWalletReloadsWalletsOnSuccess() async {
+        let client = MockAPIClient()
+        client.walletsResult = [
+            makeWallet(id: 2, name: "Visa", type: .credit, balance: 400, creditLimit: 2000, availableCredit: 1600)
+        ]
+
+        let viewModel = WalletViewModel(apiClient: client)
+        let wasDeleted = await viewModel.deleteWallet(id: 1)
+
+        XCTAssertTrue(wasDeleted)
+        XCTAssertEqual(client.callLog, ["deleteWallet", "listWallets"])
+        XCTAssertEqual(viewModel.wallets.map(\.id), [2])
+        XCTAssertNil(viewModel.error)
+    }
+
+    func testDeleteWalletStoresErrorAndSkipsReloadOnFailure() async {
+        let client = MockAPIClient()
+        client.errorToThrow = APIError.serverError("Delete failed")
+
+        let viewModel = WalletViewModel(apiClient: client)
+        let wasDeleted = await viewModel.deleteWallet(id: 1)
+
+        XCTAssertFalse(wasDeleted)
+        XCTAssertEqual(client.callLog, ["deleteWallet"])
+        XCTAssertTrue(viewModel.wallets.isEmpty)
+
+        guard case .serverError(let message)? = viewModel.error else {
+            return XCTFail("Expected server error, got \(String(describing: viewModel.error))")
+        }
+
+        XCTAssertEqual(message, "Delete failed")
+    }
+
     private func makeWallet(
         id: Int,
         name: String,

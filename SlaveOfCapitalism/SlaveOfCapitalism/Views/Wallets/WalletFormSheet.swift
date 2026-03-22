@@ -34,6 +34,13 @@ struct WalletFormSheet: View {
     var body: some View {
         NavigationStack {
             Form {
+                if let validationMessage {
+                    Section {
+                        Text(validationMessage)
+                            .foregroundStyle(.red)
+                    }
+                }
+
                 if let errorMessage {
                     Section {
                         Text(errorMessage)
@@ -78,7 +85,7 @@ struct WalletFormSheet: View {
                             await save()
                         }
                     }
-                    .disabled(isSaving)
+                    .disabled(isSaving || validationMessage != nil)
                 }
             }
         }
@@ -86,16 +93,15 @@ struct WalletFormSheet: View {
     }
 
     private func save() async {
-        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedName.isEmpty else {
-            errorMessage = "Wallet name is required."
+        guard validationMessage == nil else {
             return
         }
 
-        let creditLimit = decimalValue(from: creditLimitText) ?? 0
-        let initialBalance = decimalValue(from: initialBalanceText) ?? 0
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         let normalizedEmoji = emoji.trimmingCharacters(in: .whitespacesAndNewlines)
         let emojiValue = normalizedEmoji.isEmpty ? nil : normalizedEmoji
+        let creditLimit = walletType == .credit ? parsedCreditLimit! : 0
+        let initialBalance = wallet == nil && walletType == .normal ? parsedInitialBalance! : 0
 
         isSaving = true
         defer { isSaving = false }
@@ -126,6 +132,33 @@ struct WalletFormSheet: View {
         } catch {
             errorMessage = error.localizedDescription
         }
+    }
+
+    private var validationMessage: String? {
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedName.isEmpty else {
+            return "Wallet name is required."
+        }
+
+        if wallet == nil, walletType == .normal, parsedInitialBalance == nil {
+            return "Enter a valid initial balance."
+        }
+
+        if walletType == .credit, parsedCreditLimit == nil {
+            return "Enter a valid credit limit."
+        }
+
+        return nil
+    }
+
+    private var parsedCreditLimit: Decimal? {
+        guard walletType == .credit else { return 0 }
+        return decimalValue(from: creditLimitText)
+    }
+
+    private var parsedInitialBalance: Decimal? {
+        guard wallet == nil, walletType == .normal else { return 0 }
+        return decimalValue(from: initialBalanceText)
     }
 
     private func decimalValue(from text: String) -> Decimal? {

@@ -56,14 +56,17 @@ final class WalletViewModel {
         }
     }
 
-    func deleteWallet(id: Int) async {
+    func deleteWallet(id: Int) async -> Bool {
         do {
             try await apiClient.deleteWallet(id: id)
             await load()
+            return true
         } catch let apiError as APIError {
             error = apiError
         } catch {
             self.error = .networkError(error)
         }
+
+        return false
     }
 }

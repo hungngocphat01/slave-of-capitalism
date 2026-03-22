@@ -22,6 +22,7 @@ private enum WalletSheetDestination: Identifiable {
 
 struct WalletListView: View {
     @Environment(CategoryStore.self) private var categoryStore
+    @Environment(WalletStore.self) private var walletStore
 
     @State private var viewModel: WalletViewModel
     @State private var sheetDestination: WalletSheetDestination?
@@ -98,7 +99,7 @@ struct WalletListView: View {
         .task {
             guard !didLoad else { return }
             didLoad = true
-            await viewModel.load()
+            await refreshWallets()
         }
         .alert(
             "Delete Wallet?",
@@ -114,7 +115,9 @@ struct WalletListView: View {
         ) { wallet in
             Button("Delete", role: .destructive) {
                 Task {
-                    await viewModel.deleteWallet(id: wallet.id)
+                    if await viewModel.deleteWallet(id: wallet.id) {
+                        await walletStore.refresh()
+                    }
                     walletPendingDeletion = nil
                 }
             }
@@ -128,19 +131,19 @@ struct WalletListView: View {
             switch destination {
             case .add:
                 WalletFormSheet(apiClient: apiClient) {
-                    await viewModel.load()
+                    await refreshWallets()
                 }
             case .edit(let wallet):
                 WalletFormSheet(apiClient: apiClient, wallet: wallet) {
-                    await viewModel.load()
+                    await refreshWallets()
                 }
             case .transfer(let wallet):
                 TransferSheet(apiClient: apiClient, wallets: viewModel.wallets, initialFromWalletId: wallet.id) {
-                    await viewModel.load()
+                    await refreshWallets()
                 }
             case .calibrate(let wallet):
                 CalibrateSheet(apiClient: apiClient, wallet: wallet, categories: categoryStore.categories) {
-                    await viewModel.load()
+                    await refreshWallets()
                 }
             }
         }
@@ -168,12 +171,17 @@ struct WalletListView: View {
             Spacer()
             Button("Retry") {
                 Task {
-                    await viewModel.load()
+                    await refreshWallets()
                 }
             }
         }
         .padding(14)
         .background(Color.orange.opacity(0.08), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+    }
+
+    private func refreshWallets() async {
+        await viewModel.load()
+        await walletStore.refresh()
     }
 }
 

@@ -1,5 +1,30 @@
 import SwiftUI
 
+enum CalibrateSheetRequestBuilder {
+    static func makeRequest(correctBalanceText: String, categoryId: Int) throws -> CalibrateWalletRequest {
+        guard let correctBalance = decimalValue(from: correctBalanceText) else {
+            throw WalletSheetValidationError.invalidBalance
+        }
+
+        guard categoryId != 0 else {
+            throw WalletSheetValidationError.missingCategory
+        }
+
+        return CalibrateWalletRequest(
+            correctBalance: correctBalance,
+            miscCategoryId: categoryId
+        )
+    }
+
+    private static func decimalValue(from text: String) -> Decimal? {
+        let normalized = text
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: ",", with: "")
+        guard !normalized.isEmpty else { return nil }
+        return Decimal(string: normalized)
+    }
+}
+
 struct CalibrateSheet: View {
     private let apiClient: any APIClientProtocol
     private let wallet: WalletWithBalance
@@ -85,23 +110,13 @@ struct CalibrateSheet: View {
     }
 
     private func submitCalibration() async {
-        guard let correctBalance = decimalValue(from: correctBalanceText) else {
-            errorMessage = "Enter a valid balance."
-            return
-        }
-
-        guard selectedCategoryId != 0 else {
-            errorMessage = "Select a category."
-            return
-        }
-
         isSaving = true
         defer { isSaving = false }
 
         do {
-            let request = CalibrateWalletRequest(
-                correctBalance: correctBalance,
-                miscCategoryId: selectedCategoryId
+            let request = try CalibrateSheetRequestBuilder.makeRequest(
+                correctBalanceText: correctBalanceText,
+                categoryId: selectedCategoryId
             )
             _ = try await apiClient.calibrateWallet(id: wallet.id, request)
             errorMessage = nil
@@ -112,18 +127,18 @@ struct CalibrateSheet: View {
         }
     }
 
+    private static func defaultCategoryId(from categories: [CategoryWithSubcategories]) -> Int {
+        categories.first(where: { $0.name.localizedCaseInsensitiveContains("misc") })?.id
+            ?? categories.first?.id
+            ?? 0
+    }
+
     private func decimalValue(from text: String) -> Decimal? {
         let normalized = text
             .trimmingCharacters(in: .whitespacesAndNewlines)
             .replacingOccurrences(of: ",", with: "")
         guard !normalized.isEmpty else { return nil }
         return Decimal(string: normalized)
-    }
-
-    private static func defaultCategoryId(from categories: [CategoryWithSubcategories]) -> Int {
-        categories.first(where: { $0.name.localizedCaseInsensitiveContains("misc") })?.id
-            ?? categories.first?.id
-            ?? 0
     }
 
     private static func decimalString(_ decimal: Decimal) -> String {

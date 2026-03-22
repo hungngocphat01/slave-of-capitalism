@@ -22,6 +22,7 @@
 		621B48E1B8FEF3A7DB1979BA /* Budget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02F383BB4E93148F976289F4 /* Budget.swift */; };
 		6C2896D95FBB7B25E7C52231 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C5C37C1052E765D856F6BC2 /* AppSettings.swift */; };
 		701BCDD0AD0C5C930B4EC140 /* SlaveOfCapitalismTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF649340089E8EDA1FD97642 /* SlaveOfCapitalismTests.swift */; };
+		72FFA767DCE83531606C6C7E /* WalletSheetRequestBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1228C96A6E22489A299C4B0 /* WalletSheetRequestBuilderTests.swift */; };
 		788BDCFF138D4D208E6F2003 /* WalletViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 387B92B8A1F4ACA52AD699A0 /* WalletViewModelTests.swift */; };
 		824A4563137933F94D1337B9 /* SlaveOfCapitalismApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A5D3A3C94BF9C982B9D47B4 /* SlaveOfCapitalismApp.swift */; };
 		84D726CEED705BD2C0DD8608 /* Enums.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05082C1E5304917D0993484E /* Enums.swift */; };
@@ -78,6 +79,7 @@
 		E10DF568DB3A9ACBECC802D6 /* MockAPIClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAPIClientTests.swift; sourceTree = "<group>"; };
 		E98C232A0B37CA50C45181A9 /* WalletCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletCard.swift; sourceTree = "<group>"; };
 		E9EF1078660CFC4E2D278EB5 /* Sidebar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sidebar.swift; sourceTree = "<group>"; };
+		F1228C96A6E22489A299C4B0 /* WalletSheetRequestBuilderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletSheetRequestBuilderTests.swift; sourceTree = "<group>"; };
 		F12C5E5D7024E7E566E6B646 /* LinkedEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkedEntry.swift; sourceTree = "<group>"; };
 		F272D7D9F5EDEFC98E5FD8DA /* SlaveOfCapitalism.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SlaveOfCapitalism.entitlements; sourceTree = "<group>"; };
 		F89735236A40BA9B70CEB2A9 /* Category.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Category.swift; sourceTree = "<group>"; };
@@ -220,6 +222,7 @@
 				7D223D1B1B2AF00294FE0B59 /* MockAPIClient.swift */,
 				E10DF568DB3A9ACBECC802D6 /* MockAPIClientTests.swift */,
 				AF649340089E8EDA1FD97642 /* SlaveOfCapitalismTests.swift */,
+				F1228C96A6E22489A299C4B0 /* WalletSheetRequestBuilderTests.swift */,
 				387B92B8A1F4ACA52AD699A0 /* WalletViewModelTests.swift */,
 			);
 			path = SlaveOfCapitalismTests;
@@ -311,6 +314,7 @@
 				912D49F3DC4FCB17BF36DC71 /* MockAPIClient.swift in Sources */,
 				0EEBF49B3909FBD3E2EE1179 /* MockAPIClientTests.swift in Sources */,
 				701BCDD0AD0C5C930B4EC140 /* SlaveOfCapitalismTests.swift in Sources */,
+				72FFA767DCE83531606C6C7E /* WalletSheetRequestBuilderTests.swift in Sources */,
 				788BDCFF138D4D208E6F2003 /* WalletViewModelTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
