@@ -1,0 +1,41 @@
+import Foundation
+import Observation
+
+@Observable
+final class CategoryStore {
+
+    private(set) var categories: [CategoryWithSubcategories] = []
+    private(set) var isLoading = false
+
+    private var apiClient: APIClient?
+
+    func configure(apiClient: APIClient) {
+        self.apiClient = apiClient
+    }
+
+    func refresh() async {
+        guard let apiClient else { return }
+
+        isLoading = true
+        defer { isLoading = false }
+
+        do {
+            categories = try await apiClient.listCategories()
+        } catch {
+            print("Failed to refresh categories: \(error)")
+        }
+    }
+
+    func category(for id: Int) -> CategoryWithSubcategories? {
+        categories.first { $0.id == id }
+    }
+
+    func subcategory(for id: Int) -> SubcategoryResponse? {
+        for category in categories {
+            if let subcategory = category.subcategories.first(where: { $0.id == id }) {
+                return subcategory
+            }
+        }
+        return nil
+    }
+}
