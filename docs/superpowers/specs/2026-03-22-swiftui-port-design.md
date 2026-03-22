@@ -6,7 +6,7 @@
 
 ## Overview
 
-Port the existing SvelteKit/Tauri frontend to a native SwiftUI macOS application. The existing FastAPI backend is preserved and embedded as a subprocess — zero backend changes required.
+Port the existing SvelteKit/Tauri frontend to a native SwiftUI macOS application. The existing FastAPI backend is preserved and embedded as a subprocess. One backend endpoint must be added (budget monthly summary — see Prerequisites).
 
 ## Architecture: SwiftUI Shell + Embedded Backend
 
@@ -42,6 +42,16 @@ The SwiftUI app launches the PyInstaller-compiled `expense-manager-backend` bina
 - **Pure SwiftUI + SwiftData**: Rejected. Would require rewriting all 6 services (50+ endpoints) of complex financial logic in Swift, reimplementing snapshot invalidation, linked entry state machines, installment logic, calibration resolution, and atomic bulk operations. High effort, high regression risk.
 - **SwiftUI + GRDB (direct SQLite)**: Rejected. Same rewrite cost as above, plus replicating SQLAlchemy behavior and replacing Alembic with Swift-side migrations.
 - **gRPC instead of REST**: Rejected. Localhost HTTP latency is sub-millisecond. gRPC adds protobuf compilation, heavier Swift dependencies, and breaks the existing Tauri frontend. No material benefit for a single-user local app.
+
+## Prerequisites (Backend)
+
+One missing endpoint must be added before the Summary screen can work:
+
+- **`GET /budgets/summary/{year}/{month}?period_boundaries=7,14,21,31`** — returns `MonthlySummaryResponse` with budget vs actual per category, broken into sub-period columns. The Pydantic schema (`MonthlySummaryResponse`) exists but the service method and router endpoint are both missing. The current Tauri frontend calls this endpoint but it was never implemented.
+
+- **`GET /linked-entries/transaction/{transaction_id}`** — returns the linked entry associated with a given transaction. The frontend's `ReimbursementsListModal` calls this. Neither the router endpoint nor service method exist.
+
+Both endpoints need to be implemented before the SwiftUI app (or the current Tauri app) can fully function.
 
 ## Project Structure
 
@@ -100,6 +110,7 @@ SlaveOfCapitalism/
 │       │   ├── CalibrateSheet.swift
 │       │   ├── MarkAsSplitSheet.swift
 │       │   ├── MarkAsLoanSheet.swift
+│       │   ├── MarkAsDebtSheet.swift
 │       │   ├── MarkAsInstallmentSheet.swift
 │       │   ├── LinkToEntrySheet.swift
 │       │   ├── ReclassifySheet.swift
@@ -109,6 +120,7 @@ SlaveOfCapitalism/
 │       └── Components/
 │           ├── MonthYearPicker.swift
 │           ├── CurrencyField.swift
+│           ├── TransactionInputRow.swift  # Quick-add row for transaction table
 │           └── ConfirmationDialog.swift
 └── Utilities/
     ├── Formatters.swift
@@ -124,11 +136,12 @@ SlaveOfCapitalism/
 2. **Health polling** — Polls `GET /health` until backend responds (matches Tauri's `waitForBackend` pattern)
 3. **Ready state** — Publishes `isReady: Bool`; views show a loading indicator until true
 4. **App quit** — Sends SIGTERM, waits for graceful shutdown
-5. **Crash recovery** — Monitors the process; restarts on unexpected termination
+5. **Crash recovery** — Monitors the process; if it dies, shows an error banner with "Retry" button. On retry, restarts the subprocess and re-polls health.
+6. **Settings change (database path)** — When the user changes the database path in Settings, `BackendManager` kills the current subprocess and relaunches with the new `--db-path` argument. Views reset to loading state during restart.
 
 **Database location:** `~/Library/Application Support/SlaveOfCapitalism/expense.db` (macOS convention). Configurable in Settings.
 
-**CORS:** The backend already allows `http://localhost:*` origins. No changes needed since we're calling from the same machine.
+**Note on CORS:** URLSession does not enforce CORS (browser-only mechanism). No CORS configuration is needed for the native app.
 
 ## API Client
 
@@ -178,14 +191,19 @@ A single `APIClient` class using `URLSession`. All methods are `async throws`.
 - `updateSubcategory(id:, _:) -> SubcategoryResponse`
 - `deleteSubcategory(id:, replacementCategoryId:, replacementSubcategoryId:)`
 
-**Linked Entries** (7 methods):
+**Linked Entries** (12 methods):
+- `list(linkType:, status:) -> [LinkedEntryWithDetails]`
 - `pending() -> [LinkedEntryWithDetails]`
 - `get(id:) -> LinkedEntryWithDetails`
-- `linkTransaction(entryId:, _:) -> LinkedEntryResponse`
+- `getByTransaction(transactionId:) -> LinkedEntryWithDetails` *(prerequisite — endpoint missing, see Prerequisites)*
+- `create(_:) -> LinkedEntryResponse`
 - `update(id:, _:) -> LinkedEntryResponse`
+- `delete(id:)`
+- `linkTransaction(entryId:, _:) -> LinkedEntryResponse`
+- `unlinkTransaction(entryId:, linkId:) -> LinkedEntryResponse`
+- `linkTransactions(entryId:, transactionIds:) -> LinkedEntryResponse` *(backend route is `POST /transactions/link`, not on linked-entries router)*
 - `summaryOwed() -> OwedSummary`
 - `summaryDebt() -> DebtSummary`
-- `linkTransactions(entryId:, transactionIds:) -> LinkedEntryResponse`
 
 **Budgets** (6 methods):
 - `list(year:, month:, categoryId:) -> [BudgetWithCategory]`
@@ -310,14 +328,14 @@ The most complex screen.
 - Right-click → context menu: Edit, Delete, Mark as Split/Loan/Debt/Installment, Reclassify, Link to Entry, Unlink, Unclassify, Resolve Calibration, See Reimbursements
 - Multi-select → toolbar: Delete Selected, Ignore/Unignore, Merge, Link to Entry
 - Quick-add row at table bottom
-- `Cmd+K` shortcut for "000" insertion
+- `Cmd+K` shortcut — appends "000" to the active amount field (convenience for VND/JPY currencies where amounts are in thousands)
 
 **Context menu conditional logic:** Items shown based on transaction state (e.g., "Mark as Split" only for EXPENSE+OUTFLOW, "Resolve" only for `is_calibration`, "Reimbursements" only when linked entry exists).
 
 ### Summary
 
 **Layout:** Month picker at top. Two sections:
-1. **Budget overview** — List of categories: emoji + name, budget vs actual, progress bar, percentage. Expandable to subcategories.
+1. **Budget overview** — List of categories: emoji + name, budget vs actual, progress bar, percentage. Expandable to subcategories. Supports period columns (sub-monthly boundaries, default [7, 14, 21, 31]) via `period_boundaries` query parameter. Uses `/budgets/summary/{year}/{month}` endpoint (see Prerequisites).
 2. **Daily usage chart** — Swift Charts `AreaMark` showing cumulative daily spending vs budget line. Uses `/budgets/daily-summary` endpoint.
 
 ### Wallets
@@ -342,8 +360,17 @@ Each row: counterparty, amounts, status badge, original transaction info. Expand
 ### Data Management
 
 **Layout:** Action list:
-- Import from PayPay CSV → multi-step sheet (file picker via `fileImporter()` → wallet mapping → preview → confirm)
+- Import from PayPay CSV → multi-step sheet wizard
 - Export (placeholder)
+
+**PayPay Import Wizard** — 4-step flow presented as a sheet with step navigation:
+
+1. **File Selection** — `fileImporter()` modifier for CSV file + optional rules JSON file. Validates CSV format before proceeding.
+2. **Wallet Mapping** — Maps PayPay payment methods to app wallets. Persists mappings in UserDefaults for reuse across imports.
+3. **Preview** — Table showing parsed transactions with auto-categorization from rules. User can review and correct before importing.
+4. **Confirm & Import** — Calls `/transactions/bulk-import` atomically. Shows success/error result.
+
+The CSV parsing and rule engine logic from `frontend/src/lib/paypay-importer/` (parser, rule compiler, rule executor, transformer, translator, wallet mapper) must be reimplemented in Swift. This is ~500 lines of domain-specific parsing logic.
 
 ### Audit
 
@@ -386,9 +413,15 @@ Backend binary added via "Copy Bundle Resources" build phase. Located at runtime
 - Swift Charts — daily usage chart (built into macOS 14+)
 - `@Observable` — state management (macOS 14+ / Swift 5.9)
 
-### Signing
+### Signing & Distribution
 
-Standard macOS app signing. The embedded Python binary needs same-team signing or a `com.apple.security.cs.disable-library-validation` entitlement.
+**Distribution: Developer ID only** (direct download, not Mac App Store). MAS is incompatible with embedding a PyInstaller binary that extracts and executes code from temp directories.
+
+**Signing strategy:**
+1. The SwiftUI app is signed with a Developer ID certificate
+2. The embedded PyInstaller binary must be codesigned with the same team identity (`codesign --deep --force --sign "Developer ID Application: ..."`)
+3. The app requires `com.apple.security.cs.disable-library-validation` entitlement (PyInstaller extracts dylibs at runtime)
+4. For notarization: run `xcrun notarytool submit` on the final `.app` bundle. PyInstaller's internal dylibs may need individual signing — test during first notarization attempt and fix as needed
 
 ### Localization
 
@@ -398,15 +431,57 @@ English and Vietnamese via `.xcstrings` string catalog (Xcode 15+). ~695 strings
 
 macOS 14 Sonoma — required for `@Observable`, Swift Charts, and `Table` improvements.
 
+## Error & Empty States
+
+**Backend lifecycle errors:**
+- Backend fails to start → full-screen error with "Retry" and "Open Settings" (to change DB path/port)
+- Backend crashes mid-session → error banner at top of current screen with "Reconnecting..." and auto-retry
+- Backend unreachable after retry → error screen with diagnostic info (port, DB path, last error)
+
+**API errors:**
+- Network/server errors → alert dialog with error message and "OK" to dismiss
+- Validation errors (400/422) → inline error messages on the relevant form fields
+- 404 → silent refresh of the current list (item was deleted elsewhere)
+
+**Empty states:**
+- No transactions for month → centered message "No transactions in [Month Year]" with "Add Transaction" button
+- No wallets → prompt to create first wallet
+- No budgets → "No budgets set for this month" with "Create Budget" button
+- No pending entries → "All settled" message per section
+
+## Keyboard Shortcuts
+
+| Shortcut | Action | Context |
+|----------|--------|---------|
+| `Cmd+K` | Append "000" to amount field | Any amount input (VND/JPY convenience) |
+| `Cmd+N` | Add new transaction | Transactions screen |
+| `Cmd+Delete` | Delete selected | Transactions screen with selection |
+| `Escape` | Dismiss sheet/cancel | Any sheet |
+
+Additional shortcuts may be added during implementation; these are the minimum set.
+
+## Testing Strategy
+
+- **APIClient**: Protocol-based with a `MockAPIClient` conformance for unit testing ViewModels without a running backend
+- **ViewModels**: XCTest unit tests using `MockAPIClient` — verify state transitions, error handling, data transformation
+- **Integration**: Manual testing against the real backend (same test patterns as the existing Tauri app)
+- **UI tests**: Deferred to post-launch; focus on ViewModel coverage first
+
+## Migration from Tauri App
+
+- **Database**: The SwiftUI app defaults to `~/Library/Application Support/SlaveOfCapitalism/expense.db`. On first launch, if this file doesn't exist but the Tauri-era database exists at the previous path, offer to copy or point to it via Settings.
+- **Settings**: Currency, language, and decimal preferences must be re-entered (Tauri stores them in localStorage, not accessible from Swift). This is acceptable for a one-time migration.
+- **Coexistence**: Both apps can run simultaneously against different database files, or the same file if only one is active at a time (SQLite handles single-writer).
+
 ## Scope Summary
 
 | Area | Count |
 |------|-------|
 | Screens | 8 |
-| Sheets/modals | 12 |
+| Sheets/modals | 14 |
 | ViewModels | 8 |
-| API methods | ~49 |
+| API methods | ~54 |
 | Codable models | ~35 structs/enums |
-| Shared components | ~5 |
+| Shared components | ~6 |
 | Third-party dependencies | 0 |
-| Backend changes required | 0 |
+| Backend changes required | 2 endpoints (budget monthly summary, linked entry by transaction) |
