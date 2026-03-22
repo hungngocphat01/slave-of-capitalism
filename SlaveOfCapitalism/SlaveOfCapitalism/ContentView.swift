@@ -42,7 +42,7 @@ struct ContentView: View {
     private var detailView: some View {
         switch selectedScreen {
         case .transactions:
-            Text("Transactions - Task 11")
+            TransactionListView()
         case .summary:
             Text("Summary - Task 14")
         case .wallets:

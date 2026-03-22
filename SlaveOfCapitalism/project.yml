@@ -18,6 +18,7 @@ targets:
     settings:
       base:
         CODE_SIGN_ENTITLEMENTS: SlaveOfCapitalism/SlaveOfCapitalism.entitlements
+        GENERATE_INFOPLIST_FILE: YES
         PRODUCT_BUNDLE_IDENTIFIER: com.slaveofcapitalism.app
         INFOPLIST_KEY_LSApplicationCategoryType: "public.app-category.finance"
   SlaveOfCapitalismTests:
