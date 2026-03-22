@@ -31,6 +31,64 @@ final class WalletSheetRequestBuilderTests: XCTestCase {
         XCTAssertEqual(request.miscCategoryId, 42)
     }
 
+    func testTransferRequestBuilderRejectsSameWallet() {
+        XCTAssertThrowsError(
+            try TransferSheetRequestBuilder.makeRequest(
+                fromWalletId: 1,
+                toWalletId: 1,
+                amountText: "100",
+                description: "x",
+                date: makeDate(year: 2026, month: 3, day: 22)
+            )
+        ) { error in
+            guard case .sameWallet = error as? WalletSheetValidationError else {
+                return XCTFail("Expected sameWallet, got \(error)")
+            }
+        }
+    }
+
+    func testTransferRequestBuilderRejectsInvalidAmount() {
+        XCTAssertThrowsError(
+            try TransferSheetRequestBuilder.makeRequest(
+                fromWalletId: 1,
+                toWalletId: 2,
+                amountText: "-1",
+                description: "x",
+                date: makeDate(year: 2026, month: 3, day: 22)
+            )
+        ) { error in
+            guard case .invalidAmount = error as? WalletSheetValidationError else {
+                return XCTFail("Expected invalidAmount, got \(error)")
+            }
+        }
+    }
+
+    func testCalibrateRequestBuilderRejectsMissingCategory() {
+        XCTAssertThrowsError(
+            try CalibrateSheetRequestBuilder.makeRequest(
+                correctBalanceText: "100",
+                categoryId: 0
+            )
+        ) { error in
+            guard case .missingCategory = error as? WalletSheetValidationError else {
+                return XCTFail("Expected missingCategory, got \(error)")
+            }
+        }
+    }
+
+    func testCalibrateRequestBuilderRejectsInvalidBalance() {
+        XCTAssertThrowsError(
+            try CalibrateSheetRequestBuilder.makeRequest(
+                correctBalanceText: "abc",
+                categoryId: 1
+            )
+        ) { error in
+            guard case .invalidBalance = error as? WalletSheetValidationError else {
+                return XCTFail("Expected invalidBalance, got \(error)")
+            }
+        }
+    }
+
     private func makeDate(year: Int, month: Int, day: Int) -> Date {
         var components = DateComponents()
         components.calendar = Calendar(identifier: .gregorian)

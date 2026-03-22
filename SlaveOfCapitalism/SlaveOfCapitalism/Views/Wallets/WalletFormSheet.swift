@@ -144,8 +144,16 @@ struct WalletFormSheet: View {
             return "Enter a valid initial balance."
         }
 
+        if wallet == nil, walletType == .normal, let parsedInitialBalance, parsedInitialBalance < 0 {
+            return "Initial balance cannot be negative."
+        }
+
         if walletType == .credit, parsedCreditLimit == nil {
             return "Enter a valid credit limit."
+        }
+
+        if walletType == .credit, let parsedCreditLimit, parsedCreditLimit < 0 {
+            return "Credit limit cannot be negative."
         }
 
         return nil
