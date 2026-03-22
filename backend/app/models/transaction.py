@@ -1,11 +1,12 @@
 """Updated transaction model with direction and classification."""
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from datetime import time as time_type
 from decimal import Decimal
 from enum import Enum as PyEnum
 
 from sqlalchemy import Boolean, DECIMAL, Date, DateTime, Enum, ForeignKey, Integer, String, Time
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import event as sa_event
+from sqlalchemy.orm import Mapped, mapped_column, relationship, Session
 
 from app.database import Base
 
@@ -123,11 +124,11 @@ class Transaction(Base):
     )
     
     # Audit
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime,
-        default=datetime.utcnow,
-        onupdate=datetime.utcnow,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
         nullable=False
     )
     
@@ -154,5 +155,37 @@ class Transaction(Base):
         back_populates="transaction"
     )
     
+    # Valid direction/classification combinations
+    VALID_COMBINATIONS: dict[TransactionClassification, set[TransactionDirection]] = {
+        TransactionClassification.EXPENSE: {TransactionDirection.OUTFLOW},
+        TransactionClassification.INCOME: {TransactionDirection.INFLOW},
+        TransactionClassification.LEND: {TransactionDirection.OUTFLOW},
+        TransactionClassification.BORROW: {TransactionDirection.INFLOW},
+        TransactionClassification.DEBT_COLLECTION: {TransactionDirection.INFLOW},
+        TransactionClassification.LOAN_REPAYMENT: {TransactionDirection.OUTFLOW},
+        TransactionClassification.SPLIT_PAYMENT: {TransactionDirection.OUTFLOW},
+        TransactionClassification.TRANSFER: {TransactionDirection.INFLOW, TransactionDirection.OUTFLOW},
+        TransactionClassification.INSTALLMENT: {TransactionDirection.RESERVED},
+        TransactionClassification.INSTALLMT_CHRGE: {TransactionDirection.OUTFLOW},
+    }
+
+    def validate_direction_classification(self) -> None:
+        """Validate that direction/classification combination is valid."""
+        if self.direction is not None and self.classification is not None:
+            valid_dirs = self.VALID_COMBINATIONS.get(self.classification)
+            if valid_dirs and self.direction not in valid_dirs:
+                raise ValueError(
+                    f"Invalid combination: direction={self.direction.value} "
+                    f"with classification={self.classification.value}"
+                )
+
     def __repr__(self) -> str:
         return f"<Transaction(id={self.id}, {self.direction.value} ¥{self.amount}, {self.classification.value})>"
+
+
+@sa_event.listens_for(Session, "before_flush")
+def _validate_transactions_before_flush(session: Session, flush_context, instances):
+    """Validate direction/classification on all new and dirty Transaction objects."""
+    for obj in list(session.new) + list(session.dirty):
+        if isinstance(obj, Transaction):
+            obj.validate_direction_classification()

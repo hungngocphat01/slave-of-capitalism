@@ -3,9 +3,12 @@ from datetime import date
 from decimal import Decimal
 from typing import NamedTuple
 
+from app.constants import LARGE_CACHE_REBUILD_DAYS, LARGE_CACHE_REBUILD_TRANSACTIONS
+
 from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 
+from app.models.category import Category
 from app.models.transaction import Transaction, TransactionDirection, TransactionClassification
 from app.models.linked_entry import LinkedEntry, LinkType, LinkStatus
 from app.schemas.transaction import (
@@ -23,6 +26,21 @@ from app.schemas.linked_entry import (
     MarkAsDebtRequest,
     MarkAsSplitRequest
 )
+from app.services import snapshot_service, linked_entry_service
+
+
+def _month_range(month: date) -> tuple[date, date]:
+    """Return (start_date, end_date) for the month containing the given date.
+
+    start_date is the first day of the month (inclusive).
+    end_date is the first day of the next month (exclusive).
+    """
+    start = month.replace(day=1)
+    if month.month == 12:
+        end = date(month.year + 1, 1, 1)
+    else:
+        end = date(month.year, month.month + 1, 1)
+    return start, end
 
 
 def get_transaction(db: Session, transaction_id: int) -> Transaction | None:
@@ -68,11 +86,7 @@ def get_transactions(
         )
     
     if month:
-        start_date = month.replace(day=1)
-        if month.month == 12:
-            end_date = date(month.year + 1, 1, 1)
-        else:
-            end_date = date(month.year, month.month + 1, 1)
+        start_date, end_date = _month_range(month)
         query = query.filter(Transaction.date >= start_date, Transaction.date < end_date)
     
     if direction:
@@ -86,12 +100,9 @@ def get_transactions(
 
 def create_transaction(db: Session, transaction: TransactionCreate, commit: bool = True) -> Transaction:
     """Create a new transaction."""
-    from app.services import snapshot_service
-    
     # 1. Safety Check
     # Only check impact if inserting into the past (> threshold old)
     today = date.today()
-    from app.constants import LARGE_CACHE_REBUILD_DAYS, LARGE_CACHE_REBUILD_TRANSACTIONS
     
     if (today - transaction.date).days > LARGE_CACHE_REBUILD_DAYS:
         impact = snapshot_service.check_rebuild_impact(db, transaction.wallet_id, transaction.date)
@@ -163,7 +174,6 @@ def create_wallet_transfer(db: Session, request: WalletTransferRequest, commit: 
     db_outflow.paired_transaction_id = db_inflow.id
     
     # Invalidate snapshots
-    from app.services import snapshot_service
     snapshot_service.invalidate_snapshots(db, request.from_wallet_id, request.date)
     snapshot_service.invalidate_snapshots(db, request.to_wallet_id, request.date)
     
@@ -209,9 +219,6 @@ def update_transaction(
     allow_rebuild = update_data.pop("allow_large_cache_rebuild", False)
     
     # Safety Check & Invalidation
-    from app.services import snapshot_service
-    from app.constants import LARGE_CACHE_REBUILD_DAYS, LARGE_CACHE_REBUILD_TRANSACTIONS
-    
     # 1. Old Wallet / Old Date
     today = date.today()
     if (today - old_date).days > LARGE_CACHE_REBUILD_DAYS:
@@ -268,16 +275,30 @@ def delete_transaction(db: Session, transaction_id: int, allow_large_cache_rebui
     return delete_transactions(db, [transaction_id], allow_large_cache_rebuild=allow_large_cache_rebuild)
 
 
-def _delete_transaction_impl(db: Session, transaction_id: int) -> bool:
-    """Internal implementation of delete without commit."""
+def _delete_transaction_impl(
+    db: Session, transaction_id: int, affected_wallets: dict[int, date] | None = None
+) -> bool:
+    """Internal implementation of delete without commit.
+
+    Args:
+        db: Database session
+        transaction_id: Transaction to delete
+        affected_wallets: Optional dict to track wallet_id -> min_date for snapshot
+            invalidation. If provided, paired transaction wallets are added to it.
+    """
     db_transaction = get_transaction(db, transaction_id)
     if not db_transaction:
         return False
-    
+
     # 1. Handle Paired Transfer
     if db_transaction.paired_transaction_id:
         paired = get_transaction(db, db_transaction.paired_transaction_id)
         if paired:
+            # Track the paired transaction's wallet for snapshot invalidation
+            if affected_wallets is not None:
+                current_min = affected_wallets.get(paired.wallet_id, paired.date)
+                affected_wallets[paired.wallet_id] = min(current_min, paired.date)
+
             # Break the link first
             paired.paired_transaction_id = None
             db.add(paired)
@@ -290,10 +311,9 @@ def _delete_transaction_impl(db: Session, transaction_id: int) -> bool:
 
     # 3. Handle Linked Transactions (This transaction IS a repayment)
     if db_transaction.linked_transactions:
-        from app.services import linked_entry_service
         for link in list(db_transaction.linked_transactions):
-            linked_entry_service.unlink_transaction(db, link.id)
-    
+            linked_entry_service.unlink_transaction(db, link.id, commit=False)
+
     db.delete(db_transaction)
     return True
 
@@ -318,10 +338,6 @@ def delete_transactions(db: Session, transaction_ids: list[int], allow_large_cac
              affected_wallets[txn.wallet_id] = current_min
 
     # 2. Safety Check
-    from app.services import snapshot_service
-    from datetime import date
-    from app.constants import LARGE_CACHE_REBUILD_DAYS, LARGE_CACHE_REBUILD_TRANSACTIONS
-    
     today = date.today()
     
     for wallet_id, min_date in affected_wallets.items():
@@ -333,16 +349,13 @@ def delete_transactions(db: Session, transaction_ids: list[int], allow_large_cac
                     "Please confirm large cache rebuild."
                 )
 
-    # 3. Perform Deletion
+    # 3. Perform Deletion (pass affected_wallets so paired transactions are tracked)
     success = True
     for txn in txns:
-        # We use strict delete here. 
-        # Note: _delete_transaction_impl re-fetches, which is slightly inefficient but safe.
-        # Alternatively we can refactor _delete_transaction_impl to accept object.
-        if not _delete_transaction_impl(db, txn.id):
+        if not _delete_transaction_impl(db, txn.id, affected_wallets):
             success = False
 
-    # 4. Invalidate Snapshots
+    # 4. Invalidate Snapshots (includes paired transaction wallets discovered during deletion)
     for wallet_id, min_date in affected_wallets.items():
         snapshot_service.invalidate_snapshots(db, wallet_id, min_date)
 
@@ -449,15 +462,14 @@ def resolve_calibration(
     if not calibration.is_calibration:
         raise ValueError("Transaction is not a calibration")
     
-    # Create the new transaction
+    # Create the new transaction (without committing - we commit once at the end)
     # Enforce that the new transaction belongs to the same wallet as the calibration
     if new_transaction_data.wallet_id != calibration.wallet_id:
         new_transaction_data.wallet_id = calibration.wallet_id
-        
-    new_txn = create_transaction(db, new_transaction_data)
+
+    new_txn = create_transaction(db, new_transaction_data, commit=False)
     
     # Adjust calibration amount
-    # If same direction, subtract; if opposite direction, add
     # If same direction, subtract; if opposite direction, add
     if new_txn.direction == calibration.direction:
         new_calibration_amount = calibration.amount - new_txn.amount
@@ -469,50 +481,50 @@ def resolve_calibration(
         calibration.amount = Decimal("0.00")
         calibration.is_ignored = True
         db.commit()
+        db.refresh(new_txn)
         db.refresh(calibration)
         return ResolveCalibrationResult(
             new_transaction=new_txn,
             calibration_deleted=False,
             updated_calibration=calibration
         )
-        
+
     # 2. Over-Resolution: Amount becomes negative
     elif new_calibration_amount < Decimal("0.00"):
         # Flip direction and use absolute amount
         new_direction = (
-            TransactionDirection.INFLOW 
-            if calibration.direction == TransactionDirection.OUTFLOW 
+            TransactionDirection.INFLOW
+            if calibration.direction == TransactionDirection.OUTFLOW
             else TransactionDirection.OUTFLOW
         )
-        # Flip classification too for consistency? 
-        # Usually EXPENSE <-> INCOME. 
-        # But classification is loose. Let's try to map it intelligently.
         new_classification = (
             TransactionClassification.INCOME
             if new_direction == TransactionDirection.INFLOW
             else TransactionClassification.EXPENSE
         )
-        
+
         calibration.amount = abs(new_calibration_amount)
         calibration.direction = new_direction
         calibration.classification = new_classification
-        calibration.is_ignored = False # Ensure active
-        
+        calibration.is_ignored = False
+
         db.commit()
+        db.refresh(new_txn)
         db.refresh(calibration)
-        
+
         return ResolveCalibrationResult(
             new_transaction=new_txn,
             calibration_deleted=False,
             updated_calibration=calibration
         )
-    
+
     # 3. Partial Resolution: Amount still positive
     else:
         calibration.amount = new_calibration_amount
         db.commit()
+        db.refresh(new_txn)
         db.refresh(calibration)
-        
+
         return ResolveCalibrationResult(
             new_transaction=new_txn,
             calibration_deleted=False,
@@ -612,12 +624,8 @@ def calculate_monthly_expense(db: Session, month: date) -> Decimal:
     Returns:
         Total monthly expense
     """
-    start_date = month.replace(day=1)
-    if month.month == 12:
-        end_date = date(month.year + 1, 1, 1)
-    else:
-        end_date = date(month.year, month.month + 1, 1)
-    
+    start_date, end_date = _month_range(month)
+
     # Regular expenses (excluding ignored)
     regular_expense = (
         db.query(func.sum(Transaction.amount))
@@ -665,13 +673,7 @@ def calculate_category_breakdown(db: Session, month: date) -> dict[str, Decimal]
     Returns:
         Dictionary mapping category name to total amount
     """
-    from app.models.category import Category
-    
-    start_date = month.replace(day=1)
-    if month.month == 12:
-        end_date = date(month.year + 1, 1, 1)
-    else:
-        end_date = date(month.year, month.month + 1, 1)
+    start_date, end_date = _month_range(month)
     
     # Get all expense transactions for the month (excluding ignored)
     transactions = (
@@ -726,15 +728,15 @@ def mark_as_split(db: Session, transaction_id: int, request: MarkAsSplitRequest)
     db.add(txn)
     
     # Create linked entry
-    from app.services import linked_entry_service
+
     entry = linked_entry_service.create_linked_entry(db, LinkedEntryCreate(
         primary_transaction_id=transaction_id,
         link_type=LinkType.SPLIT_PAYMENT,
         counterparty_name=request.counterparty_name,
         user_amount=request.user_amount,
         notes=request.notes
-    ))
-    
+    ), commit=False)
+
     db.commit()
     db.refresh(txn)
     db.refresh(entry)
@@ -749,37 +751,28 @@ def mark_as_loan(db: Session, transaction_id: int, request: MarkAsLoanRequest) -
     txn = get_transaction(db, transaction_id)
     if not txn:
         raise ValueError("Transaction not found")
-        
+
     if txn.direction != TransactionDirection.OUTFLOW:
         raise ValueError("Loan must be an OUTFLOW transaction")
 
     # Update classification
-    previous_classification = txn.classification
     txn.classification = TransactionClassification.LEND
-    
-    try:
-        from app.services import linked_entry_service
-        entry_create = LinkedEntryCreate(
-            primary_transaction_id=transaction_id,
-            link_type=LinkType.LOAN,
-            counterparty_name=request.counterparty_name,
-            notes=request.notes
-        )
-        # We need to do this carefully. linked_entry_service.create_linked_entry performs a commit.
-        # Ideally we refactor linked_entry_service too, but for now let's use it 
-        # as it encapsulates the creation logic.
-        # However, we changed classification above but haven't committed.
-        # create_linked_entry will commit the classification change as part of its commit because it uses the same session.
-        
-        entry = linked_entry_service.create_linked_entry(db, entry_create)
-        return LinkedEntryResponse.model_validate(entry)
-        
-    except Exception as e:
-        db.rollback() # Rollback classification change
-        # If the error was from create_linked_entry validation, it's raised before commit there.
-        # If it committed there, we can't rollback easily unless we nested.
-        # But create_linked_entry checks logic before adding to DB.
-        raise e
+    db.add(txn)
+
+    # Create linked entry
+
+    entry = linked_entry_service.create_linked_entry(db, LinkedEntryCreate(
+        primary_transaction_id=transaction_id,
+        link_type=LinkType.LOAN,
+        counterparty_name=request.counterparty_name,
+        notes=request.notes
+    ), commit=False)
+
+    db.commit()
+    db.refresh(txn)
+    db.refresh(entry)
+
+    return LinkedEntryResponse.model_validate(entry)
 
 
 def mark_as_debt(db: Session, transaction_id: int, request: MarkAsDebtRequest) -> LinkedEntryResponse:
@@ -798,15 +791,15 @@ def mark_as_debt(db: Session, transaction_id: int, request: MarkAsDebtRequest) -
     txn.classification = TransactionClassification.BORROW
     
     # Create linked entry
-    from app.services import linked_entry_service
+
     entry = linked_entry_service.create_linked_entry(db, LinkedEntryCreate(
         primary_transaction_id=transaction_id,
         link_type=LinkType.DEBT,
         counterparty_name=request.counterparty_name,
         notes=request.notes,
         user_amount=None  # Not used for debts
-    ))
-    
+    ), commit=False)
+
     db.commit()
     db.refresh(txn)
     db.refresh(entry)
@@ -835,15 +828,15 @@ def mark_as_installment(db: Session, transaction_id: int, request: MarkAsLoanReq
     db.add(txn)
     
     # Create linked entry
-    from app.services import linked_entry_service
+
     entry = linked_entry_service.create_linked_entry(db, LinkedEntryCreate(
         primary_transaction_id=transaction_id,
         link_type=LinkType.INSTALLMENT,
         counterparty_name=request.counterparty_name,
         notes=request.notes,
         user_amount=None  # Not used for installments
-    ))
-    
+    ), commit=False)
+
     db.commit()
     db.refresh(txn)
     db.refresh(entry)

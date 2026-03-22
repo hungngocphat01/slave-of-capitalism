@@ -1,10 +1,8 @@
 """Transaction API router with updated model."""
 from datetime import date
-from decimal import Decimal
+from typing import Optional
 
-from typing import Union, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -21,8 +19,7 @@ from app.schemas.transaction import (
     TransactionMergeRequest,
     BulkImportRequest
 )
-from app.models.transaction import TransactionDirection, TransactionClassification, Transaction
-from app.models.linked_entry import LinkType
+from app.models.transaction import TransactionDirection, TransactionClassification
 from app.services import transaction_service, linked_entry_service
 from app.schemas.linked_entry import (
     LinkedEntryCreate,
@@ -81,14 +78,10 @@ def list_transactions(
     """List transactions with optional filtering."""
     month_date = None
     if month:
-        from datetime import date as dt_date # avoid conflict if needed, or use date.fromisoformat
-        # Actually 'date' is imported.
         try:
-             month_date = date.fromisoformat(month)
+            month_date = date.fromisoformat(month)
         except ValueError:
-             # If invalid format, maybe raise 422? Or let service decide? 
-             # FastAPI would handle validation for `date` type, but for `str` we do it.
-             raise HTTPException(status_code=422, detail="Invalid date format. Use YYYY-MM-DD")
+            raise HTTPException(status_code=422, detail="Invalid date format. Use YYYY-MM-DD")
 
     transactions = transaction_service.get_transactions(
         db, skip=skip, limit=limit, wallet_id=wallet_id, category_id=category_id,
@@ -277,8 +270,7 @@ def get_monthly_summary(
 ):
     """Get monthly expense summary."""
     try:
-        from datetime import date as dt_date
-        month_date = dt_date.fromisoformat(month)
+        month_date = date.fromisoformat(month)
     except ValueError:
         raise HTTPException(status_code=422, detail="Invalid date format. Use YYYY-MM-DD")
 
@@ -298,15 +290,7 @@ def get_monthly_summary(
 def create_wallet_transfer(request: WalletTransferRequest, db: Session = Depends(get_db)):
     """
     Create a wallet transfer (paired transactions).
-    
-    Creates two transactions:
-    - OUTFLOW from source wallet
-    - INFLOW to destination wallet
-    Both linked via paired_transaction_id.
-    """
-    """
-    Create a wallet transfer (paired transactions).
-    
+
     Creates two transactions:
     - OUTFLOW from source wallet
     - INFLOW to destination wallet

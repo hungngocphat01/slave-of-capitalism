@@ -45,7 +45,7 @@ def get_pending_entries(db: Session) -> list[LinkedEntry]:
     ).all()
 
 
-def create_linked_entry(db: Session, entry: LinkedEntryCreate) -> LinkedEntry:
+def create_linked_entry(db: Session, entry: LinkedEntryCreate, commit: bool = True) -> LinkedEntry:
     """
     Create a new linked entry.
     
@@ -124,8 +124,12 @@ def create_linked_entry(db: Session, entry: LinkedEntryCreate) -> LinkedEntry:
     )
     
     db.add(db_entry)
-    db.commit()
-    db.refresh(db_entry)
+    if commit:
+        db.commit()
+        db.refresh(db_entry)
+    else:
+        db.flush()
+        db.refresh(db_entry)
     return db_entry
 
 
@@ -241,33 +245,42 @@ def link_transactions(
     return entry
 
 
-def unlink_transaction(db: Session, link_id: int) -> LinkedEntry:
+def unlink_transaction(db: Session, link_id: int, commit: bool = True) -> LinkedEntry:
     """
     Unlink a transaction from an entry.
-    
+
     Useful for correcting mistakes or when reimbursement is reversed.
     """
     link = db.query(LinkedTransaction).filter(LinkedTransaction.id == link_id).first()
     if not link:
         raise LinkedEntryError(f"Link {link_id} not found")
-    
+
     entry = link.linked_entry
-    
+
     # Restore pending amount
     entry.pending_amount += link.amount
-    
-    # Update status
-    if entry.pending_amount >= entry.total_amount:
+
+    # Update status - calculate initial pending amount for correct comparison
+    if entry.link_type == LinkType.SPLIT_PAYMENT and entry.user_amount is not None:
+        initial_pending = entry.total_amount - entry.user_amount
+    else:
+        initial_pending = entry.total_amount
+
+    if entry.pending_amount >= initial_pending:
         entry.status = LinkStatus.PENDING
-    elif entry.pending_amount <= Decimal("0.01"):
+    elif entry.pending_amount <= Decimal("0.00"):
         entry.status = LinkStatus.SETTLED
     else:
         entry.status = LinkStatus.PARTIAL
-    
+
     # Delete link
     db.delete(link)
-    db.commit()
-    db.refresh(entry)
+    if commit:
+        db.commit()
+        db.refresh(entry)
+    else:
+        db.flush()
+        db.refresh(entry)
     return entry
 
 
@@ -303,8 +316,8 @@ def calculate_total_owed(db: Session) -> Decimal:
         LinkedEntry.link_type.in_([LinkType.SPLIT_PAYMENT, LinkType.LOAN]),
         LinkedEntry.status.in_([LinkStatus.PENDING, LinkStatus.PARTIAL])
     ).all()
-    
-    return sum(entry.pending_amount for entry in entries)
+
+    return sum((entry.pending_amount for entry in entries), Decimal("0.00"))
 
 
 def calculate_total_debt(db: Session) -> Decimal:
@@ -313,8 +326,8 @@ def calculate_total_debt(db: Session) -> Decimal:
         LinkedEntry.link_type == LinkType.DEBT,
         LinkedEntry.status.in_([LinkStatus.PENDING, LinkStatus.PARTIAL])
     ).all()
-    
-    return sum(entry.pending_amount for entry in entries)
+
+    return sum((entry.pending_amount for entry in entries), Decimal("0.00"))
 
 
 def calculate_pending_installments(db: Session, wallet_id: int | None = None) -> Decimal:
@@ -344,8 +357,8 @@ def calculate_pending_installments(db: Session, wallet_id: int | None = None) ->
         query = query.filter(Transaction.wallet_id == wallet_id)
     
     entries = query.all()
-    
-    return sum(entry.pending_amount for entry in entries)
+
+    return sum((entry.pending_amount for entry in entries), Decimal("0.00"))
 
 
 
@@ -377,9 +390,11 @@ def unclassify_transaction(db: Session, transaction_id: int) -> bool:
                 linked_txn.classification = TransactionClassification.INCOME
             elif linked_txn.classification == TransactionClassification.LOAN_REPAYMENT:
                 linked_txn.classification = TransactionClassification.EXPENSE
-        
+            elif linked_txn.classification == TransactionClassification.INSTALLMT_CHRGE:
+                linked_txn.classification = TransactionClassification.EXPENSE
+
         db.delete(entry)
-    
+
     # Revert classification
     if txn.classification in [TransactionClassification.SPLIT_PAYMENT, TransactionClassification.LEND]:
         txn.classification = TransactionClassification.EXPENSE
@@ -388,7 +403,9 @@ def unclassify_transaction(db: Session, transaction_id: int) -> bool:
     elif txn.classification == TransactionClassification.INSTALLMENT:
         txn.classification = TransactionClassification.EXPENSE
         txn.direction = TransactionDirection.OUTFLOW
-        
+        # Direction changed from RESERVED→OUTFLOW: invalidate snapshots
+        snapshot_service.invalidate_snapshots(db, txn.wallet_id, txn.date)
+
     db.commit()
     return True
 

@@ -1,13 +1,26 @@
 """Wallet service for CRUD operations and balance calculations."""
 from datetime import date, timedelta
 from decimal import Decimal
+from typing import NamedTuple
 
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.models.transaction import Transaction, TransactionClassification
-from app.models.wallet import Wallet
+from app.constants import LAZY_SNAPSHOT_INTERVAL_DAYS
+from app.models.balance_audit import BalanceAudit
+from app.models.transaction import Transaction, TransactionDirection, TransactionClassification
+from app.models.wallet import Wallet, WalletType
 from app.schemas.wallet import WalletCreate, WalletUpdate
+from app.services import snapshot_service, linked_entry_service
+
+
+class AuditData(NamedTuple):
+    """Data for creating a balance audit record."""
+    date: date
+    balances: dict
+    debts: Decimal
+    owed: Decimal
+    net_position: Decimal
 
 
 def get_wallet(db: Session, wallet_id: int) -> Wallet | None:
@@ -45,9 +58,6 @@ def create_wallet(db: Session, wallet: WalletCreate) -> Wallet:
     
     If initial_balance is provided, creates an "INITIAL BALANCE" transaction.
     """
-    from app.models.transaction import TransactionDirection, TransactionClassification
-    from datetime import date
-
     # Extract initial_balance (not in model)
     initial_balance = wallet.initial_balance
     wallet_data = wallet.model_dump(exclude={"initial_balance"})
@@ -150,11 +160,6 @@ def calculate_wallet_balance(
     Returns:
         Current balance (for normal) or amount owed (for credit)
     """
-    from app.services import snapshot_service
-    from app.models.wallet import WalletType
-    from app.models.transaction import TransactionDirection
-    from datetime import date, timedelta
-    
     wallet = get_wallet(db, wallet_id)
     if not wallet:
         return Decimal("0.00")
@@ -223,45 +228,37 @@ def calculate_wallet_balance(
         # If we query for T-100, we technically calculate T-100 balance. We COULD snapshot T-100.
         # But let's respect the flag.
         
-        if trigger_lazy_snapshot and target_date == date.today():
-             today = date.today()
-             from app.constants import LAZY_SNAPSHOT_INTERVAL_DAYS
-             should_create_snapshot = False
-             
-             if not latest_snapshot:
-                 should_create_snapshot = True
-             elif (today - latest_snapshot.snapshot_date).days > LAZY_SNAPSHOT_INTERVAL_DAYS:
-                 should_create_snapshot = True
-                 
-             if should_create_snapshot:
+        today = date.today()
+        if trigger_lazy_snapshot and target_date == today:
+             snapshot_stale = (
+                 not latest_snapshot
+                 or (today - latest_snapshot.snapshot_date).days > LAZY_SNAPSHOT_INTERVAL_DAYS
+             )
+
+             if snapshot_stale:
                  snapshot_date = today - timedelta(days=1)
-                 
-                 if latest_snapshot and latest_snapshot.snapshot_date >= snapshot_date:
-                      pass
-                 else:
-                     # Calculate balance at end of snapshot_date (Yesterday)
-                     # Balance(Yesterday) = Current Balance - Inflows(Today) + Outflows(Today)
-                     
-                     # Check if we have transactions today that we need to reverse
+                 already_exists = (
+                     latest_snapshot and latest_snapshot.snapshot_date >= snapshot_date
+                 )
+
+                 if not already_exists:
+                     # Calculate balance at end of Yesterday
                      inflows_today = db.query(func.sum(Transaction.amount)).filter(
                          Transaction.wallet_id == wallet_id,
                          Transaction.direction == TransactionDirection.INFLOW,
                          Transaction.date == today
                      ).scalar() or Decimal("0.00")
-                     
+
                      outflows_today = db.query(func.sum(Transaction.amount)).filter(
                          Transaction.wallet_id == wallet_id,
                          Transaction.direction == TransactionDirection.OUTFLOW,
                          Transaction.date == today
                      ).scalar() or Decimal("0.00")
-                     
+
                      balance_yesterday = final_balance - inflows_today + outflows_today
-                     
+
                      existing = snapshot_service.get_latest_snapshot(db, wallet_id, before_date=snapshot_date)
-                     # Check exact match. get_latest returns <= date.
-                     if existing and existing.snapshot_date == snapshot_date:
-                         pass 
-                     else:
+                     if not (existing and existing.snapshot_date == snapshot_date):
                          snapshot_service.create_snapshot(db, wallet_id, snapshot_date, balance_yesterday)
 
         return final_balance
@@ -281,9 +278,6 @@ def calculate_available_credit(db: Session, wallet_id: int) -> Decimal:
     Returns:
         Available credit amount
     """
-    from app.models.wallet import WalletType
-    from app.services import linked_entry_service
-    
     wallet = get_wallet(db, wallet_id)
     if not wallet or wallet.wallet_type != WalletType.CREDIT:
         return Decimal("0.00")
@@ -328,9 +322,6 @@ def calibrate_wallet(
     Raises:
         ValueError: If wallet not found
     """
-    from app.models.transaction import TransactionDirection, TransactionClassification
-    from datetime import date
-    
     wallet = get_wallet(db, wallet_id)
     if not wallet:
         raise ValueError("Wallet not found")
@@ -370,8 +361,6 @@ def calibrate_wallet(
         is_ignored=False  # Calibrations count toward budget by default
     )
     
-    db.add(calibration)
-    db.commit()
     db.add(calibration)
     db.commit()
     db.refresh(calibration)
@@ -422,7 +411,6 @@ def get_balance_audits(db: Session, skip: int = 0, limit: int = 100):
     """
     Get all balance audits.
     """
-    from app.models.balance_audit import BalanceAudit
     return db.query(BalanceAudit).order_by(BalanceAudit.date.desc()).offset(skip).limit(limit).all()
 
 
@@ -431,14 +419,12 @@ def create_balance_audit(db: Session, audit_data):
     Create or update a balance audit.
     Overwrite if exists for the same day.
     """
-    from app.models.balance_audit import BalanceAudit
-    
     existing = db.query(BalanceAudit).filter(BalanceAudit.date == audit_data.date).first()
     if existing:
         existing.balances = audit_data.balances
         existing.debts = audit_data.debts
         existing.owed = audit_data.owed
-        existing.net_position = getattr(audit_data, 'net_position', Decimal("0.00"))
+        existing.net_position = audit_data.net_position
         db.commit()
         db.refresh(existing)
         return existing
@@ -448,7 +434,7 @@ def create_balance_audit(db: Session, audit_data):
             balances=audit_data.balances,
             debts=audit_data.debts,
             owed=audit_data.owed,
-            net_position=getattr(audit_data, 'net_position', Decimal("0.00"))
+            net_position=audit_data.net_position
         )
         db.add(db_audit)
         db.commit()
@@ -464,17 +450,13 @@ def perform_balance_audit(db: Session, audit_date: date):
     2. Calculate total debts/owed
     3. Save BalanceAudit record
     """
-    from app.services import linked_entry_service
-    
     # 1. Calculate balances
     wallets = get_wallets(db)
     balances = {}
     
     total_assets = Decimal("0.00")
     total_liabilities = Decimal("0.00")
-    
-    from app.models.wallet import WalletType
-    
+
     for w in wallets:
         # Use calculate_wallet_balance service method
         bal = calculate_wallet_balance(
@@ -507,16 +489,6 @@ def perform_balance_audit(db: Session, audit_date: date):
     net_position = (total_assets + total_owed) - (total_liabilities + total_debts + total_pending_installments)
     
     # 4. Create Record
-    # We can reuse create_balance_audit logic or inline.
-    # Let's create a DTO-like object for create_balance_audit
-    class AuditData:
-        def __init__(self, date, balances, debts, owed, net_position):
-            self.date = date
-            self.balances = balances
-            self.debts = debts
-            self.owed = owed
-            self.net_position = net_position
-            
     data = AuditData(audit_date, balances, total_debts, total_owed, net_position)
     return create_balance_audit(db, data)
 

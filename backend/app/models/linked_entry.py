@@ -1,5 +1,5 @@
 """Linked entry models for splits, loans, and debts."""
-from datetime import datetime
+from datetime import datetime, timezone
 from decimal import Decimal
 from enum import Enum as PyEnum
 
@@ -94,11 +94,11 @@ class LinkedEntry(Base):
     notes: Mapped[str | None] = mapped_column(String(1000), nullable=True)
     
     # Audit
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime,
-        default=datetime.utcnow,
-        onupdate=datetime.utcnow,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
         nullable=False
     )
     
@@ -150,8 +150,8 @@ class LinkedTransaction(Base):
         index=True
     )
     
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
-    
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+
     # Relationships
     linked_entry: Mapped[LinkedEntry] = relationship(
         "LinkedEntry",

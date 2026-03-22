@@ -9,8 +9,10 @@ from app.schemas.wallet import (
     WalletUpdate,
     WalletWithBalance,
 )
+from app.models.wallet import WalletType
 from app.schemas.balance_audit import BalanceAuditResponse, BalanceAuditCreate
-from app.services import wallet_service
+from app.schemas.transaction import WalletTransferRequest
+from app.services import wallet_service, transaction_service
 
 router = APIRouter()
 
@@ -18,8 +20,6 @@ router = APIRouter()
 @router.get("/", response_model=list[WalletWithBalance])
 def list_wallets(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     """List all wallets with current balances."""
-    from app.models.wallet import WalletType
-    
     wallets = wallet_service.get_wallets(db, skip=skip, limit=limit)
     
     # Enrich with current balance and available credit (for credit wallets)
@@ -68,8 +68,6 @@ def create_audit(audit: BalanceAuditCreate, db: Session = Depends(get_db)):
 @router.get("/{wallet_id}", response_model=WalletWithBalance)
 def get_wallet(wallet_id: int, db: Session = Depends(get_db)):
     """Get a specific wallet by ID."""
-    from app.models.wallet import WalletType
-    
     wallet = wallet_service.get_wallet(db, wallet_id)
     if not wallet:
         raise HTTPException(
@@ -142,105 +140,21 @@ def delete_wallet(wallet_id: int, db: Session = Depends(get_db)):
     summary="Create a wallet-to-wallet transfer",
     description="""
     Creates a transfer between two wallets by creating two paired transactions:
-    - An OUTFLOW transaction from the source wallet with description "Transfer → {destination}"
-    - An INFLOW transaction to the destination wallet with description "Transfer ← {source}"
-    
+    - An OUTFLOW transaction from the source wallet
+    - An INFLOW transaction to the destination wallet
+
     The transactions are linked via paired_transaction_id to maintain referential integrity.
-    
+
     **Note**: This does NOT affect monthly expense calculations as TRANSFER transactions are excluded.
     """,
     responses={
-        200: {
-            "description": "Transfer created successfully",
-            "content": {
-                "application/json": {
-                    "example": {
-                        "from": {
-                            "id": 1,
-                            "date": "2025-12-07",
-                            "wallet_id": 1,
-                            "direction": "outflow",
-                            "amount": 10000,
-                            "classification": "transfer",
-                            "description": "Transfer → Cash"
-                        },
-                        "to": {
-                            "id": 2,
-                            "date": "2025-12-07",
-                            "wallet_id": 2,
-                            "direction": "inflow",
-                            "amount": 10000,
-                            "classification": "transfer",
-                            "description": "Transfer ← Bank Account"
-                        }
-                    }
-                }
-            }
-        },
-        400: {"description": "Missing required fields or invalid data"},
+        200: {"description": "Transfer created successfully"},
+        400: {"description": "Invalid data"},
         404: {"description": "Source or destination wallet not found"}
     }
 )
-def create_transfer(transfer_data: dict, db: Session = Depends(get_db)):
-    """
-    Create a transfer between two wallets.
-    
-    Args:
-        transfer_data: Dictionary containing:
-            - from_wallet_id (int): Source wallet ID
-            - to_wallet_id (int): Destination wallet ID
-            - amount (float): Amount to transfer
-            - date (str): Transfer date in ISO format (YYYY-MM-DD)
-            - time (str, optional): Transfer time in ISO format (HH:MM:SS)
-            - description (str, optional): Custom description (defaults to auto-generated with arrows)
-    
-    Returns:
-        dict: Contains "from" and "to" transaction objects
-    
-    Example:
-        ```json
-        {
-            "from_wallet_id": 1,
-            "to_wallet_id": 2,
-            "amount": 10000,
-            "date": "2025-12-07",
-            "description": "Transfer"
-        }
-        ```
-    """
-    from app.models.transaction import Transaction, TransactionDirection, TransactionClassification
-    from app.schemas.transaction import TransactionResponse
-    from datetime import date as date_type, time as time_type
-    
-    from app.services import transaction_service
-    from app.schemas.transaction import WalletTransferRequest
-
-    # Validate required fields
-    required_fields = ["from_wallet_id", "to_wallet_id", "amount", "date"]
-    for field in required_fields:
-        if field not in transfer_data:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Missing required field: {field}"
-            )
-            
-    # Parse into request object
-    try:
-        request = WalletTransferRequest(
-            from_wallet_id=transfer_data["from_wallet_id"],
-            to_wallet_id=transfer_data["to_wallet_id"],
-            amount=transfer_data["amount"],
-            date=transfer_data["date"],
-            time=transfer_data.get("time"),
-            description=transfer_data.get("description", "Transfer")
-        )
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid data: {str(e)}"
-        )
-        
-    # Delegate to service
+def create_transfer(request: WalletTransferRequest, db: Session = Depends(get_db)):
+    """Create a transfer between two wallets."""
     try:
         response = transaction_service.create_wallet_transfer(db, request)
         return {
@@ -248,12 +162,8 @@ def create_transfer(transfer_data: dict, db: Session = Depends(get_db)):
             "to": response.inflow_transaction
         }
     except Exception as e:
-        # Check if wallet not found error (which might come from foreign key constraints or service checks)
-        # The service doesn't explicitly check existence, but DB will raise error if FK fails.
-        # Ideally service should check.
-        # But let's handle general errors.
-        if "Foreign key constraint failed" in str(e) or "constraint failed" in str(e):
-             raise HTTPException(
+        if "constraint failed" in str(e):
+            raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="One of the wallets was not found"
             )
@@ -261,7 +171,4 @@ def create_transfer(transfer_data: dict, db: Session = Depends(get_db)):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e)
         )
-
-
-
 

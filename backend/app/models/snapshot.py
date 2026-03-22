@@ -1,8 +1,8 @@
 """Wallet snapshot model for optimizing balance calculations."""
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from decimal import Decimal
 
-from sqlalchemy import DECIMAL, Date, DateTime, ForeignKey, Integer
+from sqlalchemy import DECIMAL, Date, DateTime, ForeignKey, Integer, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -24,7 +24,10 @@ class WalletSnapshot(Base):
     """
     
     __tablename__ = "wallet_snapshots"
-    
+    __table_args__ = (
+        UniqueConstraint("wallet_id", "snapshot_date", name="uq_wallet_snapshot_date"),
+    )
+
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     wallet_id: Mapped[int] = mapped_column(
         Integer,
@@ -37,7 +40,7 @@ class WalletSnapshot(Base):
         nullable=False
     )
     snapshot_date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
     
     # Relationships
     wallet: Mapped["Wallet"] = relationship("Wallet", back_populates="snapshots")

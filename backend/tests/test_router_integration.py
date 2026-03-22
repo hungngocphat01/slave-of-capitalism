@@ -115,14 +115,13 @@ class TestWalletTransferRouter:
         assert data["to"]["amount"] == "3000.00"
     
     def test_wallet_transfer_missing_fields(self, client, sample_wallet):
-        """Should return 400 if required fields missing."""
+        """Should return 422 if required fields missing (Pydantic validation)."""
         response = client.post("/api/wallets/transfer", json={
             "from_wallet_id": sample_wallet.id,
             # Missing to_wallet_id, amount, date
         })
-        
-        assert response.status_code == 400
-        assert "Missing required field" in response.json()["detail"]
+
+        assert response.status_code == 422
     
     def test_wallet_transfer_invalid_wallet(self, client, sample_wallet):
         """Should return 404 if wallet doesn't exist."""
@@ -130,9 +129,10 @@ class TestWalletTransferRouter:
             "from_wallet_id": sample_wallet.id,
             "to_wallet_id": 99999,
             "amount": 1000.00,
-            "date": "2025-12-07"
+            "date": "2025-12-07",
+            "description": "Transfer"
         })
-        
+
         # Should get error about wallet not found or constraint failure
         assert response.status_code in [400, 404]
 
@@ -383,7 +383,8 @@ class TestEndToEndWorkflows:
             "from_wallet_id": sample_wallet.id,
             "to_wallet_id": wallet2.id,
             "amount": float(transfer_amount),
-            "date": "2025-12-07"
+            "date": "2025-12-07",
+            "description": "Transfer"
         })
         
         assert response.status_code == 200
