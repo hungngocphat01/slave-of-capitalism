@@ -15,6 +15,7 @@ struct ContentView: View {
     @Environment(BackendManager.self) private var backendManager
     @Environment(AppSettings.self) private var appSettings
     @State private var selectedScreen: Screen = .transactions
+    @State private var isRestartingBackend = false
 
     var body: some View {
         Group {
@@ -24,8 +25,8 @@ struct ContentView: View {
             case .error(let message), .crashed(let message):
                 ErrorView(
                     message: message,
-                    onRetry: { restartBackend(openSettings: false) },
-                    onOpenSettings: { restartBackend(openSettings: true) }
+                    onRetry: isRestartingBackend ? nil : { restartBackend(openSettings: false) },
+                    onOpenSettings: isRestartingBackend ? nil : { restartBackend(openSettings: true) }
                 )
             case .ready:
                 NavigationSplitView {
@@ -60,13 +61,19 @@ struct ContentView: View {
     }
 
     private func restartBackend(openSettings: Bool) {
+        guard !isRestartingBackend else { return }
+
         if openSettings {
             selectedScreen = .settings
         }
 
         let dbPath = appSettings.databasePath.isEmpty ? nil : appSettings.databasePath
+        isRestartingBackend = true
         Task {
             await backendManager.restart(dbPath: dbPath)
+            await MainActor.run {
+                isRestartingBackend = false
+            }
         }
     }
 }
