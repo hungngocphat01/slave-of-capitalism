@@ -18,6 +18,7 @@
 		701BCDD0AD0C5C930B4EC140 /* SlaveOfCapitalismTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF649340089E8EDA1FD97642 /* SlaveOfCapitalismTests.swift */; };
 		824A4563137933F94D1337B9 /* SlaveOfCapitalismApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A5D3A3C94BF9C982B9D47B4 /* SlaveOfCapitalismApp.swift */; };
 		84D726CEED705BD2C0DD8608 /* Enums.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05082C1E5304917D0993484E /* Enums.swift */; };
+		912D49F3DC4FCB17BF36DC71 /* MockAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D223D1B1B2AF00294FE0B59 /* MockAPIClient.swift */; };
 		93DA067FE2DA933BAE9B2662 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22292BA65C9FD4C1C4DB99FA /* APIClient.swift */; };
 		A012E94A234B19E9F826BDF0 /* CategoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F85937B92CFE469DF0AA97E /* CategoryStore.swift */; };
 		A71C7A799320FF37C98BB306 /* Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = F89735236A40BA9B70CEB2A9 /* Category.swift */; };
@@ -51,6 +52,7 @@
 		6894AB73FF7E11DD5F39E63B /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		6AC423DCE6B7EF89D5C41027 /* BackendManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackendManager.swift; sourceTree = "<group>"; };
 		7C5C37C1052E765D856F6BC2 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
+		7D223D1B1B2AF00294FE0B59 /* MockAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAPIClient.swift; sourceTree = "<group>"; };
 		8B1D5F5359B0D5DC71536B5A /* Wallet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Wallet.swift; sourceTree = "<group>"; };
 		8B45D1EF72B4FAD29BA8612C /* Formatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Formatters.swift; sourceTree = "<group>"; };
 		9F85937B92CFE469DF0AA97E /* CategoryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryStore.swift; sourceTree = "<group>"; };
@@ -155,6 +157,7 @@
 		D8A443783F51D7FF729A452F /* SlaveOfCapitalismTests */ = {
 			isa = PBXGroup;
 			children = (
+				7D223D1B1B2AF00294FE0B59 /* MockAPIClient.swift */,
 				AF649340089E8EDA1FD97642 /* SlaveOfCapitalismTests.swift */,
 			);
 			path = SlaveOfCapitalismTests;
@@ -243,6 +246,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				912D49F3DC4FCB17BF36DC71 /* MockAPIClient.swift in Sources */,
 				701BCDD0AD0C5C930B4EC140 /* SlaveOfCapitalismTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
