@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0EEBF49B3909FBD3E2EE1179 /* MockAPIClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10DF568DB3A9ACBECC802D6 /* MockAPIClientTests.swift */; };
 		1A8488E8937808ED70A844CC /* LinkedEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = F12C5E5D7024E7E566E6B646 /* LinkedEntry.swift */; };
 		1C801D2D0975D6CC9EC84316 /* Formatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B45D1EF72B4FAD29BA8612C /* Formatters.swift */; };
 		2A7A1B22C4E0A3CF36355EED /* BalanceAudit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B6C1CA3902A01152E4F703B /* BalanceAudit.swift */; };
@@ -58,6 +59,7 @@
 		9F85937B92CFE469DF0AA97E /* CategoryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryStore.swift; sourceTree = "<group>"; };
 		AF649340089E8EDA1FD97642 /* SlaveOfCapitalismTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlaveOfCapitalismTests.swift; sourceTree = "<group>"; };
 		D989A14558B1A43A910AA4E9 /* SlaveOfCapitalismTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SlaveOfCapitalismTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		E10DF568DB3A9ACBECC802D6 /* MockAPIClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAPIClientTests.swift; sourceTree = "<group>"; };
 		F12C5E5D7024E7E566E6B646 /* LinkedEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkedEntry.swift; sourceTree = "<group>"; };
 		F272D7D9F5EDEFC98E5FD8DA /* SlaveOfCapitalism.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SlaveOfCapitalism.entitlements; sourceTree = "<group>"; };
 		F89735236A40BA9B70CEB2A9 /* Category.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Category.swift; sourceTree = "<group>"; };
@@ -158,6 +160,7 @@
 			isa = PBXGroup;
 			children = (
 				7D223D1B1B2AF00294FE0B59 /* MockAPIClient.swift */,
+				E10DF568DB3A9ACBECC802D6 /* MockAPIClientTests.swift */,
 				AF649340089E8EDA1FD97642 /* SlaveOfCapitalismTests.swift */,
 			);
 			path = SlaveOfCapitalismTests;
@@ -247,6 +250,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				912D49F3DC4FCB17BF36DC71 /* MockAPIClient.swift in Sources */,
+				0EEBF49B3909FBD3E2EE1179 /* MockAPIClientTests.swift in Sources */,
 				701BCDD0AD0C5C930B4EC140 /* SlaveOfCapitalismTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
