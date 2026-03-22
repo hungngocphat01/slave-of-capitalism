@@ -46,7 +46,7 @@ struct ContentView: View {
         case .summary:
             Text("Summary - Task 14")
         case .wallets:
-            Text("Wallets - Task 10")
+            WalletListView(apiClient: backendManager.apiClient)
         case .pending:
             Text("Pending - Task 13")
         case .categories:
