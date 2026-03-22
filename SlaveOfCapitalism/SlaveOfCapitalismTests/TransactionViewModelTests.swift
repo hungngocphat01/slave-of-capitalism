@@ -6,7 +6,7 @@ final class TransactionViewModelTests: XCTestCase {
     func testLoadRequestsSelectedMonthAndStoresTransactions() async {
         let client = TransactionAPIStub()
         client.listTransactionsHandler = { month in
-            XCTAssertEqual(month, "2026-03")
+            XCTAssertEqual(month, "2026-03-01")
             return [
                 Self.makeTransaction(id: 1, date: "2026-03-05", description: "Groceries"),
                 Self.makeTransaction(id: 2, date: "2026-03-06", description: "Salary", direction: .inflow, classification: .income)
@@ -16,7 +16,7 @@ final class TransactionViewModelTests: XCTestCase {
         let viewModel = TransactionViewModel(apiClient: client, selectedYear: 2026, selectedMonth: 3)
         await viewModel.load()
 
-        XCTAssertEqual(client.listTransactionsMonths, ["2026-03"])
+        XCTAssertEqual(client.listTransactionsMonths, ["2026-03-01"])
         XCTAssertEqual(viewModel.transactions.map(\.id), [1, 2])
         XCTAssertTrue(viewModel.selectedIds.isEmpty)
         XCTAssertFalse(viewModel.isLoading)
@@ -27,12 +27,12 @@ final class TransactionViewModelTests: XCTestCase {
         let client = TransactionAPIStub()
         client.listTransactionsHandler = { month in
             switch month {
-            case "2026-03":
+            case "2026-03-01":
                 return [
                     Self.makeTransaction(id: 1, date: "2026-03-05", description: "Groceries"),
                     Self.makeTransaction(id: 2, date: "2026-03-06", description: "Coffee")
                 ]
-            case "2026-04":
+            case "2026-04-01":
                 return [
                     Self.makeTransaction(id: 2, date: "2026-04-01", description: "Coffee"),
                     Self.makeTransaction(id: 3, date: "2026-04-02", description: "Rent")
@@ -49,7 +49,7 @@ final class TransactionViewModelTests: XCTestCase {
         viewModel.selectedMonth = 4
         await viewModel.load()
 
-        XCTAssertEqual(client.listTransactionsMonths, ["2026-03", "2026-04"])
+        XCTAssertEqual(client.listTransactionsMonths, ["2026-03-01", "2026-04-01"])
         XCTAssertEqual(viewModel.transactions.map(\.id), [2, 3])
         XCTAssertEqual(viewModel.selectedIds, [2])
     }
@@ -57,7 +57,7 @@ final class TransactionViewModelTests: XCTestCase {
     func testDeleteSelectedDeletesIdsClearsSelectionAndReloads() async {
         let client = TransactionAPIStub()
         client.listTransactionsHandler = { month in
-            XCTAssertEqual(month, "2026-03")
+            XCTAssertEqual(month, "2026-03-01")
             if client.listTransactionsMonths.count == 1 {
                 return [
                     Self.makeTransaction(id: 1, date: "2026-03-05", description: "Groceries"),
@@ -76,7 +76,7 @@ final class TransactionViewModelTests: XCTestCase {
         await viewModel.deleteSelected()
 
         XCTAssertEqual(client.deletedTransactionIds, [[1]])
-        XCTAssertEqual(client.listTransactionsMonths, ["2026-03", "2026-03"])
+        XCTAssertEqual(client.listTransactionsMonths, ["2026-03-01", "2026-03-01"])
         XCTAssertEqual(viewModel.transactions.map(\.id), [2])
         XCTAssertTrue(viewModel.selectedIds.isEmpty)
         XCTAssertNil(viewModel.error)
@@ -105,7 +105,7 @@ final class TransactionViewModelTests: XCTestCase {
 
         XCTAssertEqual(client.unignoredTransactionIds, [[2]])
         XCTAssertTrue(viewModel.selectedIds.isEmpty)
-        XCTAssertEqual(client.listTransactionsMonths, ["2026-03", "2026-03", "2026-03"])
+        XCTAssertEqual(client.listTransactionsMonths, ["2026-03-01", "2026-03-01", "2026-03-01"])
     }
 
     func testLoadStoresAPIErrors() async {

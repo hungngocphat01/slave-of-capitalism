@@ -63,7 +63,7 @@ final class TransactionViewModel {
     }
 
     var monthKey: String {
-        String(format: "%04d-%02d", selectedYear, selectedMonth)
+        String(format: "%04d-%02d-01", selectedYear, selectedMonth)
     }
 
     private func performBulkMutation(
@@ -78,6 +78,8 @@ final class TransactionViewModel {
             await load()
         } catch let apiError as APIError {
             error = apiError
+        } catch is CancellationError {
+            // Ignore task cancellations (e.g., rapid month changes).
         } catch {
             self.error = .networkError(error)
         }
