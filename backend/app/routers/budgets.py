@@ -38,6 +38,18 @@ def list_budgets(
     return enriched
 
 
+@router.get("/summary/{year}/{month}", response_model=MonthlySummaryResponse)
+def get_monthly_summary(
+    year: int,
+    month: int,
+    period_boundaries: str = Query(default="7,14,21,31", description="Comma-separated day boundaries"),
+    db: Session = Depends(get_db),
+):
+    """Get budget vs actual summary for a month, optionally split by sub-periods."""
+    boundaries = [int(x.strip()) for x in period_boundaries.split(",")]
+    return budget_service.calculate_monthly_summary(db, year, month, boundaries)
+
+
 @router.get("/{budget_id}", response_model=BudgetWithCategory)
 def get_budget(budget_id: int, db: Session = Depends(get_db)):
     """Get a specific budget by ID."""
