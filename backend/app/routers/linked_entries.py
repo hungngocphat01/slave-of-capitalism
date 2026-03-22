@@ -91,6 +91,36 @@ def list_pending_entries(db: Session = Depends(get_db)):
     return enriched
 
 
+@router.get("/transaction/{transaction_id}", response_model=LinkedEntryWithDetails)
+def get_linked_entry_by_transaction(transaction_id: int, db: Session = Depends(get_db)):
+    """Get the linked entry associated with a transaction."""
+    entry = linked_entry_service.get_linked_entry_by_transaction(db, transaction_id)
+    if not entry:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No linked entry found for this transaction"
+        )
+
+    entry_dict = LinkedEntryResponse.model_validate(entry).model_dump()
+
+    if entry.primary_transaction:
+        entry_dict["primary_transaction_description"] = entry.primary_transaction.description
+        entry_dict["primary_transaction_date"] = entry.primary_transaction.date.isoformat()
+
+    entry_dict["linked_transactions"] = []
+    for lt in entry.linked_transactions:
+        lt_dict = LinkedTransactionResponse.model_validate(lt).model_dump()
+        if lt.transaction:
+            lt_dict["date"] = lt.transaction.date
+            lt_dict["description"] = lt.transaction.description
+        entry_dict["linked_transactions"].append(lt_dict)
+
+    settled = sum(lt.amount for lt in entry.linked_transactions)
+    entry_dict["settled_amount"] = settled
+
+    return LinkedEntryWithDetails(**entry_dict)
+
+
 @router.get("/{entry_id}", response_model=LinkedEntryWithDetails)
 def get_linked_entry(entry_id: int, db: Session = Depends(get_db)):
     """Get a specific linked entry by ID."""

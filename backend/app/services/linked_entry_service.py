@@ -19,6 +19,13 @@ def get_linked_entry(db: Session, entry_id: int) -> LinkedEntry | None:
     return db.query(LinkedEntry).filter(LinkedEntry.id == entry_id).first()
 
 
+def get_linked_entry_by_transaction(db: Session, transaction_id: int) -> LinkedEntry | None:
+    """Get a linked entry by its primary transaction ID."""
+    return db.query(LinkedEntry).filter(
+        LinkedEntry.primary_transaction_id == transaction_id
+    ).first()
+
+
 def get_linked_entries(
     db: Session,
     link_type: LinkType | None = None,
