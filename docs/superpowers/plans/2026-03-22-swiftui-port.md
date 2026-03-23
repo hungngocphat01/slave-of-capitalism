@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Port the SvelteKit/Tauri frontend to a native SwiftUI macOS app, preserving the existing FastAPI backend as an embedded subprocess.
+**Goal:** Make the SwiftUI frontend work correctly end-to-end first (decode/runtime stability + build/test gate), then continue porting remaining screens while preserving the embedded FastAPI backend architecture.
 
 **Architecture:** SwiftUI shell launches the PyInstaller-compiled backend as a child process on localhost. All data flows through REST/HTTP. Zero third-party Swift dependencies. @Observable pattern for state management.
 
@@ -519,7 +519,7 @@ cd SlaveOfCapitalism && xcodebuild -scheme SlaveOfCapitalism -destination 'platf
 ```
 Expected: Build will fail due to missing types (BackendManager, Sidebar, LoadingView). That's fine — we're establishing the skeleton.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add SlaveOfCapitalism/
@@ -2328,6 +2328,7 @@ The most complex screen. macOS Table with multi-select, context menu, quick-add 
 - Create: `SlaveOfCapitalism/SlaveOfCapitalism/ViewModels/TransactionViewModel.swift`
 - Create: `SlaveOfCapitalism/SlaveOfCapitalism/Views/Transactions/TransactionListView.swift`
 - Create: `SlaveOfCapitalism/SlaveOfCapitalism/Views/Transactions/TransactionRow.swift`
+- Create: `SlaveOfCapitalism/SlaveOfCapitalism/Views/Transactions/TransactionInputRow.swift`
 - Create: `SlaveOfCapitalism/SlaveOfCapitalism/Views/Transactions/AddTransactionSheet.swift`
 - Create: `SlaveOfCapitalism/SlaveOfCapitalism/Views/Transactions/TransactionDetailSheet.swift`
 - Create: `SlaveOfCapitalism/SlaveOfCapitalism/Views/Shared/Components/CurrencyField.swift`
@@ -2353,19 +2354,27 @@ A decimal input field that supports `Cmd+K` to append "000". Uses `onKeyPress` m
 
 Layout: MonthYearPicker in toolbar + "Add Transaction" button. macOS `Table` with columns: Date, Description, Wallet, Category, Amount (colored by direction). Multi-row selection. Context menu per row (see spec). Bulk action toolbar when multiple selected.
 
-- [ ] **Step 5: Create AddTransactionSheet.swift**
+- [ ] **Step 5: Create TransactionInputRow.swift and wire quick-add row**
+
+Add explicit quick-add row at the bottom of the ledger (as required by spec):
+- Inputs: date (default current date), wallet, direction, amount (`CurrencyField`), classification, category/subcategory, description.
+- Keyboard behavior: Enter submits, Escape clears.
+- `Cmd+K` support for amount field via `CurrencyField`.
+- On submit: call `apiClient.createTransaction()`, then reload list and keep focus in quick-add row.
+
+- [ ] **Step 6: Create AddTransactionSheet.swift**
 
 Form: Date picker, time picker (optional), wallet picker, direction picker, amount (CurrencyField), classification picker, category/subcategory pickers, description text field. Calls `apiClient.createTransaction()`.
 
-- [ ] **Step 6: Create TransactionDetailSheet.swift**
+- [ ] **Step 7: Create TransactionDetailSheet.swift**
 
 View/edit mode. Shows all transaction fields. Edit enables modifications. Shows linked entry info if present.
 
-- [ ] **Step 7: Wire into ContentView**
+- [ ] **Step 8: Wire into ContentView**
 
 Replace `case .transactions:` placeholder.
 
-- [ ] **Step 8: Commit**
+- [ ] **Step 9: Commit**
 
 ```bash
 git add SlaveOfCapitalism/
@@ -2394,39 +2403,39 @@ All the sheets triggered by the transaction context menu.
 - Spec: Context menu conditional logic in Transactions section
 - Frontend: `frontend/src/lib/components/modals/` — all modal components
 
-- [ ] **Step 1: Create MarkAsSplitSheet.swift**
+- [x] **Step 1: Create MarkAsSplitSheet.swift**
 
 Form: Counterparty name, user amount (CurrencyField), notes. Shows total amount from transaction. Calls `apiClient.markAsSplit()`.
 
-- [ ] **Step 2: Create MarkAsLoanSheet.swift, MarkAsDebtSheet.swift, MarkAsInstallmentSheet.swift**
+- [x] **Step 2: Create MarkAsLoanSheet.swift, MarkAsDebtSheet.swift, MarkAsInstallmentSheet.swift**
 
 Similar pattern: counterparty name, optional notes. Each calls its respective API method.
 
-- [ ] **Step 3: Create ReclassifySheet.swift**
+- [x] **Step 3: Create ReclassifySheet.swift**
 
 Picker for new classification. Calls `apiClient.reclassifyTransaction()`.
 
-- [ ] **Step 4: Create LinkToEntrySheet.swift**
+- [x] **Step 4: Create LinkToEntrySheet.swift**
 
 Lists pending entries, user picks one. Calls `apiClient.linkToEntry()` with selected entry ID.
 
-- [ ] **Step 5: Create ResolveCalibrationSheet.swift**
+- [x] **Step 5: Create ResolveCalibrationSheet.swift**
 
 Form for the "real" transaction that explains the calibration discrepancy. Calls `apiClient.resolveCalibration()`.
 
-- [ ] **Step 6: Create MergeTransactionsSheet.swift**
+- [x] **Step 6: Create MergeTransactionsSheet.swift**
 
 Shows selected transactions. Form for merged date, description, category. Calls `apiClient.mergeTransactions()`.
 
-- [ ] **Step 7: Create ReimbursementsSheet.swift**
+- [x] **Step 7: Create ReimbursementsSheet.swift**
 
 Displays the linked entry and all its linked transactions. Read-only view.
 
-- [ ] **Step 8: Create ConfirmationDialog.swift**
+- [x] **Step 8: Create ConfirmationDialog.swift**
 
 Reusable confirmation with title, message, destructive action button.
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 git add SlaveOfCapitalism/SlaveOfCapitalism/Views/Shared/
@@ -2448,19 +2457,19 @@ Three collapsible sections: People Owe Me, I Owe, Installments.
 - Spec: "Pending" screen section
 - Frontend: `frontend/src/routes/(app)/pending/+page.svelte`
 
-- [ ] **Step 1: Write PendingViewModel tests**
+- [x] **Step 1: Write PendingViewModel tests**
 
 Test: loads pending entries, groups by type, calculates totals, handles link transaction action.
 
-- [ ] **Step 2: Create PendingViewModel.swift**
+- [x] **Step 2: Create PendingViewModel.swift**
 
 State: `entries: [LinkedEntryWithDetails]`, computed `owedEntries`, `debtEntries`, `installmentEntries` (filtered by link type), `totalOwed`, `totalDebt`. Fetches from `apiClient.pendingEntries()`.
 
-- [ ] **Step 3: Create PendingEntriesView.swift**
+- [x] **Step 3: Create PendingEntriesView.swift**
 
 Three `DisclosureGroup` sections. Each entry row shows: counterparty, emoji badge, amounts, status badge, expandable linked transactions list. "Link Transaction" button per entry.
 
-- [ ] **Step 4: Wire into ContentView**
+- [x] **Step 4: Wire into ContentView**
 
 - [ ] **Step 5: Commit**
 
@@ -2487,29 +2496,29 @@ Budget overview table + daily usage area chart.
 - Frontend: `frontend/src/routes/(app)/summary/+page.svelte`, `DailyUsageChart.svelte`
 - Requires: Task 1 (budget monthly summary endpoint)
 
-- [ ] **Step 1: Write SummaryViewModel tests**
+- [x] **Step 1: Write SummaryViewModel tests**
 
 Test: loads monthly summary, loads daily summary, handles month changes, calculates color thresholds.
 
-- [ ] **Step 2: Create SummaryViewModel.swift**
+- [x] **Step 2: Create SummaryViewModel.swift**
 
 State: `monthlySummary: MonthlySummaryResponse?`, `dailySummary: DailySummaryResponse?`, `year`, `month`. Loads both on month change.
 
-- [ ] **Step 3: Create BudgetViewModel.swift**
+- [x] **Step 3: Create BudgetViewModel.swift**
 
 CRUD operations for budgets: `budgets: [BudgetWithCategory]`, `create()`, `update()`, `delete()`.
 
-- [ ] **Step 4: Create SummaryView.swift**
+- [x] **Step 4: Create SummaryView.swift**
 
 MonthYearPicker at top. Budget table with expandable category rows: emoji, name, budget amount, actual amount, progress bar (colored: green <90%, yellow 90-110%, red >110%), percentage. Period columns if period boundaries configured. "Create Budget" button for categories without budgets. Inline budget editing (click amount to edit).
 
 Below the table: DailyUsageChart.
 
-- [ ] **Step 5: Create DailyUsageChart.swift**
+- [x] **Step 5: Create DailyUsageChart.swift**
 
 Swift Charts `AreaMark` chart. X-axis: day of month. Y-axis: cumulative spending. Stacked by category with category colors. Budget line as `RuleMark`. Only shows up to today if current month.
 
-- [ ] **Step 6: Wire into ContentView**
+- [x] **Step 6: Wire into ContentView**
 
 - [ ] **Step 7: Commit**
 
@@ -2529,17 +2538,17 @@ Balance snapshots with "Take Snapshot" action.
 - Create: `SlaveOfCapitalism/SlaveOfCapitalism/Views/Audit/AuditView.swift`
 - Test: `SlaveOfCapitalism/SlaveOfCapitalismTests/AuditViewModelTests.swift`
 
-- [ ] **Step 1: Write AuditViewModel tests**
+- [x] **Step 1: Write AuditViewModel tests**
 
-- [ ] **Step 2: Create AuditViewModel.swift**
+- [x] **Step 2: Create AuditViewModel.swift**
 
 State: `audits: [BalanceAuditResponse]`. Methods: `load()`, `takeSnapshot()` (calls `apiClient.createAudit()`).
 
-- [ ] **Step 3: Create AuditView.swift**
+- [x] **Step 3: Create AuditView.swift**
 
 "Take Snapshot" button in toolbar. List of audit records: date, wallet balances (JSON display), debts, owed, net position.
 
-- [ ] **Step 4: Wire into ContentView**
+- [x] **Step 4: Wire into ContentView**
 
 - [ ] **Step 5: Commit**
 
@@ -2550,6 +2559,216 @@ git commit -m "feat: add Audit screen with snapshot list"
 
 ---
 
+## Frontend Stabilization Gate (Blocking Before Task 16+)
+
+The current priority is frontend correctness. Before implementing more feature screens (Tasks 16-22), complete this stabilization gate.
+
+**Why this gate exists:**
+- Runtime decoding errors are currently surfacing in the UI (`Decoding error: The data couldn't be read because it isn't in the correct format`).
+- Backend responses frequently encode numeric values (including decimals) as JSON strings (example: `"5000.00"`), while Swift models expect `Decimal`.
+- Without a compatibility layer + contract tests, additional UI work will keep regressing.
+
+**Execution rule:**
+- Do **not** start Task 16+ until Tasks 15A-15D are complete and verified.
+
+### Task 15A: Lock Current API Contract with Failing Decode Tests
+
+Capture real backend payload shapes and add red tests that prove current decoding is insufficient.
+
+**Files:**
+- Create: `SlaveOfCapitalism/SlaveOfCapitalismTests/Fixtures/API/wallets-list.json`
+- Create: `SlaveOfCapitalism/SlaveOfCapitalismTests/Fixtures/API/transactions-list.json`
+- Create: `SlaveOfCapitalism/SlaveOfCapitalismTests/Fixtures/API/budgets-summary.json`
+- Create: `SlaveOfCapitalism/SlaveOfCapitalismTests/Fixtures/API/budgets-daily-summary.json`
+- Create: `SlaveOfCapitalism/SlaveOfCapitalismTests/APIContractDecodingTests.swift`
+
+**Reference:**
+- Backend schemas: `backend/app/schemas/*.py`
+- API models: `SlaveOfCapitalism/SlaveOfCapitalism/Models/*.swift`
+- API client decoder setup: `SlaveOfCapitalism/SlaveOfCapitalism/Backend/APIClient.swift`
+
+- [x] **Step 1: Capture fixture payloads from local backend**
+
+Run:
+```bash
+cd backend
+python -m app.main --port 8765 --database /tmp/soc-fixture.db
+```
+
+In a second terminal:
+```bash
+curl -sS http://127.0.0.1:8765/api/wallets/ > ../SlaveOfCapitalism/SlaveOfCapitalismTests/Fixtures/API/wallets-list.json
+curl -sS 'http://127.0.0.1:8765/api/transactions/?month=2026-03-01' > ../SlaveOfCapitalism/SlaveOfCapitalismTests/Fixtures/API/transactions-list.json
+curl -sS http://127.0.0.1:8765/api/budgets/summary/2026/3 > ../SlaveOfCapitalism/SlaveOfCapitalismTests/Fixtures/API/budgets-summary.json
+curl -sS http://127.0.0.1:8765/api/budgets/daily-summary/2026/3 > ../SlaveOfCapitalism/SlaveOfCapitalismTests/Fixtures/API/budgets-daily-summary.json
+```
+
+- [x] **Step 2: Write failing decode tests using current decoder behavior**
+
+Create `SlaveOfCapitalism/SlaveOfCapitalismTests/APIContractDecodingTests.swift`:
+```swift
+import XCTest
+@testable import SlaveOfCapitalism
+
+final class APIContractDecodingTests: XCTestCase {
+    func testWalletsFixtureDecodesToWalletWithBalanceArray() throws {
+        let data = try fixture("wallets-list")
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        XCTAssertNoThrow(try decoder.decode([WalletWithBalance].self, from: data))
+    }
+}
+```
+
+- [x] **Step 3: Run tests to verify RED state**
+
+Run:
+```bash
+cd SlaveOfCapitalism
+xcodegen generate
+xcodebuild -project SlaveOfCapitalism.xcodeproj -scheme SlaveOfCapitalism -configuration Debug -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO -only-testing:SlaveOfCapitalismTests/APIContractDecodingTests test
+```
+
+Expected: FAIL with `DecodingError.typeMismatch`/`dataCorrupted` on `Decimal` fields represented as JSON strings.
+
+- [x] **Step 4: Commit red fixtures + tests**
+
+```bash
+git add SlaveOfCapitalism/SlaveOfCapitalismTests/Fixtures/API SlaveOfCapitalism/SlaveOfCapitalismTests/APIContractDecodingTests.swift
+git commit -m "test: add API contract fixtures and failing decode tests"
+```
+
+### Task 15B: Implement Lossless Number-String Decoding in API Pipeline
+
+Add a single decoding compatibility layer so existing `Decimal` model fields decode from either JSON numbers or numeric strings.
+
+**Files:**
+- Create: `SlaveOfCapitalism/SlaveOfCapitalism/Utilities/APIModelDecoder.swift`
+- Modify: `SlaveOfCapitalism/SlaveOfCapitalism/Backend/APIClient.swift`
+- Test: `SlaveOfCapitalism/SlaveOfCapitalismTests/APIContractDecodingTests.swift`
+
+- [x] **Step 1: Add shared decoder utility with normalization fallback**
+
+Create `SlaveOfCapitalism/SlaveOfCapitalism/Utilities/APIModelDecoder.swift`:
+```swift
+import Foundation
+
+enum APIModelDecoder {
+    static func decode<T: Decodable>(_ type: T.Type, from data: Data, endpoint: String) throws -> T {
+        do {
+            return try configured().decode(T.self, from: data)
+        } catch {
+            let normalizedData = try normalizeNumberStrings(in: data)
+            return try configured().decode(T.self, from: normalizedData)
+        }
+    }
+}
+```
+
+Implementation details:
+- `configured()` uses `.convertFromSnakeCase`.
+- `normalizeNumberStrings(in:)` recursively converts string tokens matching `^-?\\d+(\\.\\d+)?$` into `NSDecimalNumber`.
+- Keep non-numeric strings unchanged (`date`, `description`, etc.).
+
+- [x] **Step 2: Route APIClient decoding through APIModelDecoder**
+
+Modify `SlaveOfCapitalism/SlaveOfCapitalism/Backend/APIClient.swift` in `perform<T>`:
+```swift
+return try APIModelDecoder.decode(T.self, from: data, endpoint: req.url?.path ?? "unknown")
+```
+
+- [x] **Step 3: Run contract tests to verify GREEN state**
+
+Run:
+```bash
+cd SlaveOfCapitalism
+xcodebuild -project SlaveOfCapitalism.xcodeproj -scheme SlaveOfCapitalism -configuration Debug -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO -only-testing:SlaveOfCapitalismTests/APIContractDecodingTests test
+```
+
+Expected: PASS for fixture decode tests.
+
+- [x] **Step 4: Commit decoding compatibility layer**
+
+```bash
+git add SlaveOfCapitalism/SlaveOfCapitalism/Utilities/APIModelDecoder.swift SlaveOfCapitalism/SlaveOfCapitalism/Backend/APIClient.swift SlaveOfCapitalism/SlaveOfCapitalismTests/APIContractDecodingTests.swift
+git commit -m "fix: decode decimal fields from numeric JSON strings"
+```
+
+### Task 15C: Improve Decode Error Diagnostics in UI/Logs
+
+When decoding fails, surface enough context to identify the endpoint and payload shape quickly.
+
+**Files:**
+- Modify: `SlaveOfCapitalism/SlaveOfCapitalism/Backend/APIClient.swift`
+- Test: `SlaveOfCapitalism/SlaveOfCapitalismTests/APIContractDecodingTests.swift`
+
+- [ ] **Step 1: Extend decoding error payload in APIError**
+
+Update `APIError.decodingError` to include endpoint + payload preview:
+```swift
+case decodingError(endpoint: String, preview: String, underlying: Error)
+```
+
+- [ ] **Step 2: Add payload preview in decode failure path**
+
+In `perform<T>`:
+- Build preview from response bytes (first 500 chars, UTF-8 fallback).
+- Throw `APIError.decodingError(endpoint: path, preview: preview, underlying: error)`.
+
+- [ ] **Step 3: Add/extend tests for diagnostic content**
+
+Add assertions that decode failures include endpoint path and preview in `localizedDescription`.
+
+- [ ] **Step 4: Commit diagnostic improvement**
+
+```bash
+git add SlaveOfCapitalism/SlaveOfCapitalism/Backend/APIClient.swift SlaveOfCapitalism/SlaveOfCapitalismTests/APIContractDecodingTests.swift
+git commit -m "fix: include endpoint and payload preview in decode errors"
+```
+
+### Task 15D: Add Frontend Correctness Verification Gate
+
+Define a repeatable verification command set that must pass before resuming feature development.
+
+**Files:**
+- Modify: `Makefile`
+- Modify: `docs/superpowers/plans/2026-03-22-swiftui-port.md`
+
+- [ ] **Step 1: Add `make swiftui-verify` target**
+
+Target should run, in order:
+```bash
+cd SlaveOfCapitalism && xcodegen generate
+cd SlaveOfCapitalism && xcodebuild -project SlaveOfCapitalism.xcodeproj -scheme SlaveOfCapitalism -configuration Debug -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO test
+cd SlaveOfCapitalism && xcodebuild -project SlaveOfCapitalism.xcodeproj -scheme SlaveOfCapitalism -configuration Debug -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO build
+```
+
+- [ ] **Step 2: Run verification gate**
+
+Run:
+```bash
+make swiftui-verify
+```
+
+Expected: all tests pass + build succeeds.
+
+- [ ] **Step 3: Commit verification gate tooling**
+
+```bash
+git add Makefile docs/superpowers/plans/2026-03-22-swiftui-port.md
+git commit -m "chore: add swiftui frontend verification gate"
+```
+
+### Frontend Stabilization Exit Criteria
+
+- [ ] `APIContractDecodingTests` pass against captured backend fixtures.
+- [ ] Full SwiftUI test suite passes (`xcodebuild ... test`).
+- [ ] SwiftUI build passes (`xcodebuild ... build`).
+- [ ] Runtime UI no longer shows generic decoding-format errors for supported endpoints.
+- [ ] Only after all criteria pass: resume Task 16.
+
+---
+
 ## Task 16: Settings Screen
 
 UserDefaults-backed preferences with backend restart on DB path change.
@@ -2557,23 +2776,59 @@ UserDefaults-backed preferences with backend restart on DB path change.
 **Files:**
 - Create: `SlaveOfCapitalism/SlaveOfCapitalism/ViewModels/SettingsViewModel.swift`
 - Create: `SlaveOfCapitalism/SlaveOfCapitalism/Views/Settings/SettingsView.swift`
+- Modify: `SlaveOfCapitalism/SlaveOfCapitalism/Stores/AppSettings.swift`
+- Modify: `SlaveOfCapitalism/SlaveOfCapitalism/Backend/BackendManager.swift`
+- Modify: `SlaveOfCapitalism/SlaveOfCapitalism/SlaveOfCapitalismApp.swift`
+- Modify: `SlaveOfCapitalism/SlaveOfCapitalism/ContentView.swift`
 
 - [ ] **Step 1: Create SettingsViewModel.swift**
 
-Wraps AppSettings. Methods: `saveDatabasePath()` (triggers BackendManager restart), `resetToDefaults()`.
+Wraps AppSettings and backend runtime configuration.
+State/methods must include:
+- `saveDatabasePath()` (triggers BackendManager restart)
+- `setBackendPortMode(.auto | .custom)`
+- `setCustomBackendPort(_:)` (valid range 1024...65535)
+- `applyBackendRuntimeChanges()` (restarts backend when DB path or port settings change)
+- `resetToDefaults()`
 
-- [ ] **Step 2: Create SettingsView.swift**
+- [ ] **Step 2: Extend AppSettings + BackendManager for port mode**
+
+`AppSettings.swift`:
+- Add persisted settings:
+  - `backendPortMode: String` (`"auto"` or `"custom"`)
+  - `customBackendPort: Int` (ignored in auto mode)
+
+`BackendManager.swift`:
+- Update start/restart APIs to accept a preferred port:
+  - `start(dbPath: String?, preferredPort: UInt16?)`
+  - `restart(dbPath: String?, preferredPort: UInt16?)`
+- If `preferredPort` is nil => current random-port behavior.
+- If provided => bind and launch backend on that exact port.
+- Keep exposing the actual bound `port`.
+
+- [ ] **Step 3: Create SettingsView.swift**
 
 macOS `Form` with sections:
 - Currency: Text field + preset buttons (¥, $, €, £, ₫)
 - Decimal places: Stepper (0-4)
 - Language: Picker (English/Vietnamese)
 - Database: Text field + folder picker button (NSOpenPanel). Shows "Restart required" notice when path changes.
-- Advanced: Port display (read-only, shows current port)
+- Backend:
+  - Port mode segmented picker: `Auto` / `Custom`
+  - If `Custom`: numeric port text field + validation message
+  - Show current runtime port from BackendManager
+  - Show "Restart required" when mode/port differs from active backend
+  - Apply button triggers `applyBackendRuntimeChanges()`
 
-- [ ] **Step 3: Wire into ContentView**
+- [ ] **Step 4: Wire into app startup + ContentView restart flow**
 
-- [ ] **Step 4: Commit**
+`SlaveOfCapitalismApp.swift`:
+- Pass settings-derived preferred port on initial backend start.
+
+`ContentView.swift`:
+- When retry/restart is triggered, pass both DB path and preferred port.
+
+- [ ] **Step 5: Commit**
 
 ```bash
 git add SlaveOfCapitalism/

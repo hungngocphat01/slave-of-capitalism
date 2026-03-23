@@ -3,6 +3,23 @@ import XCTest
 @testable import SlaveOfCapitalism
 
 final class APIContractDecodingTests: XCTestCase {
+    func testDecodeFailureDescriptionIncludesEndpointAndPreview() async throws {
+        let payload = #"{"broken":true,"items":[1,2,3]}"#
+        let client = makeClient(responseBody: Data(payload.utf8))
+        defer { MockURLProtocol.requestHandler = nil }
+
+        do {
+            let _: [WalletWithBalance] = try await client.listWallets()
+            XCTFail("Expected decode failure")
+        } catch let error as APIError {
+            let description = error.localizedDescription
+            XCTAssertTrue(description.contains("api/wallets/"), "Expected endpoint in description: \(description)")
+            XCTAssertTrue(description.contains(payload), "Expected payload preview in description: \(description)")
+        } catch {
+            XCTFail("Expected APIError, got \(error)")
+        }
+    }
+
     func testWalletsFixtureDecodesWithCurrentDecoder() throws {
         let data = try loadFixture(named: "wallets-list")
         XCTAssertNoThrow(try APIModelDecoder.decode([WalletWithBalance].self, from: data))
@@ -124,4 +141,47 @@ final class APIContractDecodingTests: XCTestCase {
             .appendingPathComponent("Fixtures/API/\(name).json")
         return try Data(contentsOf: fixtureURL)
     }
+
+    private func makeClient(responseBody: Data) -> APIClient {
+        MockURLProtocol.requestHandler = { request in
+            let url = request.url ?? URL(string: "https://example.com")!
+            let response = HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!
+            return (response, responseBody)
+        }
+
+        let config = URLSessionConfiguration.ephemeral
+        config.protocolClasses = [MockURLProtocol.self]
+        let session = URLSession(configuration: config)
+        return APIClient(baseURL: URL(string: "https://example.com")!, session: session)
+    }
+}
+
+private final class MockURLProtocol: URLProtocol {
+    static var requestHandler: ((URLRequest) throws -> (HTTPURLResponse, Data))?
+
+    override class func canInit(with request: URLRequest) -> Bool {
+        true
+    }
+
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest {
+        request
+    }
+
+    override func startLoading() {
+        guard let handler = Self.requestHandler else {
+            client?.urlProtocol(self, didFailWithError: URLError(.badServerResponse))
+            return
+        }
+
+        do {
+            let (response, data) = try handler(request)
+            client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+            client?.urlProtocol(self, didLoad: data)
+            client?.urlProtocolDidFinishLoading(self)
+        } catch {
+            client?.urlProtocol(self, didFailWithError: error)
+        }
+    }
+
+    override func stopLoading() {}
 }

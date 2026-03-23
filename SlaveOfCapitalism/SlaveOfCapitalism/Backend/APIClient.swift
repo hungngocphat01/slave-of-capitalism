@@ -8,7 +8,7 @@ enum APIError: LocalizedError {
     case serverError(String)
     case networkError(Error)
     case backendNotReady
-    case decodingError(Error)
+    case decodingError(endpoint: String, preview: String, underlying: Error)
 
     var errorDescription: String? {
         switch self {
@@ -17,7 +17,8 @@ enum APIError: LocalizedError {
         case .serverError(let msg): return "Server error: \(msg)"
         case .networkError(let err): return "Network error: \(err.localizedDescription)"
         case .backendNotReady: return "Backend is not ready"
-        case .decodingError(let err): return "Decoding error: \(err.localizedDescription)"
+        case .decodingError(let endpoint, let preview, let underlying):
+            return "Decoding error at \(endpoint): \(underlying.localizedDescription). Payload preview: \(preview)"
         }
     }
 }
@@ -102,12 +103,20 @@ final class APIClient: APIClientProtocol {
     private let session: URLSession
     private let encoder: JSONEncoder
 
-    init(baseURL: URL = URL(string: "http://127.0.0.1:8080")!) {
+    convenience init(baseURL: URL = URL(string: "http://127.0.0.1:8080")!) {
+        self.init(baseURL: baseURL, session: nil)
+    }
+
+    init(baseURL: URL = URL(string: "http://127.0.0.1:8080")!, session: URLSession?) {
         self.baseURL = baseURL
 
-        let config = URLSessionConfiguration.default
-        config.timeoutIntervalForRequest = 30
-        self.session = URLSession(configuration: config)
+        if let session {
+            self.session = session
+        } else {
+            let config = URLSessionConfiguration.default
+            config.timeoutIntervalForRequest = 30
+            self.session = URLSession(configuration: config)
+        }
 
         self.encoder = JSONEncoder()
         self.encoder.keyEncodingStrategy = .convertToSnakeCase
@@ -128,7 +137,7 @@ final class APIClient: APIClientProtocol {
         var req = URLRequest(url: url)
         req.httpMethod = method
         req.setValue("application/json", forHTTPHeaderField: "Accept")
-        return try await perform(req)
+        return try await perform(req, endpoint: path)
     }
 
     private func request<T: Decodable, B: Encodable>(_ method: String, path: String, body: B, query: [(String, String)] = []) async throws -> T {
@@ -142,7 +151,7 @@ final class APIClient: APIClientProtocol {
         } catch {
             throw APIError.networkError(error)
         }
-        return try await perform(req)
+        return try await perform(req, endpoint: path)
     }
 
     private func requestVoid(_ method: String, path: String, query: [(String, String)] = []) async throws {
@@ -165,7 +174,7 @@ final class APIClient: APIClientProtocol {
         try await performVoid(req)
     }
 
-    private func perform<T: Decodable>(_ req: URLRequest) async throws -> T {
+    private func perform<T: Decodable>(_ req: URLRequest, endpoint: String) async throws -> T {
         let data: Data
         let response: URLResponse
         do {
@@ -177,7 +186,8 @@ final class APIClient: APIClientProtocol {
         do {
             return try APIModelDecoder.decode(T.self, from: data)
         } catch {
-            throw APIError.decodingError(error)
+            let preview = payloadPreview(from: data)
+            throw APIError.decodingError(endpoint: endpoint, preview: preview, underlying: error)
         }
     }
 
@@ -208,6 +218,11 @@ final class APIClient: APIClientProtocol {
                 ?? "HTTP \(http.statusCode)"
             throw APIError.serverError(msg)
         }
+    }
+
+    private func payloadPreview(from data: Data) -> String {
+        let payload = String(data: data, encoding: .utf8) ?? String(decoding: data, as: UTF8.self)
+        return String(payload.prefix(500))
     }
 
     // MARK: - Health
