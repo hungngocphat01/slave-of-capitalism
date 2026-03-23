@@ -26,6 +26,7 @@
 		396DC15693DA3E36647A4E55 /* DailyUsageChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C23C735FCA9F2A9137E971D /* DailyUsageChart.swift */; };
 		3E9ED3EDC9F4CD97C96668AF /* CalibrateSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10762D62E08578A65FCE1E2D /* CalibrateSheet.swift */; };
 		40C49218F5F1A10850DB4168 /* APIContractDecodingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDC0CAFC5BE44C13A4B20ABF /* APIContractDecodingTests.swift */; };
+		44D19EA39BFC92D7E9E434BB /* EditableTextCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FCD1E9880B2FF57708BBA63 /* EditableTextCell.swift */; };
 		44F697ACCE112C8DE912A65A /* AuditViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9172EA7619508CB2EF5C3815 /* AuditViewModelTests.swift */; };
 		459106151F0185B97294FBC7 /* TransferSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 217876C43AC917020E7860D8 /* TransferSheet.swift */; };
 		45CE83D5B76C8B536FA1F99A /* TransactionViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 772B38069DF8C357DE7F7C76 /* TransactionViewModelTests.swift */; };
@@ -108,6 +109,7 @@
 		0A0B82E9CCEE94B810605894 /* ReimbursementsSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReimbursementsSheet.swift; sourceTree = "<group>"; };
 		0B4455742F27331960E50317 /* TransactionDetailSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionDetailSheet.swift; sourceTree = "<group>"; };
 		0BCA9AC9AC02B6387AB3AAE1 /* MarkAsLoanSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkAsLoanSheet.swift; sourceTree = "<group>"; };
+		0FCD1E9880B2FF57708BBA63 /* EditableTextCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditableTextCell.swift; sourceTree = "<group>"; };
 		10762D62E08578A65FCE1E2D /* CalibrateSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalibrateSheet.swift; sourceTree = "<group>"; };
 		12AF2C8D0FBBD5CFE25E0399 /* DataManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataManagementView.swift; sourceTree = "<group>"; };
 		13108ECAB820152C35FDE0F9 /* ErrorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorView.swift; sourceTree = "<group>"; };
@@ -355,6 +357,7 @@
 			isa = PBXGroup;
 			children = (
 				1C12B4972696B095663761DA /* AddTransactionSheet.swift */,
+				0FCD1E9880B2FF57708BBA63 /* EditableTextCell.swift */,
 				0B4455742F27331960E50317 /* TransactionDetailSheet.swift */,
 				3E63592245E7B3ED35F31180 /* TransactionListView.swift */,
 				BAB9CC9C33EBAF7204C87336 /* TransactionRow.swift */,
@@ -604,6 +607,7 @@
 				D625EB3B5AB493A80E6960B3 /* CurrencyField.swift in Sources */,
 				396DC15693DA3E36647A4E55 /* DailyUsageChart.swift in Sources */,
 				1CE10F7F2E8F686F103DACBD /* DataManagementView.swift in Sources */,
+				44D19EA39BFC92D7E9E434BB /* EditableTextCell.swift in Sources */,
 				84D726CEED705BD2C0DD8608 /* Enums.swift in Sources */,
 				AF84B3492AC244F68392C99F /* ErrorView.swift in Sources */,
 				1C801D2D0975D6CC9EC84316 /* Formatters.swift in Sources */,
