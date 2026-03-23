@@ -60,6 +60,7 @@
 		872C64CC4593EFC4F69EC0CC /* SummaryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65257A4A77C854FC55CB5707 /* SummaryViewModel.swift */; };
 		8939E8BA0D8803E5D0908238 /* ReimbursementsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A0B82E9CCEE94B810605894 /* ReimbursementsSheet.swift */; };
 		8DB0F3344931030385563B51 /* PayPayParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF9F2613500AD83127EB5C0F /* PayPayParser.swift */; };
+		8F811A4033B82653BD985E22 /* EditableCategoryPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2B76DA3A1DEBF89BCBCB6A9 /* EditableCategoryPicker.swift */; };
 		912D49F3DC4FCB17BF36DC71 /* MockAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D223D1B1B2AF00294FE0B59 /* MockAPIClient.swift */; };
 		91609F38069C8613DF5927A1 /* APIModelDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 229377F0F61E374DA2872EA7 /* APIModelDecoder.swift */; };
 		93DA067FE2DA933BAE9B2662 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22292BA65C9FD4C1C4DB99FA /* APIClient.swift */; };
@@ -182,6 +183,7 @@
 		F12C5E5D7024E7E566E6B646 /* LinkedEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkedEntry.swift; sourceTree = "<group>"; };
 		F13FC51664C336E0D000BB9B /* ConfirmationDialog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfirmationDialog.swift; sourceTree = "<group>"; };
 		F272D7D9F5EDEFC98E5FD8DA /* SlaveOfCapitalism.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SlaveOfCapitalism.entitlements; sourceTree = "<group>"; };
+		F2B76DA3A1DEBF89BCBCB6A9 /* EditableCategoryPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditableCategoryPicker.swift; sourceTree = "<group>"; };
 		F657336F23C7F86828C6E9E7 /* MarkAsInstallmentSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkAsInstallmentSheet.swift; sourceTree = "<group>"; };
 		F89735236A40BA9B70CEB2A9 /* Category.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Category.swift; sourceTree = "<group>"; };
 		FAAB77084C93E1476D6FFC39 /* AuditViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuditViewModel.swift; sourceTree = "<group>"; };
@@ -357,6 +359,7 @@
 			isa = PBXGroup;
 			children = (
 				1C12B4972696B095663761DA /* AddTransactionSheet.swift */,
+				F2B76DA3A1DEBF89BCBCB6A9 /* EditableCategoryPicker.swift */,
 				0FCD1E9880B2FF57708BBA63 /* EditableTextCell.swift */,
 				0B4455742F27331960E50317 /* TransactionDetailSheet.swift */,
 				3E63592245E7B3ED35F31180 /* TransactionListView.swift */,
@@ -607,6 +610,7 @@
 				D625EB3B5AB493A80E6960B3 /* CurrencyField.swift in Sources */,
 				396DC15693DA3E36647A4E55 /* DailyUsageChart.swift in Sources */,
 				1CE10F7F2E8F686F103DACBD /* DataManagementView.swift in Sources */,
+				8F811A4033B82653BD985E22 /* EditableCategoryPicker.swift in Sources */,
 				44D19EA39BFC92D7E9E434BB /* EditableTextCell.swift in Sources */,
 				84D726CEED705BD2C0DD8608 /* Enums.swift in Sources */,
 				AF84B3492AC244F68392C99F /* ErrorView.swift in Sources */,
