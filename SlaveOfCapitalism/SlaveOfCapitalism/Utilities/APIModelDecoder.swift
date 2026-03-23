@@ -45,7 +45,11 @@ enum APIModelDecoder {
     private static func applyDecimalNormalization(to value: inout Any, path: ArraySlice<CodingKey>) -> Bool {
         guard let head = path.first else {
             if let string = value as? String, isNumericString(string) {
-                value = NSDecimalNumber(string: string)
+                let decimal = NSDecimalNumber(string: string)
+                guard isLosslessNumericString(string, roundTripped: decimal.stringValue) else {
+                    return false
+                }
+                value = decimal
                 return true
             }
             return false
@@ -126,5 +130,52 @@ enum APIModelDecoder {
         }
         let range = NSRange(value.startIndex..., in: value)
         return regex.firstMatch(in: value, options: [], range: range) != nil
+    }
+
+    private static func isLosslessNumericString(_ original: String, roundTripped: String) -> Bool {
+        normalizeCanonicalNumericString(original) == normalizeCanonicalNumericString(roundTripped)
+    }
+
+    private static func normalizeCanonicalNumericString(_ value: String) -> String {
+        var result = value
+        if result.hasPrefix("+") {
+            result.removeFirst()
+        }
+
+        let isNegative = result.hasPrefix("-")
+        if isNegative {
+            result.removeFirst()
+        }
+
+        let parts = result.split(separator: ".", omittingEmptySubsequences: false)
+        var integerPart = parts.first.map(String.init) ?? result
+        var fractionPart = parts.count > 1 ? String(parts[1]) : ""
+
+        integerPart = stripLeadingZeros(integerPart)
+        fractionPart = stripTrailingZeros(fractionPart)
+
+        var canonical = integerPart.isEmpty ? "0" : integerPart
+        if !fractionPart.isEmpty {
+            canonical += ".\(fractionPart)"
+        }
+
+        if isNegative, canonical != "0" {
+            canonical = "-\(canonical)"
+        }
+
+        return canonical
+    }
+
+    private static func stripLeadingZeros(_ value: String) -> String {
+        let trimmed = value.drop(while: { $0 == "0" })
+        return trimmed.isEmpty ? "0" : String(trimmed)
+    }
+
+    private static func stripTrailingZeros(_ value: String) -> String {
+        var result = value
+        while result.last == "0" {
+            result.removeLast()
+        }
+        return result
     }
 }

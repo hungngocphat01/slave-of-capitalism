@@ -76,21 +76,24 @@ final class APIContractDecodingTests: XCTestCase {
         XCTAssertEqual(decoded.code, "01234")
     }
 
-    func testDecimalStringPreservesHighPrecision() throws {
+    func testDecimalStringWithPrecisionLossDoesNotDecode() throws {
         struct Fixture: Decodable {
             let amount: Decimal
         }
 
-        let expected = "12345678901234567890.123456789012345678"
+        let expected = "1234567890123456789012345678901234567890.1234567890"
         let data = Data(#"""
         {
           "amount": "\#(expected)"
         }
         """#.utf8)
 
-        let decoded = try APIModelDecoder.decode(Fixture.self, from: data)
-
-        XCTAssertEqual(NSDecimalNumber(decimal: decoded.amount), NSDecimalNumber(string: expected))
+        XCTAssertThrowsError(try APIModelDecoder.decode(Fixture.self, from: data)) { error in
+            guard case let DecodingError.typeMismatch(_, context) = error else {
+                return XCTFail("Expected typeMismatch, got \(error)")
+            }
+            XCTAssertEqual(context.codingPath.map(\.stringValue), ["amount"])
+        }
     }
 
     func testNumericLookingStringFieldRemainsStringWhenDecimalAlsoDecodes() throws {
