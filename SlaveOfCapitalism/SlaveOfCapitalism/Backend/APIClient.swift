@@ -175,7 +175,7 @@ final class APIClient: APIClientProtocol {
         }
         try validateResponse(response, data: data)
         do {
-            return try APIModelDecoder.decode(T.self, from: data, endpoint: req.url?.path ?? "unknown")
+            return try APIModelDecoder.decode(T.self, from: data)
         } catch {
             throw APIError.decodingError(error)
         }
