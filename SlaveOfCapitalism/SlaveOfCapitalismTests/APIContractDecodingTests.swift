@@ -51,6 +51,31 @@ final class APIContractDecodingTests: XCTestCase {
         XCTAssertEqual(decoded.label, "invoice-001")
     }
 
+    func testQuotedNumericFieldsDecodeWithoutTouchingStrings() throws {
+        struct Fixture: Decodable {
+            let count: Int
+            let ratio: Double
+            let amount: Decimal
+            let code: String
+        }
+
+        let data = Data(#"""
+        {
+          "count": "42",
+          "ratio": "0.125",
+          "amount": "19.75",
+          "code": "01234"
+        }
+        """#.utf8)
+
+        let decoded = try APIModelDecoder.decode(Fixture.self, from: data)
+
+        XCTAssertEqual(decoded.count, 42)
+        XCTAssertEqual(decoded.ratio, 0.125)
+        XCTAssertEqual(NSDecimalNumber(decimal: decoded.amount), NSDecimalNumber(string: "19.75"))
+        XCTAssertEqual(decoded.code, "01234")
+    }
+
     func testDecimalStringPreservesHighPrecision() throws {
         struct Fixture: Decodable {
             let amount: Decimal

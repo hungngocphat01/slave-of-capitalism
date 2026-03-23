@@ -10,7 +10,7 @@ enum APIModelDecoder {
             while true {
                 do {
                     return try decoder.decode(T.self, from: currentData)
-                } catch let DecodingError.typeMismatch(type, context) where isDecimalType(type) {
+                } catch let DecodingError.typeMismatch(type, context) where isNumericTargetType(type) {
                     let pathKey = codingPathKey(context.codingPath)
                     guard normalizedPaths.insert(pathKey).inserted,
                           let normalizedData = try normalizeDecimalString(at: context.codingPath, in: currentData) else {
@@ -86,8 +86,10 @@ enum APIModelDecoder {
         }.joined(separator: ".")
     }
 
-    private static func isDecimalType(_ type: Any.Type) -> Bool {
-        String(reflecting: type).contains("Decimal")
+    private static func isNumericTargetType(_ type: Any.Type) -> Bool {
+        type is any BinaryInteger.Type
+            || type is any BinaryFloatingPoint.Type
+            || String(reflecting: type).contains("Decimal")
     }
 
     private static func jsonKeyCandidates(for codingKey: String) -> [String] {
