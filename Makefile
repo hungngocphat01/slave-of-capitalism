@@ -17,7 +17,7 @@ BACKEND_BINARY := $(BACKEND_DIR)/dist/expense-manager-backend
 APP_BUNDLE := $(TAURI_DIR)/target/release/bundle/macos/Slave of Capitalism.app
 
 # Phony targets (not actual files)
-.PHONY: all build clean dev backend frontend install-deps help test
+.PHONY: all build clean dev backend frontend swiftui-verify install-deps help test
 
 # Default target
 all: build
@@ -94,6 +94,12 @@ build: frontend
 	@echo ""
 	@echo "To run the app:"
 	@echo "   open \"$(APP_BUNDLE)\""
+
+# Run SwiftUI frontend verification gate
+swiftui-verify:
+	cd SlaveOfCapitalism && xcodegen generate
+	cd SlaveOfCapitalism && xcodebuild -project SlaveOfCapitalism.xcodeproj -scheme SlaveOfCapitalism -configuration Debug -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO test
+	cd SlaveOfCapitalism && xcodebuild -project SlaveOfCapitalism.xcodeproj -scheme SlaveOfCapitalism -configuration Debug -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO build
 
 # Run in development mode
 dev:

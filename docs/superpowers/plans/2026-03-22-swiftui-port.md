@@ -2734,7 +2734,7 @@ Define a repeatable verification command set that must pass before resuming feat
 - Modify: `Makefile`
 - Modify: `docs/superpowers/plans/2026-03-22-swiftui-port.md`
 
-- [ ] **Step 1: Add `make swiftui-verify` target**
+- [x] **Step 1: Add `make swiftui-verify` target**
 
 Target should run, in order:
 ```bash
@@ -2743,7 +2743,7 @@ cd SlaveOfCapitalism && xcodebuild -project SlaveOfCapitalism.xcodeproj -scheme 
 cd SlaveOfCapitalism && xcodebuild -project SlaveOfCapitalism.xcodeproj -scheme SlaveOfCapitalism -configuration Debug -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO build
 ```
 
-- [ ] **Step 2: Run verification gate**
+- [x] **Step 2: Run verification gate**
 
 Run:
 ```bash
