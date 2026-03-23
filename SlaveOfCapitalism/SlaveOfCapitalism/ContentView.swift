@@ -50,7 +50,7 @@ struct ContentView: View {
         case .pending:
             PendingEntriesView()
         case .categories:
-            Text("Categories - Task 12")
+            CategoryManagementView()
         case .data:
             Text("Data - Task 17")
         case .audit:
