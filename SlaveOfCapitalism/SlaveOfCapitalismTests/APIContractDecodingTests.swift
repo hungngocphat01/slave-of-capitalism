@@ -36,6 +36,10 @@ final class APIContractDecodingTests: XCTestCase {
 
         let client = makeClient(responseBody: Data(bytes))
         defer { MockURLProtocol.requestHandler = nil }
+        let previewBytes = Data(bytes.prefix(500))
+        let expectedPreview = String(data: previewBytes, encoding: .utf8)
+            ?? String(decoding: previewBytes, as: UTF8.self)
+        XCTAssertFalse(expectedPreview.isEmpty, "Expected a non-empty preview from the first 500 bytes")
 
         do {
             let _: [WalletWithBalance] = try await client.listWallets()
@@ -43,6 +47,10 @@ final class APIContractDecodingTests: XCTestCase {
         } catch let error as APIError {
             let description = error.localizedDescription
             XCTAssertTrue(description.contains("api/wallets/"), "Expected endpoint in description: \(description)")
+            XCTAssertTrue(
+                description.contains("Payload preview: \(expectedPreview)"),
+                "Expected description to include the exact first-500-byte preview: \(description)"
+            )
             XCTAssertFalse(description.contains("TAIL"), "Expected preview to exclude bytes after the first 500: \(description)")
         } catch {
             XCTFail("Expected APIError, got \(error)")
