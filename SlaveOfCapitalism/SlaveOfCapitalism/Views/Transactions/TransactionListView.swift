@@ -1,6 +1,41 @@
 import SwiftUI
 
 struct TransactionListView: View {
+    private enum TransactionActionSheet: Identifiable {
+        case markSplit(TransactionWithDetails)
+        case markLoan(TransactionWithDetails)
+        case markDebt(TransactionWithDetails)
+        case markInstallment(TransactionWithDetails)
+        case reclassify(TransactionWithDetails)
+        case link([TransactionWithDetails])
+        case resolveCalibration(TransactionWithDetails)
+        case merge([TransactionWithDetails])
+        case reimbursements(TransactionWithDetails)
+
+        var id: String {
+            switch self {
+            case .markSplit(let transaction):
+                return "markSplit-\(transaction.id)"
+            case .markLoan(let transaction):
+                return "markLoan-\(transaction.id)"
+            case .markDebt(let transaction):
+                return "markDebt-\(transaction.id)"
+            case .markInstallment(let transaction):
+                return "markInstallment-\(transaction.id)"
+            case .reclassify(let transaction):
+                return "reclassify-\(transaction.id)"
+            case .link(let transactions):
+                return "link-\(transactions.map(\.id).sorted().map(String.init).joined(separator: "-"))"
+            case .resolveCalibration(let transaction):
+                return "resolve-\(transaction.id)"
+            case .merge(let transactions):
+                return "merge-\(transactions.map(\.id).sorted().map(String.init).joined(separator: "-"))"
+            case .reimbursements(let transaction):
+                return "reimbursements-\(transaction.id)"
+            }
+        }
+    }
+
     @Environment(APIClient.self) private var apiClient
     @Environment(CategoryStore.self) private var categoryStore
     @Environment(WalletStore.self) private var walletStore
@@ -8,6 +43,7 @@ struct TransactionListView: View {
     @State private var viewModel: TransactionViewModel?
     @State private var isShowingAddSheet = false
     @State private var selectedTransaction: TransactionWithDetails?
+    @State private var activeActionSheet: TransactionActionSheet?
     @State private var didRefreshReferenceData = false
     @State private var pendingDeleteIds: Set<Int> = []
     @State private var isShowingDeleteConfirmation = false
@@ -59,7 +95,7 @@ struct TransactionListView: View {
             } else {
                 Table(viewModel.transactions, selection: $bindableViewModel.selectedIds) {
                     TableColumn("Date") { transaction in
-                        interactiveCell(for: transaction) {
+                        interactiveCell(for: transaction, viewModel: viewModel) {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(transaction.date)
                                 if let time = transaction.time {
@@ -73,13 +109,13 @@ struct TransactionListView: View {
                     .width(min: 110, max: 130)
 
                     TableColumn("Description") { transaction in
-                        interactiveCell(for: transaction) {
+                        interactiveCell(for: transaction, viewModel: viewModel) {
                             TransactionRow(transaction: transaction)
                         }
                     }
 
                     TableColumn("Wallet") { transaction in
-                        interactiveCell(for: transaction) {
+                        interactiveCell(for: transaction, viewModel: viewModel) {
                             Text(transaction.walletName ?? walletStore.wallet(for: transaction.walletId)?.name ?? "Unknown")
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
@@ -87,7 +123,7 @@ struct TransactionListView: View {
                     .width(min: 120, ideal: 140)
 
                     TableColumn("Category") { transaction in
-                        interactiveCell(for: transaction) {
+                        interactiveCell(for: transaction, viewModel: viewModel) {
                             Text(categoryTitle(for: transaction))
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .foregroundStyle(transaction.categoryId == nil && transaction.subcategoryId == nil ? .secondary : .primary)
@@ -96,7 +132,7 @@ struct TransactionListView: View {
                     .width(min: 140, ideal: 160)
 
                     TableColumn("Amount") { transaction in
-                        interactiveCell(for: transaction) {
+                        interactiveCell(for: transaction, viewModel: viewModel) {
                             Text(amountTitle(for: transaction))
                                 .frame(maxWidth: .infinity, alignment: .trailing)
                                 .foregroundStyle(amountColor(for: transaction))
@@ -140,6 +176,26 @@ struct TransactionListView: View {
                 await refreshAfterMutation(viewModel)
             }
         }
+        .sheet(item: $activeActionSheet) { action in
+            actionSheetView(action, viewModel: viewModel)
+        }
+        .sheet(isPresented: $isShowingDeleteConfirmation) {
+            ConfirmationDialog(
+                title: pendingDeleteIds.count > 1 ? "Delete \(pendingDeleteIds.count) transactions?" : "Delete transaction?",
+                message: "This action cannot be undone.",
+                confirmButtonTitle: "Delete",
+                isDestructive: true,
+                onCancel: {
+                    isShowingDeleteConfirmation = false
+                },
+                onConfirm: {
+                    isShowingDeleteConfirmation = false
+                    Task {
+                        await performConfirmedDelete(viewModel)
+                    }
+                }
+            )
+        }
         .task(id: viewModel.monthKey) {
             await refreshLedger(viewModel)
         }
@@ -148,31 +204,67 @@ struct TransactionListView: View {
             didRefreshReferenceData = true
             await refreshReferenceDataIfNeeded()
         }
-        .confirmationDialog(
-            pendingDeleteIds.count > 1 ? "Delete \(pendingDeleteIds.count) transactions?" : "Delete transaction?",
-            isPresented: $isShowingDeleteConfirmation,
-            titleVisibility: .visible
-        ) {
-            Button("Delete", role: .destructive) {
-                Task {
-                    await performConfirmedDelete(viewModel)
-                }
+    }
+
+    @ViewBuilder
+    private func actionSheetView(_ action: TransactionActionSheet, viewModel: TransactionViewModel) -> some View {
+        switch action {
+        case .markSplit(let transaction):
+            MarkAsSplitSheet(apiClient: apiClient, transaction: transaction) {
+                await refreshAfterMutation(viewModel)
             }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("This action cannot be undone.")
+        case .markLoan(let transaction):
+            MarkAsLoanSheet(apiClient: apiClient, transaction: transaction) {
+                await refreshAfterMutation(viewModel)
+            }
+        case .markDebt(let transaction):
+            MarkAsDebtSheet(apiClient: apiClient, transaction: transaction) {
+                await refreshAfterMutation(viewModel)
+            }
+        case .markInstallment(let transaction):
+            MarkAsInstallmentSheet(apiClient: apiClient, transaction: transaction) {
+                await refreshAfterMutation(viewModel)
+            }
+        case .reclassify(let transaction):
+            ReclassifySheet(apiClient: apiClient, transaction: transaction) {
+                await refreshAfterMutation(viewModel)
+            }
+        case .link(let transactions):
+            LinkToEntrySheet(apiClient: apiClient, transactions: transactions) {
+                await refreshAfterMutation(viewModel)
+            }
+        case .resolveCalibration(let transaction):
+            ResolveCalibrationSheet(
+                apiClient: apiClient,
+                calibration: transaction,
+                categories: categoryStore.categories,
+                wallets: walletStore.wallets
+            ) {
+                await refreshAfterMutation(viewModel)
+            }
+        case .merge(let transactions):
+            MergeTransactionsSheet(
+                apiClient: apiClient,
+                transactions: transactions,
+                categories: categoryStore.categories
+            ) {
+                await refreshAfterMutation(viewModel)
+            }
+        case .reimbursements(let transaction):
+            ReimbursementsSheet(apiClient: apiClient, transaction: transaction)
         }
     }
 
     @ViewBuilder
     private func interactiveCell<Content: View>(
         for transaction: TransactionWithDetails,
+        viewModel: TransactionViewModel,
         @ViewBuilder content: () -> Content
     ) -> some View {
         content()
             .contentShape(Rectangle())
             .contextMenu {
-                rowContextMenu(for: transaction)
+                rowContextMenu(for: transaction, viewModel: viewModel)
             }
             .onTapGesture {
                 selectedTransaction = transaction
@@ -180,18 +272,80 @@ struct TransactionListView: View {
     }
 
     @ViewBuilder
-    private func rowContextMenu(for transaction: TransactionWithDetails) -> some View {
+    private func rowContextMenu(for transaction: TransactionWithDetails, viewModel: TransactionViewModel) -> some View {
         Button("Open Details") {
             selectedTransaction = transaction
         }
 
+        if canMarkAsSplit(transaction) {
+            Button("Mark as Split") {
+                activeActionSheet = .markSplit(transaction)
+            }
+        }
+
+        if canMarkAsLoan(transaction) {
+            Button("Mark as Loan") {
+                activeActionSheet = .markLoan(transaction)
+            }
+        }
+
+        if canMarkAsDebt(transaction) {
+            Button("Mark as Debt") {
+                activeActionSheet = .markDebt(transaction)
+            }
+        }
+
+        if canMarkAsInstallment(transaction) {
+            Button("Mark as Installment") {
+                activeActionSheet = .markInstallment(transaction)
+            }
+        }
+
+        if canLinkToEntry(transaction) {
+            Button("Link to Entry") {
+                activeActionSheet = .link([transaction])
+            }
+        }
+
+        if transaction.isLinkedToEntry {
+            Button("Unlink") {
+                Task {
+                    await unlink(transaction, viewModel: viewModel)
+                }
+            }
+        }
+
+        if transaction.hasLinkedEntry {
+            Button("See Reimbursements") {
+                activeActionSheet = .reimbursements(transaction)
+            }
+
+            Button("Unclassify") {
+                Task {
+                    await unclassify(transaction, viewModel: viewModel)
+                }
+            }
+        } else {
+            Button("Reclassify") {
+                activeActionSheet = .reclassify(transaction)
+            }
+        }
+
+        if transaction.isCalibration {
+            Button("Resolve Calibration") {
+                activeActionSheet = .resolveCalibration(transaction)
+            }
+        }
+
+        Divider()
+
         Button(transaction.isIgnored ? "Unignore" : "Ignore") {
             Task {
-                viewModel?.selectedIds = [transaction.id]
+                viewModel.selectedIds = [transaction.id]
                 if transaction.isIgnored {
-                    await viewModel?.unignoreSelected()
+                    await viewModel.unignoreSelected()
                 } else {
-                    await viewModel?.ignoreSelected()
+                    await viewModel.ignoreSelected()
                 }
                 await walletStore.refresh()
             }
@@ -200,21 +354,12 @@ struct TransactionListView: View {
         Button("Delete", role: .destructive) {
             requestDelete(ids: [transaction.id])
         }
-
-        Divider()
-
-        Button("Mark as Split (Task 12)") {}
-            .disabled(true)
-        Button("Mark as Loan (Task 12)") {}
-            .disabled(true)
-        Button("Mark as Debt (Task 12)") {}
-            .disabled(true)
-        Button("Link to Entry (Task 12)") {}
-            .disabled(true)
     }
 
     private func bulkActionBar(for viewModel: TransactionViewModel) -> some View {
-        HStack(spacing: 12) {
+        let selectedTransactions = selectedTransactions(for: viewModel)
+
+        return HStack(spacing: 12) {
             Text("\(viewModel.selectedIds.count) selected")
                 .font(.subheadline.weight(.semibold))
 
@@ -235,6 +380,16 @@ struct TransactionListView: View {
                 }
             }
             .disabled(viewModel.isLoading)
+
+            Button("Link to Entry") {
+                activeActionSheet = .link(selectedTransactions)
+            }
+            .disabled(viewModel.isLoading || !canBulkLink(selectedTransactions))
+
+            Button("Merge") {
+                activeActionSheet = .merge(selectedTransactions)
+            }
+            .disabled(viewModel.isLoading || !canMerge(selectedTransactions))
 
             Button("Delete", role: .destructive) {
                 requestDelete(ids: viewModel.selectedIds)
@@ -329,5 +484,92 @@ struct TransactionListView: View {
         viewModel.selectedIds = ids
         await viewModel.deleteSelected()
         await walletStore.refresh()
+    }
+
+    private func canMarkAsSplit(_ transaction: TransactionWithDetails) -> Bool {
+        transaction.direction == .outflow && transaction.classification == .expense
+    }
+
+    private func canMarkAsLoan(_ transaction: TransactionWithDetails) -> Bool {
+        transaction.direction == .outflow && (transaction.classification == .lend || transaction.classification == .expense)
+    }
+
+    private func canMarkAsDebt(_ transaction: TransactionWithDetails) -> Bool {
+        transaction.direction == .inflow && (transaction.classification == .borrow || transaction.classification == .income)
+    }
+
+    private func canMarkAsInstallment(_ transaction: TransactionWithDetails) -> Bool {
+        transaction.direction == .outflow
+            && transaction.classification == .expense
+            && walletType(for: transaction) == .credit
+    }
+
+    private func walletType(for transaction: TransactionWithDetails) -> WalletType? {
+        if let walletType = transaction.walletType, let parsed = WalletType(rawValue: walletType) {
+            return parsed
+        }
+        return walletStore.wallet(for: transaction.walletId)?.walletType
+    }
+
+    private func canLinkToEntry(_ transaction: TransactionWithDetails) -> Bool {
+        switch transaction.classification {
+        case .debtCollection, .loanRepayment, .installmtChrge, .income:
+            return true
+        default:
+            return false
+        }
+    }
+
+    private func selectedTransactions(for viewModel: TransactionViewModel) -> [TransactionWithDetails] {
+        viewModel.transactions
+            .filter { viewModel.selectedIds.contains($0.id) }
+            .sorted { $0.id < $1.id }
+    }
+
+    private func canBulkLink(_ transactions: [TransactionWithDetails]) -> Bool {
+        guard let first = transactions.first else { return false }
+        guard first.direction != .reserved else { return false }
+        return transactions.allSatisfy { $0.direction == first.direction && canLinkToEntry($0) }
+    }
+
+    private func canMerge(_ transactions: [TransactionWithDetails]) -> Bool {
+        guard transactions.count >= 2, let first = transactions.first else { return false }
+
+        let sameWallet = transactions.allSatisfy { $0.walletId == first.walletId }
+        let sameDirection = transactions.allSatisfy { $0.direction == first.direction }
+        let allowedClassifications = transactions.allSatisfy { $0.classification == .expense || $0.classification == .income }
+        let noCalibration = transactions.allSatisfy { !$0.isCalibration }
+
+        return sameWallet && sameDirection && allowedClassifications && noCalibration
+    }
+
+    private func unlink(_ transaction: TransactionWithDetails, viewModel: TransactionViewModel) async {
+        do {
+            try await apiClient.unlinkTransaction(id: transaction.id)
+            await refreshAfterMutation(viewModel)
+        } catch {
+            assign(error: error, to: viewModel)
+        }
+    }
+
+    private func unclassify(_ transaction: TransactionWithDetails, viewModel: TransactionViewModel) async {
+        do {
+            try await apiClient.unclassifyTransaction(id: transaction.id)
+            await refreshAfterMutation(viewModel)
+        } catch {
+            assign(error: error, to: viewModel)
+        }
+    }
+
+    private func assign(error: Error, to viewModel: TransactionViewModel) {
+        if error is CancellationError {
+            return
+        }
+
+        if let apiError = error as? APIError {
+            viewModel.error = apiError
+        } else {
+            viewModel.error = .networkError(error)
+        }
     }
 }
