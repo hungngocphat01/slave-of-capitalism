@@ -108,6 +108,22 @@ final class TransactionViewModelTests: XCTestCase {
         XCTAssertEqual(client.listTransactionsMonths, ["2026-03-01", "2026-03-01", "2026-03-01"])
     }
 
+    func testUpdateTransactionReloadsData() async {
+        let client = TransactionAPIStub()
+        client.listTransactionsHandler = { _ in [Self.makeTransaction(id: 1, date: "2026-03-05", description: "Groceries")] }
+        let viewModel = TransactionViewModel(apiClient: client, selectedYear: 2026, selectedMonth: 3)
+
+        await viewModel.load()
+        XCTAssertEqual(viewModel.transactions.count, 1)
+
+        let update = TransactionUpdate(description: "Updated")
+        await viewModel.updateTransaction(id: 1, update)
+
+        XCTAssertNil(viewModel.error)
+        XCTAssertEqual(client.updateCalledWithId, 1)
+        XCTAssertEqual(client.listTransactionsMonths.count, 2)
+    }
+
     func testLoadStoresAPIErrors() async {
         let client = TransactionAPIStub()
         client.listTransactionsError = APIError.serverError("Transaction load failed")
@@ -197,7 +213,20 @@ private final class TransactionAPIStub: APIClientProtocol {
 
     func getTransaction(id: Int) async throws -> TransactionWithDetails { fatalError("Unused") }
     func createTransaction(_ body: TransactionCreate) async throws -> TransactionResponse { fatalError("Unused") }
-    func updateTransaction(id: Int, _ body: TransactionUpdate) async throws -> TransactionResponse { fatalError("Unused") }
+    var updateCalledWithId: Int?
+    var updateCalledWithBody: TransactionUpdate?
+
+    func updateTransaction(id: Int, _ body: TransactionUpdate) async throws -> TransactionResponse {
+        updateCalledWithId = id
+        updateCalledWithBody = body
+        return TransactionResponse(
+            id: id, date: "2026-01-15", time: nil, walletId: 1,
+            direction: .outflow, amount: 100, classification: .expense,
+            description: "Updated", categoryId: nil, subcategoryId: nil,
+            pairedTransactionId: nil, isIgnored: false, isCalibration: false,
+            createdAt: "2026-01-01T00:00:00", updatedAt: "2026-01-01T00:00:00"
+        )
+    }
     func deleteTransaction(id: Int) async throws { fatalError("Unused") }
     func deleteTransactions(ids: [Int]) async throws { deletedTransactionIds.append(ids) }
     func ignoreTransactions(ids: [Int]) async throws { ignoredTransactionIds.append(ids) }

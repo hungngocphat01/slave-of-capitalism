@@ -64,6 +64,19 @@ final class TransactionViewModel {
         }
     }
 
+    func updateTransaction(id: Int, _ body: TransactionUpdate) async {
+        do {
+            _ = try await apiClient.updateTransaction(id: id, body)
+            await load()
+        } catch let apiError as APIError {
+            error = apiError
+        } catch is CancellationError {
+            // Ignore
+        } catch {
+            self.error = .networkError(error)
+        }
+    }
+
     var monthKey: String {
         String(format: "%04d-%02d-01", selectedYear, selectedMonth)
     }
