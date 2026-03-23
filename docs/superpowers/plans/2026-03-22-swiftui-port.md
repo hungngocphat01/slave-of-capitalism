@@ -2702,24 +2702,24 @@ When decoding fails, surface enough context to identify the endpoint and payload
 - Modify: `SlaveOfCapitalism/SlaveOfCapitalism/Backend/APIClient.swift`
 - Test: `SlaveOfCapitalism/SlaveOfCapitalismTests/APIContractDecodingTests.swift`
 
-- [ ] **Step 1: Extend decoding error payload in APIError**
+- [x] **Step 1: Extend decoding error payload in APIError**
 
 Update `APIError.decodingError` to include endpoint + payload preview:
 ```swift
 case decodingError(endpoint: String, preview: String, underlying: Error)
 ```
 
-- [ ] **Step 2: Add payload preview in decode failure path**
+- [x] **Step 2: Add payload preview in decode failure path**
 
 In `perform<T>`:
 - Build preview from response bytes (first 500 chars, UTF-8 fallback).
 - Throw `APIError.decodingError(endpoint: path, preview: preview, underlying: error)`.
 
-- [ ] **Step 3: Add/extend tests for diagnostic content**
+- [x] **Step 3: Add/extend tests for diagnostic content**
 
 Add assertions that decode failures include endpoint path and preview in `localizedDescription`.
 
-- [ ] **Step 4: Commit diagnostic improvement**
+- [x] **Step 4: Commit diagnostic improvement**
 
 ```bash
 git add SlaveOfCapitalism/SlaveOfCapitalism/Backend/APIClient.swift SlaveOfCapitalism/SlaveOfCapitalismTests/APIContractDecodingTests.swift
