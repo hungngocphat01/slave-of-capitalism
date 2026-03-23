@@ -58,28 +58,27 @@ struct WalletListView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 40)
                 } else {
-                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 250), spacing: 16)], spacing: 16) {
-                        ForEach(viewModel.wallets) { wallet in
-                            WalletCard(wallet: wallet)
-                                .contextMenu {
-                                    Button("Edit") {
-                                        sheetDestination = .edit(wallet)
-                                    }
+                    let normalWallets = viewModel.wallets.filter { $0.walletType == .normal }
+                    let creditWallets = viewModel.wallets.filter { $0.walletType == .credit }
 
-                                    Button("Transfer") {
-                                        sheetDestination = .transfer(wallet)
-                                    }
+                    if !normalWallets.isEmpty {
+                        Text("Wallets")
+                            .font(.headline)
+                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 250), spacing: 16)], spacing: 16) {
+                            ForEach(normalWallets) { wallet in
+                                walletCardWithMenu(wallet)
+                            }
+                        }
+                    }
 
-                                    Button("Calibrate") {
-                                        sheetDestination = .calibrate(wallet)
-                                    }
-
-                                    Divider()
-
-                                    Button("Delete", role: .destructive) {
-                                        walletPendingDeletion = wallet
-                                    }
-                                }
+                    if !creditWallets.isEmpty {
+                        Text("Credit Cards")
+                            .font(.headline)
+                            .padding(.top, normalWallets.isEmpty ? 0 : 8)
+                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 250), spacing: 16)], spacing: 16) {
+                            ForEach(creditWallets) { wallet in
+                                walletCardWithMenu(wallet)
+                            }
                         }
                     }
                 }
@@ -147,6 +146,17 @@ struct WalletListView: View {
                 }
             }
         }
+    }
+
+    private func walletCardWithMenu(_ wallet: WalletWithBalance) -> some View {
+        WalletCard(wallet: wallet)
+            .contextMenu {
+                Button("Edit") { sheetDestination = .edit(wallet) }
+                Button("Transfer") { sheetDestination = .transfer(wallet) }
+                Button("Calibrate") { sheetDestination = .calibrate(wallet) }
+                Divider()
+                Button("Delete", role: .destructive) { walletPendingDeletion = wallet }
+            }
     }
 
     private var summarySection: some View {
