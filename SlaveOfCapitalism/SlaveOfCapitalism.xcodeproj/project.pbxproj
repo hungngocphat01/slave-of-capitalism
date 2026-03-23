@@ -67,7 +67,6 @@
 		9AECCBD4B08DEE1EC995046F /* TransactionListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E63592245E7B3ED35F31180 /* TransactionListView.swift */; };
 		9CADF9E090EF4A4D62B08CC6 /* CategoryViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B76777F617001533202D8B2 /* CategoryViewModelTests.swift */; };
 		9DEE69DC4E95A2B4272A7697 /* WalletViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70A83EE797D94EEAAA16BF8A /* WalletViewModel.swift */; };
-		A00EDC481EBD7FFAA2319231 /* TransactionRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAB9CC9C33EBAF7204C87336 /* TransactionRow.swift */; };
 		A012E94A234B19E9F826BDF0 /* CategoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F85937B92CFE469DF0AA97E /* CategoryStore.swift */; };
 		A71C7A799320FF37C98BB306 /* Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = F89735236A40BA9B70CEB2A9 /* Category.swift */; };
 		AF84B3492AC244F68392C99F /* ErrorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13108ECAB820152C35FDE0F9 /* ErrorView.swift */; };
@@ -166,7 +165,6 @@
 		AD63B73BA401723F19CA526A /* PayPayMappingStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PayPayMappingStep.swift; sourceTree = "<group>"; };
 		AF649340089E8EDA1FD97642 /* SlaveOfCapitalismTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlaveOfCapitalismTests.swift; sourceTree = "<group>"; };
 		B24A937B32466EC21D0C04A5 /* CurrencyField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyField.swift; sourceTree = "<group>"; };
-		BAB9CC9C33EBAF7204C87336 /* TransactionRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionRow.swift; sourceTree = "<group>"; };
 		BDC0CAFC5BE44C13A4B20ABF /* APIContractDecodingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIContractDecodingTests.swift; sourceTree = "<group>"; };
 		C49EB72632623FF22FD33571 /* PendingViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PendingViewModelTests.swift; sourceTree = "<group>"; };
 		CF9F2613500AD83127EB5C0F /* PayPayParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PayPayParser.swift; sourceTree = "<group>"; };
@@ -363,7 +361,6 @@
 				0FCD1E9880B2FF57708BBA63 /* EditableTextCell.swift */,
 				0B4455742F27331960E50317 /* TransactionDetailSheet.swift */,
 				3E63592245E7B3ED35F31180 /* TransactionListView.swift */,
-				BAB9CC9C33EBAF7204C87336 /* TransactionRow.swift */,
 			);
 			path = Transactions;
 			sourceTree = "<group>";
@@ -646,7 +643,6 @@
 				B4E342B38304677E041A4C31 /* Transaction.swift in Sources */,
 				D73C1A9405BC5406BDFC1899 /* TransactionDetailSheet.swift in Sources */,
 				9AECCBD4B08DEE1EC995046F /* TransactionListView.swift in Sources */,
-				A00EDC481EBD7FFAA2319231 /* TransactionRow.swift in Sources */,
 				2F9875B08D25B93D221924DF /* TransactionViewModel.swift in Sources */,
 				459106151F0185B97294FBC7 /* TransferSheet.swift in Sources */,
 				56BB42C8FCFCEABA4908A35B /* Wallet.swift in Sources */,

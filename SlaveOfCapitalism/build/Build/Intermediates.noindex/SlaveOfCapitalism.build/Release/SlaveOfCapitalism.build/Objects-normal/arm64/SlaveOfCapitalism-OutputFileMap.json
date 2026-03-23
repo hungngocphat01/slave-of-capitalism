@@ -98,6 +98,11 @@
     "llvm-bc" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/Build/Intermediates.noindex/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/BudgetViewModel.bc",
     "object" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/Build/Intermediates.noindex/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/BudgetViewModel.o"
   },
+  "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/ViewModels/CategoryViewModel.swift" : {
+    "index-unit-output-path" : "/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/CategoryViewModel.o",
+    "llvm-bc" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/Build/Intermediates.noindex/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/CategoryViewModel.bc",
+    "object" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/Build/Intermediates.noindex/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/CategoryViewModel.o"
+  },
   "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/ViewModels/PendingViewModel.swift" : {
     "index-unit-output-path" : "/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/PendingViewModel.o",
     "llvm-bc" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/Build/Intermediates.noindex/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/PendingViewModel.bc",
@@ -127,6 +132,56 @@
     "index-unit-output-path" : "/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/AuditView.o",
     "llvm-bc" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/Build/Intermediates.noindex/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/AuditView.bc",
     "object" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/Build/Intermediates.noindex/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/AuditView.o"
+  },
+  "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/Views/Categories/CategoryManagementView.swift" : {
+    "index-unit-output-path" : "/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/CategoryManagementView.o",
+    "llvm-bc" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/Build/Intermediates.noindex/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/CategoryManagementView.bc",
+    "object" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/Build/Intermediates.noindex/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/CategoryManagementView.o"
+  },
+  "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/Views/Data/DataManagementView.swift" : {
+    "index-unit-output-path" : "/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/DataManagementView.o",
+    "llvm-bc" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/Build/Intermediates.noindex/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/DataManagementView.bc",
+    "object" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/Build/Intermediates.noindex/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/DataManagementView.o"
+  },
+  "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/Views/Data/PayPayImport/PayPayConfirmStep.swift" : {
+    "index-unit-output-path" : "/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/PayPayConfirmStep.o",
+    "llvm-bc" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/Build/Intermediates.noindex/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/PayPayConfirmStep.bc",
+    "object" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/Build/Intermediates.noindex/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/PayPayConfirmStep.o"
+  },
+  "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/Views/Data/PayPayImport/PayPayFileStep.swift" : {
+    "index-unit-output-path" : "/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/PayPayFileStep.o",
+    "llvm-bc" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/Build/Intermediates.noindex/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/PayPayFileStep.bc",
+    "object" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/Build/Intermediates.noindex/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/PayPayFileStep.o"
+  },
+  "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/Views/Data/PayPayImport/PayPayMappingStep.swift" : {
+    "index-unit-output-path" : "/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/PayPayMappingStep.o",
+    "llvm-bc" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/Build/Intermediates.noindex/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/PayPayMappingStep.bc",
+    "object" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/Build/Intermediates.noindex/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/PayPayMappingStep.o"
+  },
+  "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/Views/Data/PayPayImport/PayPayParser.swift" : {
+    "index-unit-output-path" : "/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/PayPayParser.o",
+    "llvm-bc" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/Build/Intermediates.noindex/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/PayPayParser.bc",
+    "object" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/Build/Intermediates.noindex/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/PayPayParser.o"
+  },
+  "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/Views/Data/PayPayImport/PayPayPreviewStep.swift" : {
+    "index-unit-output-path" : "/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/PayPayPreviewStep.o",
+    "llvm-bc" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/Build/Intermediates.noindex/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/PayPayPreviewStep.bc",
+    "object" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/Build/Intermediates.noindex/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/PayPayPreviewStep.o"
+  },
+  "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/Views/Data/PayPayImport/PayPayRuleEngine.swift" : {
+    "index-unit-output-path" : "/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/PayPayRuleEngine.o",
+    "llvm-bc" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/Build/Intermediates.noindex/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/PayPayRuleEngine.bc",
+    "object" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/Build/Intermediates.noindex/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/PayPayRuleEngine.o"
+  },
+  "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/Views/Data/PayPayImport/PayPayTransformer.swift" : {
+    "index-unit-output-path" : "/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/PayPayTransformer.o",
+    "llvm-bc" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/Build/Intermediates.noindex/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/PayPayTransformer.bc",
+    "object" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/Build/Intermediates.noindex/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/PayPayTransformer.o"
+  },
+  "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/Views/Data/PayPayImport/PayPayWizardSheet.swift" : {
+    "index-unit-output-path" : "/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/PayPayWizardSheet.o",
+    "llvm-bc" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/Build/Intermediates.noindex/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/PayPayWizardSheet.bc",
+    "object" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/Build/Intermediates.noindex/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/PayPayWizardSheet.o"
   },
   "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/Views/ErrorView.swift" : {
     "index-unit-output-path" : "/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/ErrorView.o",

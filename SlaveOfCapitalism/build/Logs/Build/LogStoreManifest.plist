@@ -6,6 +6,48 @@
 	<integer>12</integer>
 	<key>logs</key>
 	<dict>
+		<key>318A81AE-3C04-40EB-A106-1D9697FB6F4D</key>
+		<dict>
+			<key>className</key>
+			<string>IDECommandLineBuildLog</string>
+			<key>documentTypeString</key>
+			<string>&lt;nil&gt;</string>
+			<key>domainType</key>
+			<string>Xcode.IDEActivityLogDomainType.BuildLog</string>
+			<key>fileName</key>
+			<string>318A81AE-3C04-40EB-A106-1D9697FB6F4D.xcactivitylog</string>
+			<key>hasPrimaryLog</key>
+			<true/>
+			<key>primaryObservable</key>
+			<dict>
+				<key>highLevelStatus</key>
+				<string>S</string>
+				<key>totalNumberOfAnalyzerIssues</key>
+				<integer>0</integer>
+				<key>totalNumberOfErrors</key>
+				<integer>0</integer>
+				<key>totalNumberOfTestFailures</key>
+				<integer>0</integer>
+				<key>totalNumberOfWarnings</key>
+				<integer>0</integer>
+			</dict>
+			<key>schemeIdentifier-containerName</key>
+			<string>SlaveOfCapitalism project</string>
+			<key>schemeIdentifier-schemeName</key>
+			<string>SlaveOfCapitalism</string>
+			<key>schemeIdentifier-sharedScheme</key>
+			<integer>1</integer>
+			<key>signature</key>
+			<string>Building project SlaveOfCapitalism with scheme SlaveOfCapitalism and configuration Release</string>
+			<key>timeStartedRecording</key>
+			<real>795954165.21877503</real>
+			<key>timeStoppedRecording</key>
+			<real>795954175.51724195</real>
+			<key>title</key>
+			<string>Building project SlaveOfCapitalism with scheme SlaveOfCapitalism and configuration Release</string>
+			<key>uniqueIdentifier</key>
+			<string>318A81AE-3C04-40EB-A106-1D9697FB6F4D</string>
+		</dict>
 		<key>989673CE-7B79-40CB-A1A0-D2A704A4FF03</key>
 		<dict>
 			<key>className</key>
