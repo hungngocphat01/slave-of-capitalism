@@ -20,6 +20,35 @@ final class APIContractDecodingTests: XCTestCase {
         }
     }
 
+    func testDecodeFailureDescriptionPreviewIsBoundedToFirst500Bytes() async throws {
+        var bytes = [UInt8]()
+        bytes.reserveCapacity(505)
+
+        for _ in 0..<249 {
+            bytes.append(0xC3)
+            bytes.append(0xA9)
+        }
+
+        bytes.append(0x41)
+        bytes.append(0xC3)
+        bytes.append(0xA9)
+        bytes.append(contentsOf: Array("TAIL".utf8))
+
+        let client = makeClient(responseBody: Data(bytes))
+        defer { MockURLProtocol.requestHandler = nil }
+
+        do {
+            let _: [WalletWithBalance] = try await client.listWallets()
+            XCTFail("Expected decode failure")
+        } catch let error as APIError {
+            let description = error.localizedDescription
+            XCTAssertTrue(description.contains("api/wallets/"), "Expected endpoint in description: \(description)")
+            XCTAssertFalse(description.contains("TAIL"), "Expected preview to exclude bytes after the first 500: \(description)")
+        } catch {
+            XCTFail("Expected APIError, got \(error)")
+        }
+    }
+
     func testWalletsFixtureDecodesWithCurrentDecoder() throws {
         let data = try loadFixture(named: "wallets-list")
         XCTAssertNoThrow(try APIModelDecoder.decode([WalletWithBalance].self, from: data))

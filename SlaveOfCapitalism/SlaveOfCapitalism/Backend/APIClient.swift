@@ -221,8 +221,8 @@ final class APIClient: APIClientProtocol {
     }
 
     private func payloadPreview(from data: Data) -> String {
-        let payload = String(data: data, encoding: .utf8) ?? String(decoding: data, as: UTF8.self)
-        return String(payload.prefix(500))
+        let previewBytes = data.prefix(500)
+        return String(data: previewBytes, encoding: .utf8) ?? String(decoding: previewBytes, as: UTF8.self)
     }
 
     // MARK: - Health
