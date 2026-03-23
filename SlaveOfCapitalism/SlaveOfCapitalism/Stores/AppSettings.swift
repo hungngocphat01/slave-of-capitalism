@@ -9,6 +9,8 @@ final class AppSettings {
         static let decimals = "decimals"
         static let language = "language"
         static let databasePath = "databasePath"
+        static let backendPortMode = "backendPortMode"
+        static let customBackendPort = "customBackendPort"
     }
 
     private let defaults: UserDefaults
@@ -29,11 +31,21 @@ final class AppSettings {
         didSet { defaults.set(databasePath, forKey: Keys.databasePath) }
     }
 
+    var backendPortMode: String {
+        didSet { defaults.set(backendPortMode, forKey: Keys.backendPortMode) }
+    }
+
+    var customBackendPort: Int {
+        didSet { defaults.set(customBackendPort, forKey: Keys.customBackendPort) }
+    }
+
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
         self.currency = defaults.string(forKey: Keys.currency) ?? "¥"
         self.decimals = defaults.object(forKey: Keys.decimals) as? Int ?? 0
         self.language = defaults.string(forKey: Keys.language) ?? "en"
         self.databasePath = defaults.string(forKey: Keys.databasePath) ?? ""
+        self.backendPortMode = defaults.string(forKey: Keys.backendPortMode) ?? "auto"
+        self.customBackendPort = defaults.object(forKey: Keys.customBackendPort) as? Int ?? 8000
     }
 }

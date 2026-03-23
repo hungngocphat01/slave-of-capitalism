@@ -16,7 +16,9 @@ struct SlaveOfCapitalismApp: App {
                 .environment(walletStore)
                 .environment(appSettings)
                 .task {
-                    await backendManager.start(dbPath: appSettings.databasePath.isEmpty ? nil : appSettings.databasePath)
+                    let dbPath = appSettings.databasePath.isEmpty ? nil : appSettings.databasePath
+                    let preferredPort: UInt16? = appSettings.backendPortMode == "custom" ? UInt16(appSettings.customBackendPort) : nil
+                    await backendManager.start(dbPath: dbPath, preferredPort: preferredPort)
                 }
                 .onChange(of: backendManager.isReady) { _, isReady in
                     guard isReady else { return }

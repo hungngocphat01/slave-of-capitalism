@@ -44,36 +44,31 @@ struct ContentView: View {
         case .transactions:
             TransactionListView()
         case .summary:
-            Text("Summary - Task 14")
+            SummaryView()
         case .wallets:
             WalletListView(apiClient: backendManager.apiClient)
         case .pending:
-            Text("Pending - Task 13")
+            PendingEntriesView()
         case .categories:
             Text("Categories - Task 12")
         case .data:
             Text("Data - Task 17")
         case .audit:
-            Text("Audit - Task 15")
+            AuditView()
         case .settings:
-            Text("Settings - Task 16")
+            SettingsView()
         }
     }
 
     private func restartBackend(openSettings: Bool) {
         guard !isRestartingBackend else { return }
-
-        if openSettings {
-            selectedScreen = .settings
-        }
-
+        if openSettings { selectedScreen = .settings }
         let dbPath = appSettings.databasePath.isEmpty ? nil : appSettings.databasePath
+        let preferredPort: UInt16? = appSettings.backendPortMode == "custom" ? UInt16(appSettings.customBackendPort) : nil
         isRestartingBackend = true
         Task {
-            await backendManager.restart(dbPath: dbPath)
-            await MainActor.run {
-                isRestartingBackend = false
-            }
+            await backendManager.restart(dbPath: dbPath, preferredPort: preferredPort)
+            await MainActor.run { isRestartingBackend = false }
         }
     }
 }

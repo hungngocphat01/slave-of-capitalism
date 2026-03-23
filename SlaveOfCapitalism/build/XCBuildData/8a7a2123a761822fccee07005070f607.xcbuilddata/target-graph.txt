@@ -1,0 +1,4 @@
+Target dependency graph (2 targets)
+Target 'SlaveOfCapitalismTests' in project 'SlaveOfCapitalism'
+➜ Explicit dependency on target 'SlaveOfCapitalism' in project 'SlaveOfCapitalism'
+Target 'SlaveOfCapitalism' in project 'SlaveOfCapitalism' (no dependencies)

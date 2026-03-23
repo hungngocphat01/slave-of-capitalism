@@ -1,0 +1,39 @@
+{
+  "" : {
+    "diagnostics" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalismTests.build/Objects-normal/arm64/SlaveOfCapitalismTests-primary.dia",
+    "emit-module-dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalismTests.build/Objects-normal/arm64/SlaveOfCapitalismTests-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalismTests.build/Objects-normal/arm64/SlaveOfCapitalismTests-primary-emit-module.dia",
+    "pch" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalismTests.build/Objects-normal/arm64/SlaveOfCapitalismTests-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalismTests.build/Objects-normal/arm64/SlaveOfCapitalismTests-primary.swiftdeps"
+  },
+  "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalismTests/MockAPIClient.swift" : {
+    "const-values" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalismTests.build/Objects-normal/arm64/MockAPIClient.swiftconstvalues",
+    "dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalismTests.build/Objects-normal/arm64/MockAPIClient.d",
+    "diagnostics" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalismTests.build/Objects-normal/arm64/MockAPIClient.dia",
+    "index-unit-output-path" : "/SlaveOfCapitalism.build/Debug/SlaveOfCapitalismTests.build/Objects-normal/arm64/MockAPIClient.o",
+    "llvm-bc" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalismTests.build/Objects-normal/arm64/MockAPIClient.bc",
+    "object" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalismTests.build/Objects-normal/arm64/MockAPIClient.o",
+    "swift-dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalismTests.build/Objects-normal/arm64/MockAPIClient.swiftdeps",
+    "swiftmodule" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalismTests.build/Objects-normal/arm64/MockAPIClient~partial.swiftmodule"
+  },
+  "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalismTests/MockAPIClientTests.swift" : {
+    "const-values" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalismTests.build/Objects-normal/arm64/MockAPIClientTests.swiftconstvalues",
+    "dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalismTests.build/Objects-normal/arm64/MockAPIClientTests.d",
+    "diagnostics" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalismTests.build/Objects-normal/arm64/MockAPIClientTests.dia",
+    "index-unit-output-path" : "/SlaveOfCapitalism.build/Debug/SlaveOfCapitalismTests.build/Objects-normal/arm64/MockAPIClientTests.o",
+    "llvm-bc" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalismTests.build/Objects-normal/arm64/MockAPIClientTests.bc",
+    "object" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalismTests.build/Objects-normal/arm64/MockAPIClientTests.o",
+    "swift-dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalismTests.build/Objects-normal/arm64/MockAPIClientTests.swiftdeps",
+    "swiftmodule" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalismTests.build/Objects-normal/arm64/MockAPIClientTests~partial.swiftmodule"
+  },
+  "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalismTests/SlaveOfCapitalismTests.swift" : {
+    "const-values" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalismTests.build/Objects-normal/arm64/SlaveOfCapitalismTests.swiftconstvalues",
+    "dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalismTests.build/Objects-normal/arm64/SlaveOfCapitalismTests.d",
+    "diagnostics" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalismTests.build/Objects-normal/arm64/SlaveOfCapitalismTests.dia",
+    "index-unit-output-path" : "/SlaveOfCapitalism.build/Debug/SlaveOfCapitalismTests.build/Objects-normal/arm64/SlaveOfCapitalismTests.o",
+    "llvm-bc" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalismTests.build/Objects-normal/arm64/SlaveOfCapitalismTests.bc",
+    "object" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalismTests.build/Objects-normal/arm64/SlaveOfCapitalismTests.o",
+    "swift-dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalismTests.build/Objects-normal/arm64/SlaveOfCapitalismTests.swiftdeps",
+    "swiftmodule" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalismTests.build/Objects-normal/arm64/SlaveOfCapitalismTests~partial.swiftmodule"
+  }
+}

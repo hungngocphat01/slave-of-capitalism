@@ -1,0 +1,17 @@
+/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/Backend/APIClient.swift
+/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/Stores/AppSettings.swift
+/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/Backend/BackendManager.swift
+/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/Models/BalanceAudit.swift
+/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/Models/Budget.swift
+/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/Models/Category.swift
+/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/Stores/CategoryStore.swift
+/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/ContentView.swift
+/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/Models/Enums.swift
+/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/Views/ErrorView.swift
+/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/Utilities/Formatters.swift
+/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/Models/LinkedEntry.swift
+/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/Views/LoadingView.swift
+/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/SlaveOfCapitalismApp.swift
+/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/Models/Transaction.swift
+/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/Models/Wallet.swift
+/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/Stores/WalletStore.swift

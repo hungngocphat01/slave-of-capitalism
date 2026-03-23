@@ -31,19 +31,27 @@ final class BackendManager {
     private var process: Process?
     private var stdoutPipe: Pipe?
     private var stderrPipe: Pipe?
+    private let backendBinaryName = "expense-manager-backend"
 
     // MARK: - Lifecycle
 
-    func start(dbPath: String? = nil) async {
+    func start(dbPath: String? = nil, preferredPort: UInt16? = nil) async {
         await MainActor.run { state = .starting }
 
-        guard let binaryURL = Bundle.main.url(forResource: "expense-manager-backend", withExtension: nil) else {
-            await MainActor.run { state = .error("Backend binary not found in app bundle") }
+        guard let binaryURL = resolveBackendBinaryURL() else {
+            await MainActor.run {
+                state = .error("Backend binary not found. Rebuild the app so Resources include \(backendBinaryName), or set SOC_BACKEND_BINARY to an absolute path.")
+            }
             return
         }
 
         do {
-            let assignedPort = try findAvailablePort()
+            let assignedPort: UInt16
+            if let preferred = preferredPort {
+                assignedPort = preferred
+            } else {
+                assignedPort = try findAvailablePort()
+            }
             await MainActor.run { port = assignedPort }
 
             let resolvedDbPath: String
@@ -58,7 +66,7 @@ final class BackendManager {
 
             let proc = Process()
             proc.executableURL = binaryURL
-            proc.arguments = ["--port", "\(assignedPort)", "--db-path", resolvedDbPath]
+            proc.arguments = ["--port", "\(assignedPort)", "--database", resolvedDbPath]
 
             let outPipe = Pipe()
             let errPipe = Pipe()
@@ -102,11 +110,11 @@ final class BackendManager {
         process = nil
     }
 
-    func restart(dbPath: String? = nil) async {
+    func restart(dbPath: String? = nil, preferredPort: UInt16? = nil) async {
         stop()
         // Brief pause to let the process clean up
         try? await Task.sleep(nanoseconds: 300_000_000)
-        await start(dbPath: dbPath)
+        await start(dbPath: dbPath, preferredPort: preferredPort)
     }
 
     // MARK: - Port Discovery
@@ -164,5 +172,73 @@ final class BackendManager {
             }
         }
         throw APIError.serverError("Backend did not become healthy after \(maxAttempts) attempts")
+    }
+
+    // MARK: - Binary Resolution
+
+    private func resolveBackendBinaryURL() -> URL? {
+        let fileManager = FileManager.default
+
+        func existingExecutable(_ url: URL?) -> URL? {
+            guard let url else { return nil }
+            let path = url.path
+            guard fileManager.fileExists(atPath: path) else { return nil }
+            if fileManager.isExecutableFile(atPath: path) {
+                return url
+            }
+            do {
+                var attributes = try fileManager.attributesOfItem(atPath: path)
+                let current = (attributes[.posixPermissions] as? NSNumber)?.intValue ?? 0o644
+                attributes[.posixPermissions] = NSNumber(value: current | 0o111)
+                try fileManager.setAttributes(attributes, ofItemAtPath: path)
+                return fileManager.isExecutableFile(atPath: path) ? url : nil
+            } catch {
+                return nil
+            }
+        }
+
+        if let envPath = ProcessInfo.processInfo.environment["SOC_BACKEND_BINARY"], !envPath.isEmpty {
+            if let url = existingExecutable(URL(fileURLWithPath: (envPath as NSString).expandingTildeInPath)) {
+                return url
+            }
+        }
+
+        if let url = existingExecutable(Bundle.main.url(forResource: backendBinaryName, withExtension: nil)) {
+            return url
+        }
+
+        if let resourceURL = Bundle.main.resourceURL {
+            if let url = existingExecutable(resourceURL.appendingPathComponent(backendBinaryName)) {
+                return url
+            }
+        }
+
+        let executableURL = URL(fileURLWithPath: CommandLine.arguments[0]).standardizedFileURL
+        let executableRelativeURL = executableURL
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .appendingPathComponent("Resources")
+            .appendingPathComponent(backendBinaryName)
+        if let url = existingExecutable(executableRelativeURL) {
+            return url
+        }
+
+#if DEBUG
+        let cwd = URL(fileURLWithPath: fileManager.currentDirectoryPath, isDirectory: true)
+        let debugCandidates: [URL] = [
+            cwd.appendingPathComponent("SlaveOfCapitalism/Resources/\(backendBinaryName)"),
+            cwd.appendingPathComponent("SlaveOfCapitalism/SlaveOfCapitalism/Resources/\(backendBinaryName)"),
+            cwd.appendingPathComponent("../SlaveOfCapitalism/Resources/\(backendBinaryName)"),
+            cwd.appendingPathComponent("../SlaveOfCapitalism/SlaveOfCapitalism/Resources/\(backendBinaryName)")
+        ].map { $0.standardizedFileURL }
+
+        for candidate in debugCandidates {
+            if let url = existingExecutable(candidate) {
+                return url
+            }
+        }
+#endif
+
+        return nil
     }
 }

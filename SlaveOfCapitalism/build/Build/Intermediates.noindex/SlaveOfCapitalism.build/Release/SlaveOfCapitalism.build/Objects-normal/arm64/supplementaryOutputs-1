@@ -1,0 +1,12 @@
+{
+  "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/Backend/APIClient.swift" : {
+    "abi-baseline-json" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/Build/Intermediates.noindex/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/SlaveOfCapitalism.abi.json",
+    "const-values" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/Build/Intermediates.noindex/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/SlaveOfCapitalism-primary.swiftconstvalues",
+    "dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/Build/Intermediates.noindex/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/SlaveOfCapitalism-primary.d",
+    "diagnostics" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/Build/Intermediates.noindex/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/SlaveOfCapitalism-primary.dia",
+    "objc-header" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/Build/Intermediates.noindex/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/SlaveOfCapitalism-Swift.h",
+    "swiftdoc" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/Build/Intermediates.noindex/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/SlaveOfCapitalism.swiftdoc",
+    "swiftmodule" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/Build/Intermediates.noindex/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/SlaveOfCapitalism.swiftmodule",
+    "swiftsourceinfo" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/Build/Intermediates.noindex/SlaveOfCapitalism.build/Release/SlaveOfCapitalism.build/Objects-normal/arm64/SlaveOfCapitalism.swiftsourceinfo"
+  }
+}

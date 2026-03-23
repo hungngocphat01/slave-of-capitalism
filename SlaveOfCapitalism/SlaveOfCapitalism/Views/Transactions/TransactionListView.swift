@@ -68,6 +68,11 @@ struct TransactionListView: View {
         @Bindable var bindableViewModel = viewModel
 
         VStack(spacing: 0) {
+            MonthYearPicker(year: $bindableViewModel.selectedYear, month: $bindableViewModel.selectedMonth)
+                .padding(.horizontal, 24)
+                .padding(.top, 20)
+                .padding(.bottom, 14)
+
             if let error = viewModel.error {
                 errorBanner(message: error.localizedDescription) {
                     Task {
@@ -145,10 +150,6 @@ struct TransactionListView: View {
             }
         }
         .toolbar {
-            ToolbarItem(placement: .principal) {
-                MonthYearPicker(year: $bindableViewModel.selectedYear, month: $bindableViewModel.selectedMonth)
-            }
-
             ToolbarItem(placement: .primaryAction) {
                 Button {
                     isShowingAddSheet = true

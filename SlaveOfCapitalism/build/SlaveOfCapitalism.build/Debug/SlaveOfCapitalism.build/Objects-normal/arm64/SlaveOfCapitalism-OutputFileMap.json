@@ -1,0 +1,179 @@
+{
+  "" : {
+    "diagnostics" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/SlaveOfCapitalism-primary.dia",
+    "emit-module-dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/SlaveOfCapitalism-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/SlaveOfCapitalism-primary-emit-module.dia",
+    "pch" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/SlaveOfCapitalism-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/SlaveOfCapitalism-primary.swiftdeps"
+  },
+  "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/Backend/APIClient.swift" : {
+    "const-values" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/APIClient.swiftconstvalues",
+    "dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/APIClient.d",
+    "diagnostics" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/APIClient.dia",
+    "index-unit-output-path" : "/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/APIClient.o",
+    "llvm-bc" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/APIClient.bc",
+    "object" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/APIClient.o",
+    "swift-dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/APIClient.swiftdeps",
+    "swiftmodule" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/APIClient~partial.swiftmodule"
+  },
+  "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/Backend/BackendManager.swift" : {
+    "const-values" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/BackendManager.swiftconstvalues",
+    "dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/BackendManager.d",
+    "diagnostics" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/BackendManager.dia",
+    "index-unit-output-path" : "/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/BackendManager.o",
+    "llvm-bc" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/BackendManager.bc",
+    "object" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/BackendManager.o",
+    "swift-dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/BackendManager.swiftdeps",
+    "swiftmodule" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/BackendManager~partial.swiftmodule"
+  },
+  "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/ContentView.swift" : {
+    "const-values" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/ContentView.swiftconstvalues",
+    "dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/ContentView.d",
+    "diagnostics" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/ContentView.dia",
+    "index-unit-output-path" : "/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/ContentView.o",
+    "llvm-bc" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/ContentView.bc",
+    "object" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/ContentView.o",
+    "swift-dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/ContentView.swiftdeps",
+    "swiftmodule" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/ContentView~partial.swiftmodule"
+  },
+  "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/Models/BalanceAudit.swift" : {
+    "const-values" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/BalanceAudit.swiftconstvalues",
+    "dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/BalanceAudit.d",
+    "diagnostics" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/BalanceAudit.dia",
+    "index-unit-output-path" : "/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/BalanceAudit.o",
+    "llvm-bc" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/BalanceAudit.bc",
+    "object" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/BalanceAudit.o",
+    "swift-dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/BalanceAudit.swiftdeps",
+    "swiftmodule" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/BalanceAudit~partial.swiftmodule"
+  },
+  "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/Models/Budget.swift" : {
+    "const-values" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Budget.swiftconstvalues",
+    "dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Budget.d",
+    "diagnostics" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Budget.dia",
+    "index-unit-output-path" : "/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Budget.o",
+    "llvm-bc" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Budget.bc",
+    "object" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Budget.o",
+    "swift-dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Budget.swiftdeps",
+    "swiftmodule" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Budget~partial.swiftmodule"
+  },
+  "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/Models/Category.swift" : {
+    "const-values" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Category.swiftconstvalues",
+    "dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Category.d",
+    "diagnostics" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Category.dia",
+    "index-unit-output-path" : "/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Category.o",
+    "llvm-bc" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Category.bc",
+    "object" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Category.o",
+    "swift-dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Category.swiftdeps",
+    "swiftmodule" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Category~partial.swiftmodule"
+  },
+  "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/Models/Enums.swift" : {
+    "const-values" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Enums.swiftconstvalues",
+    "dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Enums.d",
+    "diagnostics" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Enums.dia",
+    "index-unit-output-path" : "/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Enums.o",
+    "llvm-bc" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Enums.bc",
+    "object" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Enums.o",
+    "swift-dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Enums.swiftdeps",
+    "swiftmodule" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Enums~partial.swiftmodule"
+  },
+  "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/Models/LinkedEntry.swift" : {
+    "const-values" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/LinkedEntry.swiftconstvalues",
+    "dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/LinkedEntry.d",
+    "diagnostics" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/LinkedEntry.dia",
+    "index-unit-output-path" : "/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/LinkedEntry.o",
+    "llvm-bc" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/LinkedEntry.bc",
+    "object" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/LinkedEntry.o",
+    "swift-dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/LinkedEntry.swiftdeps",
+    "swiftmodule" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/LinkedEntry~partial.swiftmodule"
+  },
+  "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/Models/Transaction.swift" : {
+    "const-values" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Transaction.swiftconstvalues",
+    "dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Transaction.d",
+    "diagnostics" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Transaction.dia",
+    "index-unit-output-path" : "/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Transaction.o",
+    "llvm-bc" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Transaction.bc",
+    "object" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Transaction.o",
+    "swift-dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Transaction.swiftdeps",
+    "swiftmodule" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Transaction~partial.swiftmodule"
+  },
+  "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/Models/Wallet.swift" : {
+    "const-values" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Wallet.swiftconstvalues",
+    "dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Wallet.d",
+    "diagnostics" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Wallet.dia",
+    "index-unit-output-path" : "/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Wallet.o",
+    "llvm-bc" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Wallet.bc",
+    "object" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Wallet.o",
+    "swift-dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Wallet.swiftdeps",
+    "swiftmodule" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Wallet~partial.swiftmodule"
+  },
+  "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/SlaveOfCapitalismApp.swift" : {
+    "const-values" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/SlaveOfCapitalismApp.swiftconstvalues",
+    "dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/SlaveOfCapitalismApp.d",
+    "diagnostics" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/SlaveOfCapitalismApp.dia",
+    "index-unit-output-path" : "/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/SlaveOfCapitalismApp.o",
+    "llvm-bc" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/SlaveOfCapitalismApp.bc",
+    "object" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/SlaveOfCapitalismApp.o",
+    "swift-dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/SlaveOfCapitalismApp.swiftdeps",
+    "swiftmodule" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/SlaveOfCapitalismApp~partial.swiftmodule"
+  },
+  "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/Stores/AppSettings.swift" : {
+    "const-values" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/AppSettings.swiftconstvalues",
+    "dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/AppSettings.d",
+    "diagnostics" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/AppSettings.dia",
+    "index-unit-output-path" : "/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/AppSettings.o",
+    "llvm-bc" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/AppSettings.bc",
+    "object" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/AppSettings.o",
+    "swift-dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/AppSettings.swiftdeps",
+    "swiftmodule" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/AppSettings~partial.swiftmodule"
+  },
+  "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/Stores/CategoryStore.swift" : {
+    "const-values" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/CategoryStore.swiftconstvalues",
+    "dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/CategoryStore.d",
+    "diagnostics" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/CategoryStore.dia",
+    "index-unit-output-path" : "/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/CategoryStore.o",
+    "llvm-bc" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/CategoryStore.bc",
+    "object" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/CategoryStore.o",
+    "swift-dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/CategoryStore.swiftdeps",
+    "swiftmodule" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/CategoryStore~partial.swiftmodule"
+  },
+  "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/Stores/WalletStore.swift" : {
+    "const-values" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/WalletStore.swiftconstvalues",
+    "dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/WalletStore.d",
+    "diagnostics" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/WalletStore.dia",
+    "index-unit-output-path" : "/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/WalletStore.o",
+    "llvm-bc" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/WalletStore.bc",
+    "object" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/WalletStore.o",
+    "swift-dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/WalletStore.swiftdeps",
+    "swiftmodule" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/WalletStore~partial.swiftmodule"
+  },
+  "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/Utilities/Formatters.swift" : {
+    "const-values" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Formatters.swiftconstvalues",
+    "dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Formatters.d",
+    "diagnostics" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Formatters.dia",
+    "index-unit-output-path" : "/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Formatters.o",
+    "llvm-bc" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Formatters.bc",
+    "object" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Formatters.o",
+    "swift-dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Formatters.swiftdeps",
+    "swiftmodule" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/Formatters~partial.swiftmodule"
+  },
+  "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/Views/ErrorView.swift" : {
+    "const-values" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/ErrorView.swiftconstvalues",
+    "dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/ErrorView.d",
+    "diagnostics" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/ErrorView.dia",
+    "index-unit-output-path" : "/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/ErrorView.o",
+    "llvm-bc" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/ErrorView.bc",
+    "object" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/ErrorView.o",
+    "swift-dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/ErrorView.swiftdeps",
+    "swiftmodule" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/ErrorView~partial.swiftmodule"
+  },
+  "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/SlaveOfCapitalism/Views/LoadingView.swift" : {
+    "const-values" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/LoadingView.swiftconstvalues",
+    "dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/LoadingView.d",
+    "diagnostics" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/LoadingView.dia",
+    "index-unit-output-path" : "/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/LoadingView.o",
+    "llvm-bc" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/LoadingView.bc",
+    "object" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/LoadingView.o",
+    "swift-dependencies" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/LoadingView.swiftdeps",
+    "swiftmodule" : "/Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism/build/SlaveOfCapitalism.build/Debug/SlaveOfCapitalism.build/Objects-normal/arm64/LoadingView~partial.swiftmodule"
+  }
+}

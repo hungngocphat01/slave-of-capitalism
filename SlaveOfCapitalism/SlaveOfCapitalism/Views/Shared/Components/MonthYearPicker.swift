@@ -5,20 +5,28 @@ struct MonthYearPicker: View {
     @Binding var month: Int
 
     var body: some View {
-        HStack(spacing: 8) {
-            Button(action: previousMonth) {
-                Image(systemName: "chevron.left")
-            }
-            .buttonStyle(.borderless)
-
+        HStack(alignment: .center, spacing: 20) {
             Text(Formatters.monthYear(year: year, month: month))
-                .font(.headline)
-                .frame(minWidth: 140)
+                .font(.largeTitle.weight(.semibold))
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
 
-            Button(action: nextMonth) {
-                Image(systemName: "chevron.right")
+            Spacer(minLength: 16)
+
+            ControlGroup {
+                Button(action: previousMonth) {
+                    Image(systemName: "chevron.left")
+                }
+
+                Button(action: setToCurrentMonth) {
+                    Text("Today")
+                }
+
+                Button(action: nextMonth) {
+                    Image(systemName: "chevron.right")
+                }
             }
-            .buttonStyle(.borderless)
+            .controlSize(.regular)
         }
     }
 
@@ -38,6 +46,13 @@ struct MonthYearPicker: View {
         } else {
             month += 1
         }
+    }
+
+    private func setToCurrentMonth() {
+        let current = Calendar.current.dateComponents([.year, .month], from: .now)
+        guard let currentYear = current.year, let currentMonth = current.month else { return }
+        year = currentYear
+        month = currentMonth
     }
 }
 
