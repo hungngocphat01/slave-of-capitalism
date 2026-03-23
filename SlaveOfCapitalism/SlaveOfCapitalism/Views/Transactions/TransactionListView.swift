@@ -574,12 +574,16 @@ struct TransactionListView: View {
         editText = ""
     }
 
-    private func commitDateEdit(_ transaction: TransactionWithDetails, newValue: String, viewModel: TransactionViewModel) {
-        let trimmed = newValue.trimmingCharacters(in: .whitespaces)
+    private static let dateValidator: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
         formatter.locale = Locale(identifier: "en_US_POSIX")
-        guard !trimmed.isEmpty, trimmed != transaction.date, formatter.date(from: trimmed) != nil else {
+        return formatter
+    }()
+
+    private func commitDateEdit(_ transaction: TransactionWithDetails, newValue: String, viewModel: TransactionViewModel) {
+        let trimmed = newValue.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty, trimmed != transaction.date, Self.dateValidator.date(from: trimmed) != nil else {
             cancelEdit()
             return
         }
