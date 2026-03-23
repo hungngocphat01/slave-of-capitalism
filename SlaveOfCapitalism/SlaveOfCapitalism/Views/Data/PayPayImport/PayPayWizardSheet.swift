@@ -1,0 +1,166 @@
+import SwiftUI
+
+struct PayPayWizardSheet: View {
+    @Environment(APIClient.self) private var apiClient
+    @Environment(CategoryStore.self) private var categoryStore
+    @Environment(WalletStore.self) private var walletStore
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var step = 1
+    @State private var csvContent: String?
+    @State private var rulesContent: String?
+    @State private var walletMapping: [String: Int] = PayPayWizardSheet.loadSavedWalletMapping()
+    @State private var categoryMapping: [String: CategoryMapEntry] = [:]
+    @State private var transformedRows: [TransformedRow] = []
+    @State private var importPayload: PayPayImportPayload?
+    @State private var importResult: BulkImportResponse?
+    @State private var transfersImported: Int = 0
+    @State private var importError: String?
+    @State private var isImporting = false
+
+    var body: some View {
+        VStack(spacing: 0) {
+            // Step indicator
+            HStack {
+                ForEach(1...4, id: \.self) { s in
+                    Text("Step \(s)")
+                        .font(s == step ? .headline : .subheadline)
+                        .foregroundStyle(s == step ? .primary : .secondary)
+                    if s < 4 { Spacer() }
+                }
+            }
+            .padding()
+
+            Divider()
+
+            // Step content
+            Group {
+                switch step {
+                case 1:
+                    PayPayFileStep(csvContent: $csvContent, rulesContent: $rulesContent)
+                case 2:
+                    PayPayMappingStep(rows: transformedRows, walletMapping: $walletMapping, wallets: walletStore.wallets)
+                case 3:
+                    PayPayPreviewStep(rows: transformedRows, categoryMapping: $categoryMapping, categories: categoryStore.categories)
+                case 4:
+                    PayPayConfirmStep(
+                        transactionCount: importPayload?.transactions.count ?? 0,
+                        transferCount: importPayload?.transfers.count ?? 0,
+                        result: importResult,
+                        transfersImported: transfersImported,
+                        error: importError,
+                        isImporting: isImporting
+                    )
+                default:
+                    EmptyView()
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+            Divider()
+
+            // Navigation buttons
+            HStack {
+                if step > 1 && importResult == nil {
+                    Button("Back") { step -= 1 }
+                }
+                Spacer()
+                if step < 4 {
+                    Button("Next") { advanceStep() }
+                        .buttonStyle(.borderedProminent)
+                        .disabled(!canAdvance)
+                } else if importResult == nil && importError == nil {
+                    Button("Import") { performImport() }
+                        .buttonStyle(.borderedProminent)
+                        .disabled(isImporting || (importPayload?.transactions.isEmpty ?? true && importPayload?.transfers.isEmpty ?? true))
+                } else {
+                    Button("Done") { dismiss() }
+                        .buttonStyle(.borderedProminent)
+                }
+            }
+            .padding()
+        }
+        .frame(width: 700, height: 500)
+    }
+
+    private var canAdvance: Bool {
+        switch step {
+        case 1: return csvContent != nil
+        case 2: return true
+        case 3: return true
+        default: return false
+        }
+    }
+
+    private func advanceStep() {
+        switch step {
+        case 1:
+            // Parse and transform
+            if let csv = csvContent {
+                let raw = PayPayParser.parseCSV(csv)
+                transformedRows = PayPayParser.transform(raw)
+                // Apply rules if provided
+                if let rulesText = rulesContent {
+                    let rules = PayPayRuleEngine.compile(rulesText.components(separatedBy: "\n"))
+                    PayPayRuleEngine.execute(rules: rules, rows: &transformedRows)
+                }
+            }
+            step = 2
+        case 2:
+            // Apply wallet mapping
+            PayPayTransformer.mapWallets(rows: &transformedRows, mapping: walletMapping)
+            saveWalletMapping(walletMapping)
+            step = 3
+        case 3:
+            // Build import payload
+            importPayload = PayPayTransformer.buildPayload(
+                rows: transformedRows,
+                walletMapping: walletMapping,
+                categoryMapping: categoryMapping
+            )
+            step = 4
+        default:
+            break
+        }
+    }
+
+    private func performImport() {
+        guard let payload = importPayload else { return }
+        isImporting = true
+        Task {
+            do {
+                // Import regular transactions via bulk import
+                var bulkResult: BulkImportResponse?
+                if !payload.transactions.isEmpty {
+                    bulkResult = try await apiClient.bulkImport(BulkImportRequest(items: payload.transactions))
+                }
+
+                // Import wallet transfers individually
+                var transferCount = 0
+                for transfer in payload.transfers {
+                    _ = try await apiClient.transfer(transfer)
+                    transferCount += 1
+                }
+
+                await MainActor.run {
+                    transfersImported = transferCount
+                    importResult = bulkResult ?? BulkImportResponse(importedCount: 0, message: "Done")
+                    isImporting = false
+                }
+            } catch {
+                await MainActor.run {
+                    importError = error.localizedDescription
+                    isImporting = false
+                }
+            }
+        }
+    }
+
+    private static func loadSavedWalletMapping() -> [String: Int] {
+        (UserDefaults.standard.dictionary(forKey: "paypayWalletMapping") as? [String: Int]) ?? [:]
+    }
+
+    private func saveWalletMapping(_ mapping: [String: Int]) {
+        UserDefaults.standard.set(mapping, forKey: "paypayWalletMapping")
+    }
+}

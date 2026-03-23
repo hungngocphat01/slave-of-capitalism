@@ -52,7 +52,7 @@ struct ContentView: View {
         case .categories:
             CategoryManagementView()
         case .data:
-            Text("Data - Task 17")
+            DataManagementView()
         case .audit:
             AuditView()
         case .settings:
