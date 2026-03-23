@@ -48,6 +48,17 @@ struct TransactionListView: View {
     @State private var pendingDeleteIds: Set<Int> = []
     @State private var isShowingDeleteConfirmation = false
 
+    @State private var editingTransactionId: Int?
+    @State private var editingField: EditableField?
+    @State private var editText: String = ""
+    @State private var editWalletId: Int = 0
+    @State private var editCategoryId: Int = 0
+    @State private var editSubcategoryId: Int = 0
+
+    private enum EditableField: Hashable {
+        case date, description, wallet, category, amount
+    }
+
     var body: some View {
         Group {
             if let viewModel {
@@ -100,48 +111,131 @@ struct TransactionListView: View {
             } else {
                 Table(viewModel.transactions, selection: $bindableViewModel.selectedIds) {
                     TableColumn("Date") { transaction in
-                        interactiveCell(for: transaction, viewModel: viewModel) {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(transaction.date)
-                                if let time = transaction.time {
-                                    Text(time)
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
+                        VStack(alignment: .leading, spacing: 2) {
+                            EditableTextCell(
+                                value: transaction.date,
+                                isEditing: isEditing(transaction, field: .date),
+                                editText: $editText,
+                                font: .body,
+                                onBeginEdit: { beginEdit(transaction, field: .date, text: transaction.date) },
+                                onCommit: { newValue in commitDateEdit(transaction, newValue: newValue, viewModel: viewModel) },
+                                onCancel: { cancelEdit() }
+                            )
+                            if let time = transaction.time, !isEditing(transaction, field: .date) {
+                                Text(time)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
                             }
                         }
+                        .contextMenu { rowContextMenu(for: transaction, viewModel: viewModel) }
                     }
                     .width(min: 110, max: 130)
 
                     TableColumn("Description") { transaction in
-                        interactiveCell(for: transaction, viewModel: viewModel) {
-                            TransactionRow(transaction: transaction)
+                        VStack(alignment: .leading, spacing: 4) {
+                            EditableTextCell(
+                                value: transaction.description?.isEmpty == false ? transaction.description! : "Untitled Transaction",
+                                isEditing: isEditing(transaction, field: .description),
+                                editText: $editText,
+                                onBeginEdit: { beginEdit(transaction, field: .description, text: transaction.description ?? "") },
+                                onCommit: { newValue in commitDescriptionEdit(transaction, newValue: newValue, viewModel: viewModel) },
+                                onCancel: { cancelEdit() }
+                            )
+
+                            if !isEditing(transaction, field: .description) {
+                                HStack(spacing: 6) {
+                                    Text(transaction.classification.rawValue.replacingOccurrences(of: "_", with: " ").capitalized)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                    if transaction.isIgnored {
+                                        badge("Ignored", tint: .orange)
+                                    }
+                                    if transaction.hasLinkedEntry {
+                                        badge("Linked", tint: .blue)
+                                    }
+                                }
+                            }
                         }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .contextMenu { rowContextMenu(for: transaction, viewModel: viewModel) }
                     }
 
                     TableColumn("Wallet") { transaction in
-                        interactiveCell(for: transaction, viewModel: viewModel) {
-                            Text(transaction.walletName ?? walletStore.wallet(for: transaction.walletId)?.name ?? "Unknown")
-                                .frame(maxWidth: .infinity, alignment: .leading)
+                        Group {
+                            if isEditing(transaction, field: .wallet) {
+                                HStack(spacing: 4) {
+                                    Picker("Wallet", selection: $editWalletId) {
+                                        ForEach(walletStore.wallets) { wallet in
+                                            Text(wallet.name).tag(wallet.id)
+                                        }
+                                    }
+                                    .pickerStyle(.menu)
+                                    .labelsHidden()
+
+                                    Button("OK") {
+                                        commitWalletEdit(transaction, newWalletId: editWalletId, viewModel: viewModel)
+                                    }
+                                    .buttonStyle(.borderedProminent)
+                                    .controlSize(.small)
+
+                                    Button {
+                                        cancelEdit()
+                                    } label: {
+                                        Image(systemName: "xmark")
+                                            .font(.caption)
+                                    }
+                                    .buttonStyle(.plain)
+                                    .foregroundStyle(.secondary)
+                                }
+                                .onExitCommand { cancelEdit() }
+                            } else {
+                                Text(transaction.walletName ?? walletStore.wallet(for: transaction.walletId)?.name ?? "Unknown")
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .contentShape(Rectangle())
+                                    .onTapGesture {
+                                        editWalletId = transaction.walletId
+                                        editingTransactionId = transaction.id
+                                        editingField = .wallet
+                                    }
+                            }
                         }
+                        .contextMenu { rowContextMenu(for: transaction, viewModel: viewModel) }
                     }
                     .width(min: 120, ideal: 140)
 
                     TableColumn("Category") { transaction in
-                        interactiveCell(for: transaction, viewModel: viewModel) {
-                            Text(categoryTitle(for: transaction))
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .foregroundStyle(transaction.categoryId == nil && transaction.subcategoryId == nil ? .secondary : .primary)
-                        }
+                        EditableCategoryPicker(
+                            displayText: categoryTitle(for: transaction),
+                            isEditing: isEditing(transaction, field: .category),
+                            isUncategorized: transaction.categoryId == nil && transaction.subcategoryId == nil,
+                            categories: categoryStore.categories,
+                            selectedCategoryId: $editCategoryId,
+                            selectedSubcategoryId: $editSubcategoryId,
+                            onBeginEdit: {
+                                editCategoryId = transaction.categoryId ?? 0
+                                editSubcategoryId = transaction.subcategoryId ?? 0
+                                editingTransactionId = transaction.id
+                                editingField = .category
+                            },
+                            onCommit: { catId, subId in commitCategoryEdit(transaction, categoryId: catId, subcategoryId: subId, viewModel: viewModel) },
+                            onCancel: { cancelEdit() }
+                        )
+                        .contextMenu { rowContextMenu(for: transaction, viewModel: viewModel) }
                     }
                     .width(min: 140, ideal: 160)
 
                     TableColumn("Amount") { transaction in
-                        interactiveCell(for: transaction, viewModel: viewModel) {
-                            Text(amountTitle(for: transaction))
-                                .frame(maxWidth: .infinity, alignment: .trailing)
-                                .foregroundStyle(amountColor(for: transaction))
-                        }
+                        EditableTextCell(
+                            value: amountTitle(for: transaction),
+                            isEditing: isEditing(transaction, field: .amount),
+                            editText: $editText,
+                            alignment: .trailing,
+                            foregroundStyle: AnyShapeStyle(amountColor(for: transaction)),
+                            onBeginEdit: { beginEdit(transaction, field: .amount, text: transaction.amount.description) },
+                            onCommit: { newValue in commitAmountEdit(transaction, newValue: newValue, viewModel: viewModel) },
+                            onCancel: { cancelEdit() }
+                        )
+                        .contextMenu { rowContextMenu(for: transaction, viewModel: viewModel) }
                     }
                     .width(min: 100, ideal: 120)
                 }
@@ -256,20 +350,13 @@ struct TransactionListView: View {
         }
     }
 
-    @ViewBuilder
-    private func interactiveCell<Content: View>(
-        for transaction: TransactionWithDetails,
-        viewModel: TransactionViewModel,
-        @ViewBuilder content: () -> Content
-    ) -> some View {
-        content()
-            .contentShape(Rectangle())
-            .contextMenu {
-                rowContextMenu(for: transaction, viewModel: viewModel)
-            }
-            .onTapGesture {
-                selectedTransaction = transaction
-            }
+    private func badge(_ title: String, tint: Color) -> some View {
+        Text(title)
+            .font(.caption2.weight(.semibold))
+            .foregroundStyle(tint)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(tint.opacity(0.12), in: Capsule())
     }
 
     @ViewBuilder
@@ -469,6 +556,85 @@ struct TransactionListView: View {
 
     private func categoryTitle(for transaction: TransactionWithDetails) -> String {
         transaction.subcategoryName ?? transaction.categoryName ?? "Uncategorized"
+    }
+
+    private func isEditing(_ transaction: TransactionWithDetails, field: EditableField) -> Bool {
+        editingTransactionId == transaction.id && editingField == field
+    }
+
+    private func beginEdit(_ transaction: TransactionWithDetails, field: EditableField, text: String) {
+        editText = text
+        editingTransactionId = transaction.id
+        editingField = field
+    }
+
+    private func cancelEdit() {
+        editingTransactionId = nil
+        editingField = nil
+        editText = ""
+    }
+
+    private func commitDateEdit(_ transaction: TransactionWithDetails, newValue: String, viewModel: TransactionViewModel) {
+        let trimmed = newValue.trimmingCharacters(in: .whitespaces)
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        guard !trimmed.isEmpty, trimmed != transaction.date, formatter.date(from: trimmed) != nil else {
+            cancelEdit()
+            return
+        }
+        cancelEdit()
+        Task {
+            await viewModel.updateTransaction(id: transaction.id, TransactionUpdate(date: trimmed))
+            await walletStore.refresh()
+        }
+    }
+
+    private func commitDescriptionEdit(_ transaction: TransactionWithDetails, newValue: String, viewModel: TransactionViewModel) {
+        let trimmed = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmed != (transaction.description ?? "") else {
+            cancelEdit()
+            return
+        }
+        cancelEdit()
+        Task {
+            await viewModel.updateTransaction(id: transaction.id, TransactionUpdate(description: trimmed))
+        }
+    }
+
+    private func commitWalletEdit(_ transaction: TransactionWithDetails, newWalletId: Int, viewModel: TransactionViewModel) {
+        guard newWalletId != transaction.walletId else {
+            cancelEdit()
+            return
+        }
+        cancelEdit()
+        Task {
+            await viewModel.updateTransaction(id: transaction.id, TransactionUpdate(walletId: newWalletId))
+            await walletStore.refresh()
+        }
+    }
+
+    private func commitCategoryEdit(_ transaction: TransactionWithDetails, categoryId: Int?, subcategoryId: Int?, viewModel: TransactionViewModel) {
+        guard categoryId != transaction.categoryId || subcategoryId != transaction.subcategoryId else {
+            cancelEdit()
+            return
+        }
+        cancelEdit()
+        Task {
+            await viewModel.updateTransaction(id: transaction.id, TransactionUpdate(categoryId: categoryId, subcategoryId: subcategoryId))
+        }
+    }
+
+    private func commitAmountEdit(_ transaction: TransactionWithDetails, newValue: String, viewModel: TransactionViewModel) {
+        guard let amount = Decimal(string: newValue), amount > 0, amount != transaction.amount else {
+            cancelEdit()
+            return
+        }
+        cancelEdit()
+        Task {
+            await viewModel.updateTransaction(id: transaction.id, TransactionUpdate(amount: amount))
+            await walletStore.refresh()
+        }
     }
 
     private func requestDelete(ids: Set<Int>) {
