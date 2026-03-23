@@ -100,7 +100,6 @@ final class APIClient: APIClientProtocol {
     var baseURL: URL
 
     private let session: URLSession
-    private let decoder: JSONDecoder
     private let encoder: JSONEncoder
 
     init(baseURL: URL = URL(string: "http://127.0.0.1:8080")!) {
@@ -109,9 +108,6 @@ final class APIClient: APIClientProtocol {
         let config = URLSessionConfiguration.default
         config.timeoutIntervalForRequest = 30
         self.session = URLSession(configuration: config)
-
-        self.decoder = JSONDecoder()
-        self.decoder.keyDecodingStrategy = .convertFromSnakeCase
 
         self.encoder = JSONEncoder()
         self.encoder.keyEncodingStrategy = .convertToSnakeCase
@@ -179,7 +175,7 @@ final class APIClient: APIClientProtocol {
         }
         try validateResponse(response, data: data)
         do {
-            return try decoder.decode(T.self, from: data)
+            return try APIModelDecoder.decode(T.self, from: data, endpoint: req.url?.path ?? "unknown")
         } catch {
             throw APIError.decodingError(error)
         }
@@ -219,7 +215,8 @@ final class APIClient: APIClientProtocol {
     func healthCheck() async throws -> Bool {
         struct HealthResponse: Decodable { let status: String }
         let resp: HealthResponse = try await request("GET", path: "api/health")
-        return resp.status == "ok"
+        let normalized = resp.status.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        return normalized == "ok" || normalized == "healthy"
     }
 
     // MARK: - Wallets

@@ -5,37 +5,56 @@ import XCTest
 final class APIContractDecodingTests: XCTestCase {
     func testWalletsFixtureDecodesWithCurrentDecoder() throws {
         let data = try loadFixture(named: "wallets-list")
-        let decoder = makeDecoder()
-
-        XCTAssertNoThrow(try decoder.decode([WalletWithBalance].self, from: data))
+        XCTAssertNoThrow(try APIModelDecoder.decode([WalletWithBalance].self, from: data, endpoint: "/api/wallets/"))
     }
 
     func testTransactionsFixtureDecodesWithCurrentDecoder() throws {
         let data = try loadFixture(named: "transactions-list")
-        let decoder = makeDecoder()
-
-        XCTAssertNoThrow(try decoder.decode([TransactionWithDetails].self, from: data))
+        XCTAssertNoThrow(try APIModelDecoder.decode([TransactionWithDetails].self, from: data, endpoint: "/api/transactions/"))
     }
 
     func testBudgetsSummaryFixtureDecodesWithCurrentDecoder() throws {
         let data = try loadFixture(named: "budgets-summary")
-        let decoder = makeDecoder()
-
-        XCTAssertNoThrow(try decoder.decode(MonthlySummaryResponse.self, from: data))
+        XCTAssertNoThrow(try APIModelDecoder.decode(MonthlySummaryResponse.self, from: data, endpoint: "/api/budgets/summary/2026/3"))
     }
 
     func testBudgetsDailySummaryFixtureDecodesWithCurrentDecoder() throws {
         let data = try loadFixture(named: "budgets-daily-summary")
-        let decoder = makeDecoder()
-
-        XCTAssertNoThrow(try decoder.decode(DailySummaryResponse.self, from: data))
+        XCTAssertNoThrow(try APIModelDecoder.decode(DailySummaryResponse.self, from: data, endpoint: "/api/budgets/daily-summary/2026/3"))
     }
 
-    private func makeDecoder() -> JSONDecoder {
-        // Mirrors the current APIClient decoder strategy so this stays a contract test.
-        let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
-        return decoder
+    func testNumericStringFallbackNormalizesOnlyNumericTokens() throws {
+        struct Fixture: Decodable {
+            let count: Int
+            let amount: Decimal
+            let label: String
+            let nested: Nested
+        }
+
+        struct Nested: Decodable {
+            let ratio: Double
+            let note: String
+        }
+
+        let data = Data(#"""
+        {
+          "count": "42",
+          "amount": "19.75",
+          "label": "invoice-001",
+          "nested": {
+            "ratio": "0.5",
+            "note": "v1.2.3"
+          }
+        }
+        """#.utf8)
+
+        let decoded = try APIModelDecoder.decode(Fixture.self, from: data, endpoint: "/api/test")
+
+        XCTAssertEqual(decoded.count, 42)
+        XCTAssertEqual(NSDecimalNumber(decimal: decoded.amount), NSDecimalNumber(string: "19.75"))
+        XCTAssertEqual(decoded.label, "invoice-001")
+        XCTAssertEqual(decoded.nested.ratio, 0.5)
+        XCTAssertEqual(decoded.nested.note, "v1.2.3")
     }
 
     private func loadFixture(named name: String) throws -> Data {
