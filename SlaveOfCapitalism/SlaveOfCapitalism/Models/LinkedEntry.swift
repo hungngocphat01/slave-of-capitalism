@@ -86,3 +86,70 @@ struct DebtSummary: Codable, Sendable {
     let totalDebt: Decimal
     let pendingCount: Int
 }
+
+enum LinkedEntryPresentation {
+    static func ownerBadgeText(for transaction: TransactionWithDetails) -> String {
+        if let linkType = transaction.linkedEntry?.linkType {
+            return ownerBadgeText(for: linkType)
+        }
+
+        switch transaction.classification {
+        case .splitPayment:
+            return ownerBadgeText(for: .splitPayment)
+        case .installment:
+            return ownerBadgeText(for: .installment)
+        default:
+            return "Linked Entry"
+        }
+    }
+
+    static func ownerBadgeText(for linkType: LinkType) -> String {
+        switch linkType {
+        case .splitPayment:
+            return "Split Entry"
+        case .loan:
+            return "Loan Entry"
+        case .debt:
+            return "Debt Entry"
+        case .installment:
+            return "Installment Entry"
+        }
+    }
+
+    static func linkActionTitle(for linkType: LinkType) -> String {
+        switch linkType {
+        case .splitPayment, .loan:
+            return "Link Repayment"
+        case .debt:
+            return "Link Payment"
+        case .installment:
+            return "Link Charge"
+        }
+    }
+
+    static func linkSheetTitle(for linkType: LinkType) -> String {
+        linkActionTitle(for: linkType)
+    }
+
+    static func emptyStateDescription(for linkType: LinkType) -> String {
+        switch linkType {
+        case .splitPayment, .loan:
+            return "Create the repayment transaction first, then link it here."
+        case .debt:
+            return "Create the payment transaction first, then link it here."
+        case .installment:
+            return "Create the matching charge transaction first, then link it here."
+        }
+    }
+
+    static func linkedTransactionsLabel(for linkType: LinkType) -> String {
+        switch linkType {
+        case .splitPayment, .loan:
+            return "Payments Received"
+        case .debt:
+            return "Repayments Made"
+        case .installment:
+            return "Charges Recorded"
+        }
+    }
+}

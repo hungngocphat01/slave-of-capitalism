@@ -167,7 +167,7 @@ struct PendingEntriesView: View {
             }
 
             if !entry.linkedTransactions.isEmpty {
-                DisclosureGroup("\(paymentsLabel(for: entry.linkType)) (\(entry.linkedTransactions.count))") {
+                DisclosureGroup("\(LinkedEntryPresentation.linkedTransactionsLabel(for: entry.linkType)) (\(entry.linkedTransactions.count))") {
                     VStack(alignment: .leading, spacing: 6) {
                         ForEach(entry.linkedTransactions) { linkedTransaction in
                             HStack {
@@ -192,7 +192,7 @@ struct PendingEntriesView: View {
             if entry.status != .settled {
                 HStack {
                     Spacer()
-                    Button("Link Transaction") {
+                    Button(LinkedEntryPresentation.linkActionTitle(for: entry.linkType)) {
                         linkingEntry = entry
                     }
                 }
@@ -227,7 +227,7 @@ struct PendingEntriesView: View {
                         ContentUnavailableView {
                             Label("No Candidate Transactions", systemImage: "tray")
                         } description: {
-                            Text("Create a matching transaction first, then link it here.")
+                            Text(LinkedEntryPresentation.emptyStateDescription(for: entry.linkType))
                         }
                     } else {
                         List(candidates) { transaction in
@@ -254,7 +254,7 @@ struct PendingEntriesView: View {
                     }
                 }
             }
-            .navigationTitle("Link Transaction")
+            .navigationTitle(LinkedEntryPresentation.linkSheetTitle(for: entry.linkType))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
@@ -346,16 +346,6 @@ struct PendingEntriesView: View {
         }
     }
 
-    private func paymentsLabel(for linkType: LinkType) -> String {
-        switch linkType {
-        case .splitPayment, .loan:
-            return "Payments Received"
-        case .debt:
-            return "Repayments Made"
-        case .installment:
-            return "Charges Recorded"
-        }
-    }
 }
 
 #Preview {

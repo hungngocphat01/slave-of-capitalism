@@ -14,6 +14,7 @@
 		13155209BA7CDEB15ED795F1 /* transactions-list.json in Resources */ = {isa = PBXBuildFile; fileRef = 2539A02A58D72587D4404AF9 /* transactions-list.json */; };
 		1331DC74F146E6F756E52538 /* LinkToEntrySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32C4E8DF541A17C9884F86A7 /* LinkToEntrySheet.swift */; };
 		17503586E88FB9C652A75F78 /* WalletListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81518E87C247CA409B786770 /* WalletListView.swift */; };
+		17E2DD6D8FCA27F94EB3AC5B /* SheetPresentationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 523C9E9DE288599BE074A872 /* SheetPresentationTests.swift */; };
 		19864EA7FD24BB22E8DA0B5C /* expense-manager-backend in Resources */ = {isa = PBXBuildFile; fileRef = 90C34437DF817C0ECBA58BB5 /* expense-manager-backend */; };
 		1A8488E8937808ED70A844CC /* LinkedEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = F12C5E5D7024E7E566E6B646 /* LinkedEntry.swift */; };
 		1C801D2D0975D6CC9EC84316 /* Formatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B45D1EF72B4FAD29BA8612C /* Formatters.swift */; };
@@ -133,6 +134,7 @@
 		3C08FD26C428B977088ADD2D /* PayPayRuleEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PayPayRuleEngine.swift; sourceTree = "<group>"; };
 		3E63592245E7B3ED35F31180 /* TransactionListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionListView.swift; sourceTree = "<group>"; };
 		4921CD260D206705C0F7B0EF /* WalletStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletStore.swift; sourceTree = "<group>"; };
+		523C9E9DE288599BE074A872 /* SheetPresentationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SheetPresentationTests.swift; sourceTree = "<group>"; };
 		5A5D3A3C94BF9C982B9D47B4 /* SlaveOfCapitalismApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlaveOfCapitalismApp.swift; sourceTree = "<group>"; };
 		5C23C735FCA9F2A9137E971D /* DailyUsageChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyUsageChart.swift; sourceTree = "<group>"; };
 		5D2B830465D21B4AD9BB2EE2 /* BudgetViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetViewModel.swift; sourceTree = "<group>"; };
@@ -451,6 +453,7 @@
 				E10DF568DB3A9ACBECC802D6 /* MockAPIClientTests.swift */,
 				75607FED54E71F81C84FBCD0 /* PayPayParserTests.swift */,
 				C49EB72632623FF22FD33571 /* PendingViewModelTests.swift */,
+				523C9E9DE288599BE074A872 /* SheetPresentationTests.swift */,
 				AF649340089E8EDA1FD97642 /* SlaveOfCapitalismTests.swift */,
 				150C5AB95F32113ADD2730E4 /* SummaryViewModelTests.swift */,
 				772B38069DF8C357DE7F7C76 /* TransactionViewModelTests.swift */,
@@ -575,6 +578,7 @@
 				0EEBF49B3909FBD3E2EE1179 /* MockAPIClientTests.swift in Sources */,
 				E0564C25C7EFF47320441E9E /* PayPayParserTests.swift in Sources */,
 				4CBD4518098013786F0D220A /* PendingViewModelTests.swift in Sources */,
+				17E2DD6D8FCA27F94EB3AC5B /* SheetPresentationTests.swift in Sources */,
 				701BCDD0AD0C5C930B4EC140 /* SlaveOfCapitalismTests.swift in Sources */,
 				E4E8991341C16A82E53618C5 /* SummaryViewModelTests.swift in Sources */,
 				45CE83D5B76C8B536FA1F99A /* TransactionViewModelTests.swift in Sources */,

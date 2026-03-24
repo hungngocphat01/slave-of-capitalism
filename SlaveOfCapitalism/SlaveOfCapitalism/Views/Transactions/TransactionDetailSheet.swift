@@ -1,5 +1,37 @@
 import SwiftUI
 
+enum TransactionDetailSheetPresentation {
+    static func locksStructureEditing(for transaction: TransactionWithDetails) -> Bool {
+        transaction.hasLinkedEntry || transaction.isLinkedToEntry
+    }
+
+    static func bannerMessage(
+        validationMessage: String?,
+        errorMessage: String?,
+        isEditing: Bool
+    ) -> String? {
+        if let errorMessage {
+            return errorMessage
+        }
+
+        if isEditing, let validationMessage {
+            return validationMessage
+        }
+
+        return nil
+    }
+
+    static func structureEditingNote(for transaction: TransactionWithDetails) -> String? {
+        guard locksStructureEditing(for: transaction) else { return nil }
+
+        if transaction.isLinkedToEntry {
+            return "Direction and classification are fixed by the linked entry this transaction resolves."
+        }
+
+        return "Direction and classification are managed by the linked entry workflow for this transaction."
+    }
+}
+
 struct TransactionDetailSheet: View {
     @Environment(APIClient.self) private var apiClient
     @Environment(\.dismiss) private var dismiss
@@ -54,73 +86,53 @@ struct TransactionDetailSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                if let errorMessage {
+                if let bannerMessage {
                     Section {
-                        Text(errorMessage)
-                            .foregroundStyle(.red)
+                        TransactionSheetMessageBanner(
+                            tone: errorMessage == nil ? .advisory : .critical,
+                            message: bannerMessage
+                        )
                     }
                 }
 
-                Section("Status") {
-                    LabeledContent("Transaction ID", value: String(transaction.id))
-                    LabeledContent("Created", value: transaction.createdAt)
-                    LabeledContent("Updated", value: transaction.updatedAt)
-                    if !isEditing {
-                        LabeledContent("Ignored", value: transaction.isIgnored ? "Yes" : "No")
-                        LabeledContent("Calibration", value: transaction.isCalibration ? "Yes" : "No")
-                    } else {
-                        Toggle("Ignored", isOn: $isIgnored)
-                    }
-                }
-
-                Section("When") {
-                    if isEditing {
-                        DatePicker("Date", selection: $transactionDate, displayedComponents: .date)
-                        Toggle("Include time", isOn: $includesTime)
-                        if includesTime {
-                            DatePicker("Time", selection: $transactionTime, displayedComponents: .hourAndMinute)
-                        }
-                    } else {
-                        LabeledContent("Date", value: transaction.date)
-                        if let time = transaction.time {
-                            LabeledContent("Time", value: time)
-                        }
-                    }
-                }
-
-                Section("Basics") {
+                Section("Cash flow") {
                     if isEditing {
                         Picker("Wallet", selection: $selectedWalletId) {
                             ForEach(wallets) { wallet in
                                 Text(wallet.name).tag(wallet.id)
                             }
                         }
-
-                        Picker("Direction", selection: $direction) {
-                            Text("Outflow").tag(TransactionDirection.outflow)
-                            Text("Inflow").tag(TransactionDirection.inflow)
-                            Text("Reserved").tag(TransactionDirection.reserved)
-                        }
-
-                        Picker("Classification", selection: $classification) {
-                            ForEach(TransactionClassification.allCases, id: \.self) { option in
-                                Text(Self.classificationLabel(option)).tag(option)
-                            }
-                        }
-
-                        CurrencyField(title: "Amount", text: $amountText, prompt: "0")
-                        TextField("Description", text: $descriptionText)
                     } else {
                         LabeledContent("Wallet", value: walletName)
-                        LabeledContent("Direction", value: Self.classificationLabel(direction))
-                        LabeledContent("Classification", value: Self.classificationLabel(classification))
-                        LabeledContent("Amount", value: Formatters.currency(transaction.amount))
-                        LabeledContent("Description", value: (transaction.description?.isEmpty == false ? transaction.description! : "Untitled Transaction"))
                     }
+                    
+                    LabeledContent("Direction", value: Self.classificationLabel(transaction.direction))
+                    LabeledContent("Classification", value: Self.classificationLabel(transaction.classification))
                 }
 
-                Section("Category") {
+                Section("Basics") {
                     if isEditing {
+                        CurrencyField(title: "Amount", text: $amountText)
+                        TextField("Description", text: $descriptionText)
+                        DatePicker("Date", selection: $transactionDate, displayedComponents: .date)
+                        Toggle("Include time", isOn: $includesTime)
+                        if includesTime {
+                            DatePicker("Time", selection: $transactionTime, displayedComponents: .hourAndMinute)
+                        }
+                    } else {
+                        LabeledContent("Amount", value: Formatters.currency(transaction.amount))
+                        LabeledContent("Description", value: descriptionValue)
+                        LabeledContent("Date", value: transaction.date)
+                        if let time = transaction.time {
+                            LabeledContent("Time", value: time)
+                        }
+
+                        LabeledContent("Category", value: categoryName)
+                    }
+                }
+                
+                if isEditing {
+                    Section("Category") {
                         Picker("Category", selection: $selectedCategoryId) {
                             Text("None").tag(0)
                             ForEach(categories) { category in
@@ -135,8 +147,6 @@ struct TransactionDetailSheet: View {
                             }
                         }
                         .disabled(activeSubcategories.isEmpty)
-                    } else {
-                        LabeledContent("Category", value: categoryName)
                     }
                 }
 
@@ -154,8 +164,21 @@ struct TransactionDetailSheet: View {
                             Text(notes)
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
                         }
                     }
+                }
+
+                Section("Status") {
+                    if isEditing {
+                        Toggle("Ignored", isOn: $isIgnored)
+                    } else {
+                        LabeledContent("Ignored", value: transaction.isIgnored ? "Yes" : "No")
+                    }
+                    LabeledContent("Calibration", value: transaction.isCalibration ? "Yes" : "No")
+                    LabeledContent("Transaction ID", value: String(transaction.id))
+                    LabeledContent("Created", value: transaction.createdAt)
+                    LabeledContent("Updated", value: transaction.updatedAt)
                 }
             }
             .formStyle(.grouped)
@@ -166,6 +189,7 @@ struct TransactionDetailSheet: View {
                         if isEditing {
                             resetDraft()
                             isEditing = false
+                            dismiss()
                         } else {
                             dismiss()
                         }
@@ -217,6 +241,27 @@ struct TransactionDetailSheet: View {
             return categoryName
         }
         return "Uncategorized"
+    }
+
+    private var descriptionValue: String {
+        let trimmedDescription = (transaction.description ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmedDescription.isEmpty ? "Untitled Transaction" : trimmedDescription
+    }
+
+    private var bannerMessage: String? {
+        TransactionDetailSheetPresentation.bannerMessage(
+            validationMessage: validationMessage,
+            errorMessage: errorMessage,
+            isEditing: isEditing
+        )
+    }
+
+    private var structureEditingIsLocked: Bool {
+        TransactionDetailSheetPresentation.locksStructureEditing(for: transaction)
+    }
+
+    private var structureEditingNote: String? {
+        TransactionDetailSheetPresentation.structureEditingNote(for: transaction)
     }
 
     private var validationMessage: String? {

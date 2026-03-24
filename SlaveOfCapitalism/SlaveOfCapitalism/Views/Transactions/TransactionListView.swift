@@ -1,6 +1,245 @@
 import SwiftUI
 
+struct TransactionAmountPresentation {
+    enum TintRole: Equatable {
+        case accent
+        case normal
+        case muted
+    }
+
+    let primaryText: String
+    let secondaryText: String?
+
+    static func make(for transaction: TransactionWithDetails) -> TransactionAmountPresentation {
+        if
+            transaction.classification == .splitPayment,
+            transaction.linkedEntry?.linkType == .splitPayment,
+            let userAmount = transaction.linkedEntry?.userAmount
+        {
+            return TransactionAmountPresentation(
+                primaryText: displayAmount(userAmount, direction: transaction.direction),
+                secondaryText: "(over \(Formatters.currency(transaction.amount)))"
+            )
+        }
+
+        return TransactionAmountPresentation(
+            primaryText: displayAmount(transaction.amount, direction: transaction.direction),
+            secondaryText: nil
+        )
+    }
+
+    private static func displayAmount(_ amount: Decimal, direction: TransactionDirection) -> String {
+        switch direction {
+        case .inflow:
+            return "+\(Formatters.currency(amount))"
+        case .outflow, .reserved:
+            return Formatters.currency(amount)
+        }
+    }
+
+    static func tintRole(for transaction: TransactionWithDetails) -> TintRole {
+        if transaction.isIgnored {
+            return .muted
+        }
+
+        switch transaction.direction {
+        case .inflow:
+            return .accent
+        case .outflow:
+            return .normal
+        case .reserved:
+            return .muted
+        }
+    }
+}
+
+struct TransactionBadgePresentation {
+    struct Badge {
+        let title: String
+        let tint: Color
+    }
+
+    static func titles(for transaction: TransactionWithDetails) -> [String] {
+        badges(for: transaction).map(\.title)
+    }
+
+    static func badges(for transaction: TransactionWithDetails) -> [Badge] {
+        var badges: [Badge] = []
+
+        if let classificationBadge = classificationBadge(for: transaction.classification) {
+            badges.append(classificationBadge)
+        }
+
+        if transaction.isIgnored {
+            badges.append(Badge(title: "Ignored", tint: .gray))
+        }
+
+        if let linkedEntryBadge = linkedEntryBadge(for: transaction) {
+            badges.append(linkedEntryBadge)
+        }
+
+        if let completionBadge = completionBadge(for: transaction) {
+            badges.append(completionBadge)
+        }
+
+        return badges
+    }
+
+    private static func classificationBadge(for classification: TransactionClassification) -> Badge? {
+        switch classification {
+        case .expense, .income:
+            return nil
+        case .splitPayment:
+            return Badge(title: "Split Payment", tint: .blue)
+        case .debtCollection:
+            return Badge(title: "Debt Collection", tint: .green)
+        case .loanRepayment:
+            return Badge(title: "Loan Repayment", tint: .orange)
+        case .installmtChrge:
+            return Badge(title: "Installment Charge", tint: .orange)
+        case .installment:
+            return Badge(title: "Installment", tint: .orange)
+        case .transfer:
+            return Badge(title: "Transfer", tint: .secondary)
+        case .lend:
+            return Badge(title: "Lend", tint: .blue)
+        case .borrow:
+            return Badge(title: "Borrow", tint: .purple)
+        }
+    }
+
+    private static func linkedEntryBadge(for transaction: TransactionWithDetails) -> Badge? {
+        guard transaction.hasLinkedEntry else { return nil }
+        guard !duplicatesClassificationMeaning(for: transaction) else { return nil }
+
+        return Badge(
+            title: LinkedEntryPresentation.ownerBadgeText(for: transaction),
+            tint: .blue
+        )
+    }
+
+    private static func duplicatesClassificationMeaning(for transaction: TransactionWithDetails) -> Bool {
+        guard let linkType = transaction.linkedEntry?.linkType else { return false }
+
+        switch (transaction.classification, linkType) {
+        case (.splitPayment, .splitPayment), (.installment, .installment):
+            return true
+        default:
+            return false
+        }
+    }
+
+    private static func completionBadge(for transaction: TransactionWithDetails) -> Badge? {
+        guard transaction.linkedEntry?.linkType == .splitPayment else { return nil }
+        guard transaction.linkedEntry?.status == .settled else { return nil }
+
+        return Badge(title: "Done", tint: .green)
+    }
+}
+
+struct TransactionInlineEditState {
+    enum Field: Hashable {
+        case description, wallet, category, amount
+    }
+
+    struct TableSelection: Equatable {
+        let rowIds: Set<String>
+        let transactionIds: Set<Int>
+    }
+
+    var editingTransactionId: Int?
+    var editingField: Field?
+    var editText: String = ""
+    var editWalletId: Int = 0
+    var editWalletInitialId: Int?
+    var editCategoryId: Int = 0
+    var editSubcategoryId: Int = 0
+    var selectedRowIds: Set<String> = []
+
+    static func rowId(for transactionId: Int) -> String {
+        "t:\(transactionId)"
+    }
+
+    mutating func beginTextEdit(transactionId: Int, field: Field, text: String) {
+        editText = text
+        beginEditing(transactionId: transactionId, field: field)
+    }
+
+    mutating func beginWalletEdit(transactionId: Int, walletId: Int) {
+        editWalletId = walletId
+        editWalletInitialId = walletId
+        beginEditing(transactionId: transactionId, field: .wallet)
+    }
+
+    mutating func beginCategoryEdit(transactionId: Int, categoryId: Int?, subcategoryId: Int?) {
+        editCategoryId = categoryId ?? 0
+        editSubcategoryId = subcategoryId ?? 0
+        beginEditing(transactionId: transactionId, field: .category)
+    }
+
+    mutating func beginEditing(transactionId: Int, field: Field) {
+        selectedRowIds = [Self.rowId(for: transactionId)]
+        editingTransactionId = transactionId
+        editingField = field
+    }
+
+    mutating func applyTableSelection(_ rowIds: Set<String>) -> TableSelection {
+        let transactionRows = Set(rowIds.filter { $0.hasPrefix("t:") })
+        selectedRowIds = transactionRows
+
+        let transactionIds = Set(transactionRows.compactMap { rowId -> Int? in
+            guard rowId.hasPrefix("t:") else { return nil }
+            return Int(rowId.dropFirst(2))
+        })
+
+        if let editingTransactionId, !transactionIds.contains(editingTransactionId) {
+            cancelEdit()
+        } else if transactionIds.isEmpty {
+            cancelEdit()
+        }
+
+        return TableSelection(rowIds: transactionRows, transactionIds: transactionIds)
+    }
+
+    mutating func syncSelectedTransactions(_ transactionIds: Set<Int>) {
+        selectedRowIds = Set(transactionIds.map(Self.rowId(for:)))
+    }
+
+    func isEditing(transactionId: Int, field: Field) -> Bool {
+        editingTransactionId == transactionId && editingField == field
+    }
+
+    mutating func cancelEdit() {
+        editingTransactionId = nil
+        editingField = nil
+        editWalletInitialId = nil
+        editText = ""
+    }
+
+    mutating func clearSelectionAndEditing() {
+        selectedRowIds.removeAll()
+        cancelEdit()
+    }
+}
+
 struct TransactionListView: View {
+    private static let rowHorizontalPadding: CGFloat = 0
+    private static let transactionRowHeight: CGFloat = 42
+
+    private enum TransactionTableRow: Identifiable {
+        case dayHeader(date: String, title: String)
+        case transaction(TransactionWithDetails)
+
+        var id: String {
+            switch self {
+            case .dayHeader(let date, _):
+                return "d:\(date)"
+            case .transaction(let transaction):
+                return "t:\(transaction.id)"
+            }
+        }
+    }
+
     private enum TransactionActionSheet: Identifiable {
         case markSplit(TransactionWithDetails)
         case markLoan(TransactionWithDetails)
@@ -48,16 +287,7 @@ struct TransactionListView: View {
     @State private var pendingDeleteIds: Set<Int> = []
     @State private var isShowingDeleteConfirmation = false
 
-    @State private var editingTransactionId: Int?
-    @State private var editingField: EditableField?
-    @State private var editText: String = ""
-    @State private var editWalletId: Int = 0
-    @State private var editCategoryId: Int = 0
-    @State private var editSubcategoryId: Int = 0
-
-    private enum EditableField: Hashable {
-        case date, description, wallet, category, amount
-    }
+    @State private var inlineEdit = TransactionInlineEditState()
 
     var body: some View {
         Group {
@@ -109,137 +339,101 @@ struct TransactionListView: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
-                Table(viewModel.transactions, selection: $bindableViewModel.selectedIds) {
-                    TableColumn("Date") { transaction in
-                        VStack(alignment: .leading, spacing: 2) {
-                            EditableTextCell(
-                                value: transaction.date,
-                                isEditing: isEditing(transaction, field: .date),
-                                editText: $editText,
-                                font: .body,
-                                onBeginEdit: { beginEdit(transaction, field: .date, text: transaction.date) },
-                                onCommit: { newValue in commitDateEdit(transaction, newValue: newValue, viewModel: viewModel) },
-                                onCancel: { cancelEdit() }
-                            )
-                            if let time = transaction.time, !isEditing(transaction, field: .date) {
-                                Text(time)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
+                let tableRows = buildTableRows(from: viewModel.transactions)
+
+                ZStack {
+                    Color.clear
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            clearSelectionAndEditing(bindableViewModel)
+                        }
+
+                    Table(tableRows, selection: $inlineEdit.selectedRowIds) {
+                        TableColumn("Description") { row in
+                            switch row {
+                            case .dayHeader(_, let title):
+                                Text(title)
+                                    .font(.headline.weight(.semibold))
+                                    .foregroundStyle(.primary)
+                                    .padding(.vertical, 2)
+                                    .padding(.horizontal, Self.rowHorizontalPadding)
+                                    .allowsHitTesting(false)
+                            case .transaction(let transaction):
+                                descriptionCell(
+                                    for: transaction,
+                                    viewModel: viewModel,
+                                    dayHeader: nil
+                                )
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .frame(minHeight: Self.transactionRowHeight, alignment: .center)
+                                .padding(.horizontal, Self.rowHorizontalPadding)
+                                .contextMenu { rowContextMenu(for: transaction, viewModel: viewModel) }
                             }
                         }
-                        .contextMenu { rowContextMenu(for: transaction, viewModel: viewModel) }
-                    }
-                    .width(min: 110, max: 130)
+                        .width(min: 220, ideal: 300, max: 380)
 
-                    TableColumn("Description") { transaction in
-                        VStack(alignment: .leading, spacing: 4) {
-                            EditableTextCell(
-                                value: transaction.description?.isEmpty == false ? transaction.description! : "Untitled Transaction",
-                                isEditing: isEditing(transaction, field: .description),
-                                editText: $editText,
-                                onBeginEdit: { beginEdit(transaction, field: .description, text: transaction.description ?? "") },
-                                onCommit: { newValue in commitDescriptionEdit(transaction, newValue: newValue, viewModel: viewModel) },
-                                onCancel: { cancelEdit() }
-                            )
-
-                            if !isEditing(transaction, field: .description) {
-                                HStack(spacing: 6) {
-                                    Text(transaction.classification.rawValue.replacingOccurrences(of: "_", with: " ").capitalized)
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                    if transaction.isIgnored {
-                                        badge("Ignored", tint: .orange)
-                                    }
-                                    if transaction.hasLinkedEntry {
-                                        badge("Linked", tint: .blue)
-                                    }
-                                }
+                        TableColumn("Category") { row in
+                            switch row {
+                            case .dayHeader:
+                                Spacer()
+                                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                    .allowsHitTesting(false)
+                            case .transaction(let transaction):
+                                categoryCell(for: transaction, viewModel: viewModel)
+                                    .frame(minHeight: Self.transactionRowHeight, alignment: .center)
+                                    .padding(.horizontal, Self.rowHorizontalPadding)
+                                    .contextMenu { rowContextMenu(for: transaction, viewModel: viewModel) }
                             }
                         }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .contextMenu { rowContextMenu(for: transaction, viewModel: viewModel) }
-                    }
+                        .width(min: 150, ideal: 190, max: 240)
 
-                    TableColumn("Wallet") { transaction in
-                        Group {
-                            if isEditing(transaction, field: .wallet) {
-                                HStack(spacing: 4) {
-                                    Picker("Wallet", selection: $editWalletId) {
-                                        ForEach(walletStore.wallets) { wallet in
-                                            Text(wallet.name).tag(wallet.id)
-                                        }
-                                    }
-                                    .pickerStyle(.menu)
-                                    .labelsHidden()
-
-                                    Button("OK") {
-                                        commitWalletEdit(transaction, newWalletId: editWalletId, viewModel: viewModel)
-                                    }
-                                    .buttonStyle(.borderedProminent)
-                                    .controlSize(.small)
-
-                                    Button {
-                                        cancelEdit()
-                                    } label: {
-                                        Image(systemName: "xmark")
-                                            .font(.caption)
-                                    }
-                                    .buttonStyle(.plain)
-                                    .foregroundStyle(.secondary)
-                                }
-                                .onExitCommand { cancelEdit() }
-                            } else {
-                                Text(transaction.walletName ?? walletStore.wallet(for: transaction.walletId)?.name ?? "Unknown")
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .contentShape(Rectangle())
-                                    .onTapGesture {
-                                        editWalletId = transaction.walletId
-                                        editingTransactionId = transaction.id
-                                        editingField = .wallet
-                                    }
+                        TableColumn("Amount") { row in
+                            switch row {
+                            case .dayHeader:
+                                Spacer()
+                                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                    .allowsHitTesting(false)
+                            case .transaction(let transaction):
+                                amountCell(for: transaction, viewModel: viewModel)
+                                    .frame(minHeight: Self.transactionRowHeight, alignment: .center)
+                                    .padding(.horizontal, Self.rowHorizontalPadding)
+                                    .contextMenu { rowContextMenu(for: transaction, viewModel: viewModel) }
                             }
                         }
-                        .contextMenu { rowContextMenu(for: transaction, viewModel: viewModel) }
-                    }
-                    .width(min: 120, ideal: 140)
+                        .width(min: 110, ideal: 130, max: 170)
 
-                    TableColumn("Category") { transaction in
-                        EditableCategoryPicker(
-                            displayText: categoryTitle(for: transaction),
-                            isEditing: isEditing(transaction, field: .category),
-                            isUncategorized: transaction.categoryId == nil && transaction.subcategoryId == nil,
-                            categories: categoryStore.categories,
-                            selectedCategoryId: $editCategoryId,
-                            selectedSubcategoryId: $editSubcategoryId,
-                            onBeginEdit: {
-                                editCategoryId = transaction.categoryId ?? 0
-                                editSubcategoryId = transaction.subcategoryId ?? 0
-                                editingTransactionId = transaction.id
-                                editingField = .category
-                            },
-                            onCommit: { catId, subId in commitCategoryEdit(transaction, categoryId: catId, subcategoryId: subId, viewModel: viewModel) },
-                            onCancel: { cancelEdit() }
-                        )
-                        .contextMenu { rowContextMenu(for: transaction, viewModel: viewModel) }
+                        TableColumn("Wallet") { row in
+                            switch row {
+                            case .dayHeader:
+                                Spacer()
+                                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                    .allowsHitTesting(false)
+                            case .transaction(let transaction):
+                                walletCell(for: transaction, viewModel: viewModel)
+                                    .frame(minHeight: Self.transactionRowHeight, alignment: .center)
+                                    .padding(.horizontal, Self.rowHorizontalPadding)
+                                    .contextMenu { rowContextMenu(for: transaction, viewModel: viewModel) }
+                            }
+                        }
+                        .width(min: 120, ideal: 150, max: 190)
                     }
-                    .width(min: 140, ideal: 160)
-
-                    TableColumn("Amount") { transaction in
-                        EditableTextCell(
-                            value: amountTitle(for: transaction),
-                            isEditing: isEditing(transaction, field: .amount),
-                            editText: $editText,
-                            alignment: .trailing,
-                            foregroundStyle: AnyShapeStyle(amountColor(for: transaction)),
-                            onBeginEdit: { beginEdit(transaction, field: .amount, text: transaction.amount.description) },
-                            onCommit: { newValue in commitAmountEdit(transaction, newValue: newValue, viewModel: viewModel) },
-                            onCancel: { cancelEdit() }
-                        )
-                        .contextMenu { rowContextMenu(for: transaction, viewModel: viewModel) }
+                    .tableStyle(.inset(alternatesRowBackgrounds: false))
+                    .onChange(of: inlineEdit.selectedRowIds) { _, newValue in
+                        let selection = inlineEdit.applyTableSelection(newValue)
+                        if selection.transactionIds != bindableViewModel.selectedIds {
+                            bindableViewModel.selectedIds = selection.transactionIds
+                        }
                     }
-                    .width(min: 100, ideal: 120)
+                    .onChange(of: bindableViewModel.selectedIds) { _, newValue in
+                        let mapped = Set(newValue.map { "t:\($0)" })
+                        if mapped != inlineEdit.selectedRowIds {
+                            inlineEdit.syncSelectedTransactions(newValue)
+                        }
+                    }
+                    .onExitCommand {
+                        clearSelectionAndEditing(bindableViewModel)
+                    }
                 }
-                .tableStyle(.inset(alternatesRowBackgrounds: true))
                 .padding(24)
             }
         }
@@ -359,36 +553,178 @@ struct TransactionListView: View {
             .background(tint.opacity(0.12), in: Capsule())
     }
 
+    private func buildTableRows(from transactions: [TransactionWithDetails]) -> [TransactionTableRow] {
+        var rows: [TransactionTableRow] = []
+        var lastDate: String?
+        for transaction in transactions {
+            if transaction.date != lastDate {
+                rows.append(.dayHeader(date: transaction.date, title: daySectionTitle(for: transaction.date)))
+                lastDate = transaction.date
+            }
+            rows.append(.transaction(transaction))
+        }
+        return rows
+    }
+
+    private func descriptionCell(for transaction: TransactionWithDetails, viewModel: TransactionViewModel, dayHeader: String?) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            if let dayHeader {
+                Text(dayHeader)
+                    .font(.headline.weight(.semibold))
+                    .foregroundStyle(.primary)
+                    .padding(.top, 4)
+                    .padding(.bottom, 2)
+            }
+
+            EditableTextCell(
+                value: transaction.description?.isEmpty == false ? transaction.description! : "Untitled Transaction",
+                isEditing: isEditing(transaction, field: .description),
+                editText: $inlineEdit.editText,
+                onBeginEdit: { beginTextEdit(transaction, field: .description, text: transaction.description ?? "", viewModel: viewModel) },
+                onCommit: { newValue in commitDescriptionEdit(transaction, newValue: newValue, viewModel: viewModel) },
+                onCancel: { cancelEdit() }
+            )
+
+            if !isEditing(transaction, field: .description) {
+                HStack(spacing: 6) {
+                    if let time = transaction.time {
+                        Text(time)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    ForEach(Array(TransactionBadgePresentation.badges(for: transaction).enumerated()), id: \.offset) { _, badge in
+                        self.badge(badge.title, tint: badge.tint)
+                    }
+                }
+            }
+        }
+    }
+
+    private func walletCell(for transaction: TransactionWithDetails, viewModel: TransactionViewModel) -> some View {
+        Group {
+            if isEditing(transaction, field: .wallet) {
+                HStack(spacing: 4) {
+                    Picker("Wallet", selection: $inlineEdit.editWalletId) {
+                        ForEach(walletStore.wallets) { wallet in
+                            Text(walletTitle(for: wallet)).tag(wallet.id)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .labelsHidden()
+                    .onChange(of: inlineEdit.editWalletId) { _, newWalletId in
+                        guard let initial = inlineEdit.editWalletInitialId else { return }
+                        guard newWalletId != initial else { return }
+                        commitWalletEdit(transaction, newWalletId: newWalletId, viewModel: viewModel)
+                    }
+
+                    Button {
+                        cancelEdit()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.caption)
+                            .frame(width: 18, height: 18)
+                    }
+                    .buttonStyle(.borderless)
+                    .foregroundStyle(.secondary)
+                }
+                .onExitCommand { cancelEdit() }
+            } else {
+                Text(walletTitle(for: transaction))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
+                    .simultaneousGesture(TapGesture(count: 2).onEnded {
+                        beginWalletEdit(transaction, viewModel: viewModel)
+                    })
+            }
+        }
+    }
+
+    private func categoryCell(for transaction: TransactionWithDetails, viewModel: TransactionViewModel) -> some View {
+        EditableCategoryPicker(
+            displayText: categoryTitle(for: transaction),
+            isEditing: isEditing(transaction, field: .category),
+            isUncategorized: transaction.categoryId == nil && transaction.subcategoryId == nil,
+            categories: categoryStore.categories,
+            selectedCategoryId: $inlineEdit.editCategoryId,
+            selectedSubcategoryId: $inlineEdit.editSubcategoryId,
+            onBeginEdit: {
+                beginCategoryEdit(transaction, viewModel: viewModel)
+            },
+            onCommit: { catId, subId in commitCategoryEdit(transaction, categoryId: catId, subcategoryId: subId, viewModel: viewModel) },
+            onCancel: { cancelEdit() }
+        )
+    }
+
+    private func amountCell(for transaction: TransactionWithDetails, viewModel: TransactionViewModel) -> some View {
+        Group {
+            if isEditing(transaction, field: .amount) {
+                EditableTextCell(
+                    value: amountTitle(for: transaction),
+                    isEditing: true,
+                    editText: $inlineEdit.editText,
+                    alignment: .leading,
+                    onBeginEdit: { beginTextEdit(transaction, field: .amount, text: transaction.amount.description, viewModel: viewModel) },
+                    onCommit: { newValue in commitAmountEdit(transaction, newValue: newValue, viewModel: viewModel) },
+                    onCancel: { cancelEdit() }
+                )
+            } else {
+                let presentation = amountPresentation(for: transaction)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(presentation.primaryText)
+                        .font(.system(size: 14, weight: .semibold, design: .monospaced))
+                        .foregroundStyle(amountColor(for: transaction))
+                        .lineLimit(1)
+
+                    if let secondaryText = presentation.secondaryText {
+                        Text(secondaryText)
+                            .font(.system(size: 11, weight: .medium, design: .monospaced))
+                            .foregroundStyle(amountColor(for: transaction).opacity(0.7))
+                            .lineLimit(1)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .contentShape(Rectangle())
+                .simultaneousGesture(TapGesture(count: 2).onEnded {
+                    beginTextEdit(transaction, field: .amount, text: transaction.amount.description, viewModel: viewModel)
+                })
+            }
+        }
+    }
+
     @ViewBuilder
     private func rowContextMenu(for transaction: TransactionWithDetails, viewModel: TransactionViewModel) -> some View {
-        Button("Open Details") {
+        Button("Details") {
             selectedTransaction = transaction
         }
+        
+        Menu("Mark as") {
+            if canMarkAsSplit(transaction) {
+                Button("Split payment") {
+                    activeActionSheet = .markSplit(transaction)
+                }
+            }
 
-        if canMarkAsSplit(transaction) {
-            Button("Mark as Split") {
-                activeActionSheet = .markSplit(transaction)
+            if canMarkAsLoan(transaction) {
+                Button("Loan") {
+                    activeActionSheet = .markLoan(transaction)
+                }
+            }
+
+            if canMarkAsDebt(transaction) {
+                Button("Debt") {
+                    activeActionSheet = .markDebt(transaction)
+                }
+            }
+
+            if canMarkAsInstallment(transaction) {
+                Button("Installment plan") {
+                    activeActionSheet = .markInstallment(transaction)
+                }
             }
         }
-
-        if canMarkAsLoan(transaction) {
-            Button("Mark as Loan") {
-                activeActionSheet = .markLoan(transaction)
-            }
-        }
-
-        if canMarkAsDebt(transaction) {
-            Button("Mark as Debt") {
-                activeActionSheet = .markDebt(transaction)
-            }
-        }
-
-        if canMarkAsInstallment(transaction) {
-            Button("Mark as Installment") {
-                activeActionSheet = .markInstallment(transaction)
-            }
-        }
-
+        
         if canLinkToEntry(transaction) {
             Button("Link to Entry") {
                 activeActionSheet = .link([transaction])
@@ -404,7 +740,7 @@ struct TransactionListView: View {
         }
 
         if transaction.hasLinkedEntry {
-            Button("See Reimbursements") {
+            Button("See reimbursements") {
                 activeActionSheet = .reimbursements(transaction)
             }
 
@@ -420,7 +756,7 @@ struct TransactionListView: View {
         }
 
         if transaction.isCalibration {
-            Button("Resolve Calibration") {
+            Button("Resolve calibration") {
                 activeActionSheet = .resolveCalibration(transaction)
             }
         }
@@ -453,21 +789,25 @@ struct TransactionListView: View {
 
             Spacer()
 
-            Button("Ignore") {
-                Task {
-                    await viewModel.ignoreSelected()
-                    await walletStore.refresh()
+            if selectedTransactions.contains(where: { !$0.isIgnored }) {
+                Button("Ignore") {
+                    Task {
+                        await viewModel.ignoreSelected()
+                        await walletStore.refresh()
+                    }
                 }
+                .disabled(viewModel.isLoading)
             }
-            .disabled(viewModel.isLoading)
 
-            Button("Unignore") {
-                Task {
-                    await viewModel.unignoreSelected()
-                    await walletStore.refresh()
+            if selectedTransactions.contains(where: { $0.isIgnored }) {
+                Button("Unignore") {
+                    Task {
+                        await viewModel.unignoreSelected()
+                        await walletStore.refresh()
+                    }
                 }
+                .disabled(viewModel.isLoading)
             }
-            .disabled(viewModel.isLoading)
 
             Button("Link to Entry") {
                 activeActionSheet = .link(selectedTransactions)
@@ -484,8 +824,8 @@ struct TransactionListView: View {
             }
             .disabled(viewModel.isLoading)
 
-            Button("Clear") {
-                viewModel.selectedIds.removeAll()
+            Button("Unselect") {
+                clearSelectionAndEditing(viewModel)
             }
         }
         .padding(.horizontal, 16)
@@ -531,67 +871,125 @@ struct TransactionListView: View {
     }
 
     private func amountTitle(for transaction: TransactionWithDetails) -> String {
-        let prefix: String
-        switch transaction.direction {
-        case .inflow:
-            prefix = "+"
-        case .outflow:
-            prefix = "-"
-        case .reserved:
-            prefix = ""
-        }
-        return prefix + Formatters.currency(transaction.amount)
+        amountPresentation(for: transaction).primaryText
+    }
+
+    private func amountPresentation(for transaction: TransactionWithDetails) -> TransactionAmountPresentation {
+        TransactionAmountPresentation.make(for: transaction)
     }
 
     private func amountColor(for transaction: TransactionWithDetails) -> Color {
-        switch transaction.direction {
-        case .inflow:
+        switch TransactionAmountPresentation.tintRole(for: transaction) {
+        case .accent:
             return .green
-        case .outflow:
-            return .red
-        case .reserved:
-            return .orange
+        case .normal:
+            return .primary
+        case .muted:
+            return .secondary
         }
     }
 
+    private func walletTitle(for wallet: WalletWithBalance) -> String {
+        if let emoji = wallet.emoji, !emoji.isEmpty {
+            return "\(emoji) \(wallet.name)"
+        }
+        return wallet.name
+    }
+
+    private func walletTitle(for transaction: TransactionWithDetails) -> String {
+        let resolved = walletStore.wallet(for: transaction.walletId)
+        if let resolved {
+            return walletTitle(for: resolved)
+        }
+
+        let name = transaction.walletName ?? "Unknown"
+        return name
+    }
+
     private func categoryTitle(for transaction: TransactionWithDetails) -> String {
-        transaction.subcategoryName ?? transaction.categoryName ?? "Uncategorized"
+        guard let categoryId = transaction.categoryId else {
+            return "Uncategorized"
+        }
+
+        let category = categoryStore.categories.first(where: { $0.id == categoryId })
+        let emojiPrefix: String = {
+            if let emoji = category?.emoji, !emoji.isEmpty {
+                return "\(emoji) "
+            }
+            return ""
+        }()
+
+        if let subcategoryName = transaction.subcategoryName, !subcategoryName.isEmpty {
+            return emojiPrefix + subcategoryName
+        }
+
+        if let categoryName = category?.name {
+            return emojiPrefix + categoryName
+        }
+
+        if let categoryName = transaction.categoryName, !categoryName.isEmpty {
+            return emojiPrefix + categoryName
+        }
+
+        return "Uncategorized"
     }
 
-    private func isEditing(_ transaction: TransactionWithDetails, field: EditableField) -> Bool {
-        editingTransactionId == transaction.id && editingField == field
+    private func isEditing(_ transaction: TransactionWithDetails, field: TransactionInlineEditState.Field) -> Bool {
+        inlineEdit.isEditing(transactionId: transaction.id, field: field)
     }
 
-    private func beginEdit(_ transaction: TransactionWithDetails, field: EditableField, text: String) {
-        editText = text
-        editingTransactionId = transaction.id
-        editingField = field
+    private func beginTextEdit(
+        _ transaction: TransactionWithDetails,
+        field: TransactionInlineEditState.Field,
+        text: String,
+        viewModel: TransactionViewModel
+    ) {
+        inlineEdit.beginTextEdit(transactionId: transaction.id, field: field, text: text)
+        viewModel.selectedIds = [transaction.id]
+    }
+
+    private func beginWalletEdit(_ transaction: TransactionWithDetails, viewModel: TransactionViewModel) {
+        inlineEdit.beginWalletEdit(transactionId: transaction.id, walletId: transaction.walletId)
+        viewModel.selectedIds = [transaction.id]
+    }
+
+    private func beginCategoryEdit(_ transaction: TransactionWithDetails, viewModel: TransactionViewModel) {
+        inlineEdit.beginCategoryEdit(
+            transactionId: transaction.id,
+            categoryId: transaction.categoryId,
+            subcategoryId: transaction.subcategoryId
+        )
+        viewModel.selectedIds = [transaction.id]
     }
 
     private func cancelEdit() {
-        editingTransactionId = nil
-        editingField = nil
-        editText = ""
+        inlineEdit.cancelEdit()
     }
 
-    private static let dateValidator: DateFormatter = {
+    private func clearSelectionAndEditing(_ viewModel: TransactionViewModel) {
+        inlineEdit.clearSelectionAndEditing()
+        viewModel.selectedIds.removeAll()
+    }
+
+    private static let groupedDateParser: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
         formatter.locale = Locale(identifier: "en_US_POSIX")
         return formatter
     }()
 
-    private func commitDateEdit(_ transaction: TransactionWithDetails, newValue: String, viewModel: TransactionViewModel) {
-        let trimmed = newValue.trimmingCharacters(in: .whitespaces)
-        guard !trimmed.isEmpty, trimmed != transaction.date, Self.dateValidator.date(from: trimmed) != nil else {
-            cancelEdit()
-            return
+    private static let groupedDateTitleFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "EEE d"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        return formatter
+    }()
+
+    private func daySectionTitle(for date: String) -> String {
+        guard let parsedDate = Self.groupedDateParser.date(from: date) else {
+            return date
         }
-        cancelEdit()
-        Task {
-            await viewModel.updateTransaction(id: transaction.id, TransactionUpdate(date: trimmed))
-            await walletStore.refresh()
-        }
+        return Self.groupedDateTitleFormatter.string(from: parsedDate)
     }
 
     private func commitDescriptionEdit(_ transaction: TransactionWithDetails, newValue: String, viewModel: TransactionViewModel) {

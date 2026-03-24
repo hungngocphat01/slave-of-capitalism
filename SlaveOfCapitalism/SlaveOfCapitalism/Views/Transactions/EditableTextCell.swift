@@ -42,9 +42,9 @@ struct EditableTextCell: View {
                     .foregroundStyle(foregroundStyle)
                     .frame(maxWidth: .infinity, alignment: alignment)
                     .contentShape(Rectangle())
-                    .onTapGesture {
+                    .simultaneousGesture(TapGesture(count: 2).onEnded {
                         onBeginEdit()
-                    }
+                    })
             }
         }
     }

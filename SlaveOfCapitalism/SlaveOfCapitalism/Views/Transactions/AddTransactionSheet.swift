@@ -1,5 +1,201 @@
 import SwiftUI
 
+struct TransactionSheetMessageBanner: View {
+    enum Tone {
+        case advisory
+        case critical
+
+        var iconName: String {
+            switch self {
+            case .advisory:
+                return "exclamationmark.circle.fill"
+            case .critical:
+                return "xmark.octagon.fill"
+            }
+        }
+
+        var title: String {
+            switch self {
+            case .advisory:
+                return "Complete Required Fields"
+            case .critical:
+                return "Couldn't Save Transaction"
+            }
+        }
+
+        var tint: Color {
+            switch self {
+            case .advisory:
+                return .orange
+            case .critical:
+                return .red
+            }
+        }
+    }
+
+    let tone: Tone
+    let message: String
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: tone.iconName)
+                .font(.title3.weight(.semibold))
+                .foregroundStyle(tone.tint)
+                .padding(.top, 1)
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(tone.title)
+                    .font(.headline)
+
+                Text(message)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding(.vertical, 6)
+    }
+}
+
+enum AddTransactionSheetPresentation {
+    struct Banner {
+        let tone: TransactionSheetMessageBanner.Tone
+        let message: String
+    }
+
+    static func banner(validationMessage: String?, errorMessage: String?) -> Banner? {
+        if let errorMessage {
+            return Banner(tone: .critical, message: errorMessage)
+        }
+
+        if let validationMessage {
+            return Banner(tone: .advisory, message: validationMessage)
+        }
+
+        return nil
+    }
+}
+
+struct TransactionCategoryMenuModel {
+    private static let subcategoryIndent = "    "
+
+    struct MenuSection: Identifiable, Equatable {
+        let categoryId: Int
+        let headerTitle: String?
+        let rows: [MenuRow]
+
+        var id: Int {
+            categoryId
+        }
+    }
+
+    struct MenuRow: Identifiable, Equatable {
+        let id: String
+        let title: String
+    }
+
+    static func sections(from categories: [CategoryWithSubcategories]) -> [MenuSection] {
+        categories.map { category in
+            if category.subcategories.isEmpty {
+                return MenuSection(
+                    categoryId: category.id,
+                    headerTitle: nil,
+                    rows: [
+                        MenuRow(
+                            id: "c:\(category.id)",
+                            title: displayTitle(for: category)
+                        )
+                    ]
+                )
+            }
+
+            return MenuSection(
+                categoryId: category.id,
+                headerTitle: displayTitle(for: category),
+                rows: category.subcategories.map { subcategory in
+                    MenuRow(
+                        id: "s:\(subcategory.id)",
+                        title: subcategoryIndent + subcategory.name
+                    )
+                }
+            )
+        }
+    }
+
+    static func optionId(
+        categoryId: Int?,
+        subcategoryId: Int?,
+        categories: [CategoryWithSubcategories]
+    ) -> String {
+        if let subcategoryId {
+            return "s:\(subcategoryId)"
+        }
+
+        if let categoryId,
+           let category = categories.first(where: { $0.id == categoryId }),
+           category.subcategories.isEmpty {
+            return "c:\(categoryId)"
+        }
+
+        return "u:0"
+    }
+
+    static func isValid(optionId: String, categories: [CategoryWithSubcategories]) -> Bool {
+        if optionId == "u:0" {
+            return true
+        }
+
+        if let categoryId = categoryId(from: optionId) {
+            return categories.first(where: { $0.id == categoryId })?.subcategories.isEmpty == true
+        }
+
+        if let subcategoryId = subcategoryId(from: optionId) {
+            return categories.contains(where: { $0.subcategories.contains(where: { $0.id == subcategoryId }) })
+        }
+
+        return false
+    }
+
+    static func selectionTitle(
+        categoryId: Int?,
+        subcategoryId: Int?,
+        categories: [CategoryWithSubcategories]
+    ) -> String {
+        if let subcategoryId {
+            for category in categories {
+                if let subcategory = category.subcategories.first(where: { $0.id == subcategoryId }) {
+                    return subcategory.name
+                }
+            }
+        }
+
+        if let categoryId,
+           let category = categories.first(where: { $0.id == categoryId }) {
+            return displayTitle(for: category)
+        }
+
+        return "Uncategorized"
+    }
+
+    static func displayTitle(for category: CategoryWithSubcategories) -> String {
+        if let emoji = category.emoji?.trimmingCharacters(in: .whitespacesAndNewlines),
+           !emoji.isEmpty {
+            return "\(emoji) \(category.name)"
+        }
+        return category.name
+    }
+
+    private static func categoryId(from optionId: String) -> Int? {
+        guard optionId.hasPrefix("c:") else { return nil }
+        return Int(optionId.dropFirst(2))
+    }
+
+    private static func subcategoryId(from optionId: String) -> Int? {
+        guard optionId.hasPrefix("s:") else { return nil }
+        return Int(optionId.dropFirst(2))
+    }
+}
+
 struct AddTransactionSheet: View {
     @Environment(APIClient.self) private var apiClient
     @Environment(\.dismiss) private var dismiss
@@ -12,12 +208,12 @@ struct AddTransactionSheet: View {
     @State private var includesTime = false
     @State private var transactionTime = Date.now
     @State private var selectedWalletId: Int
-    @State private var direction: TransactionDirection = .outflow
-    @State private var amountText = ""
-    @State private var classification: TransactionClassification = .expense
+    @State private var selectedTransactionType: TransactionType = .expense
+    @State private var amountText = "0"
     @State private var descriptionText = ""
     @State private var selectedCategoryId: Int = 0
     @State private var selectedSubcategoryId: Int = 0
+    @State private var selectedCategoryOptionId: String = "u:0"
     @State private var isSaving = false
     @State private var errorMessage: String?
 
@@ -30,22 +226,21 @@ struct AddTransactionSheet: View {
         self.categories = categories
         self.onComplete = onComplete
         _selectedWalletId = State(initialValue: wallets.first?.id ?? 0)
+        _selectedCategoryOptionId = State(initialValue: "u:0")
     }
 
     var body: some View {
         NavigationStack {
             Form {
-                if let validationMessage {
+                if let banner = AddTransactionSheetPresentation.banner(
+                    validationMessage: validationMessage,
+                    errorMessage: errorMessage
+                ) {
                     Section {
-                        Text(validationMessage)
-                            .foregroundStyle(.red)
-                    }
-                }
-
-                if let errorMessage {
-                    Section {
-                        Text(errorMessage)
-                            .foregroundStyle(.red)
+                        TransactionSheetMessageBanner(
+                            tone: banner.tone,
+                            message: banner.message
+                        )
                     }
                 }
 
@@ -69,37 +264,42 @@ struct AddTransactionSheet: View {
                         }
                     }
 
-                    Picker("Direction", selection: $direction) {
-                        Text("Outflow").tag(TransactionDirection.outflow)
-                        Text("Inflow").tag(TransactionDirection.inflow)
-                        Text("Reserved").tag(TransactionDirection.reserved)
-                    }
-
-                    Picker("Classification", selection: $classification) {
-                        ForEach(TransactionClassification.allCases, id: \.self) { option in
-                            Text(Self.classificationLabel(option)).tag(option)
+                    Picker("Type", selection: $selectedTransactionType) {
+                        ForEach(TransactionType.allCases, id: \.self) { option in
+                            Text(option.label).tag(option)
                         }
                     }
+                    .pickerStyle(.segmented)
 
-                    CurrencyField(title: "Amount", text: $amountText, prompt: "0")
+                    LabeledContent("Amount") {
+                        CurrencyField(title: "Amount", text: $amountText, prompt: "0")
+                            .frame(width: 120)
+                    }
                     TextField("Description", text: $descriptionText)
                 }
 
                 Section("Category") {
-                    Picker("Category", selection: $selectedCategoryId) {
-                        Text("None").tag(0)
-                        ForEach(categories) { category in
-                            Text(category.name).tag(category.id)
-                        }
-                    }
+                    Picker("Category", selection: $selectedCategoryOptionId) {
+                        Text("None")
+                            .tag("u:0")
 
-                    Picker("Subcategory", selection: $selectedSubcategoryId) {
-                        Text("None").tag(0)
-                        ForEach(activeSubcategories) { subcategory in
-                            Text(subcategory.name).tag(subcategory.id)
+                        ForEach(TransactionCategoryMenuModel.sections(from: categories)) { section in
+                            if let headerTitle = section.headerTitle {
+                                Section(header: Text(verbatim: headerTitle)) {
+                                    ForEach(section.rows) { row in
+                                        Text(verbatim: row.title)
+                                            .tag(row.id)
+                                    }
+                                }
+                            } else {
+                                ForEach(section.rows) { row in
+                                    Text(verbatim: row.title)
+                                        .tag(row.id)
+                                }
+                            }
                         }
                     }
-                    .disabled(activeSubcategories.isEmpty)
+                    .pickerStyle(.menu)
                 }
             }
             .formStyle(.grouped)
@@ -121,17 +321,14 @@ struct AddTransactionSheet: View {
                     .disabled(isSaving || validationMessage != nil)
                 }
             }
-            .onChange(of: selectedCategoryId) { _, newValue in
-                if !activeSubcategories.contains(where: { $0.id == selectedSubcategoryId && $0.categoryId == newValue }) {
-                    selectedSubcategoryId = 0
-                }
+            .onAppear {
+                syncCategorySelection()
+            }
+            .onChange(of: selectedCategoryOptionId) { _, newValue in
+                applyCategorySelection(for: newValue)
             }
         }
         .frame(minWidth: 460, minHeight: 420)
-    }
-
-    private var activeSubcategories: [SubcategoryResponse] {
-        categories.first(where: { $0.id == selectedCategoryId })?.subcategories ?? []
     }
 
     private var validationMessage: String? {
@@ -151,6 +348,10 @@ struct AddTransactionSheet: View {
             return "Description is required."
         }
 
+        guard TransactionCategoryMenuModel.isValid(optionId: selectedCategoryOptionId, categories: categories) else {
+            return "Select a valid category."
+        }
+
         return nil
     }
 
@@ -167,9 +368,9 @@ struct AddTransactionSheet: View {
                 date: Self.isoDateString(from: transactionDate),
                 time: includesTime ? Self.isoTimeString(from: transactionTime) : nil,
                 walletId: selectedWalletId,
-                direction: direction,
+                direction: selectedTransactionType.direction,
                 amount: amount,
-                classification: classification,
+                classification: selectedTransactionType.classification,
                 description: descriptionText.trimmingCharacters(in: .whitespacesAndNewlines),
                 categoryId: selectedCategoryId == 0 ? nil : selectedCategoryId,
                 subcategoryId: selectedSubcategoryId == 0 ? nil : selectedSubcategoryId
@@ -189,8 +390,60 @@ struct AddTransactionSheet: View {
         return Decimal(string: normalized)
     }
 
-    private static func classificationLabel(_ value: TransactionClassification) -> String {
-        value.rawValue.replacingOccurrences(of: "_", with: " ").capitalized
+    private func applyCategorySelection(for optionId: String) {
+        if optionId == "u:0" {
+            selectedCategoryId = 0
+            selectedSubcategoryId = 0
+            return
+        }
+
+        if let categoryId = Self.categoryId(from: optionId),
+           let category = categories.first(where: { $0.id == categoryId }),
+           category.subcategories.isEmpty {
+            selectedCategoryId = categoryId
+            selectedSubcategoryId = 0
+            return
+        }
+
+        if let subcategoryId = Self.subcategoryId(from: optionId),
+           let category = categories.first(where: { $0.subcategories.contains(where: { $0.id == subcategoryId }) }),
+           category.subcategories.contains(where: { $0.id == subcategoryId }) {
+            selectedCategoryId = category.id
+            selectedSubcategoryId = subcategoryId
+            return
+        }
+
+        selectedCategoryOptionId = Self.optionId(categoryId: selectedCategoryId, subcategoryId: selectedSubcategoryId, categories: categories)
+    }
+
+    private func syncCategorySelection() {
+        selectedCategoryOptionId = Self.optionId(
+            categoryId: selectedCategoryId == 0 ? nil : selectedCategoryId,
+            subcategoryId: selectedSubcategoryId == 0 ? nil : selectedSubcategoryId,
+            categories: categories
+        )
+    }
+
+    private static func optionId(categoryId: Int?, subcategoryId: Int?, categories: [CategoryWithSubcategories]) -> String {
+        TransactionCategoryMenuModel.optionId(
+            categoryId: categoryId,
+            subcategoryId: subcategoryId,
+            categories: categories
+        )
+    }
+
+    private static func categoryId(from optionId: String) -> Int? {
+        if optionId == "u:0" {
+            return nil
+        }
+
+        guard optionId.hasPrefix("c:") else { return nil }
+        return Int(optionId.dropFirst(2))
+    }
+
+    private static func subcategoryId(from optionId: String) -> Int? {
+        guard optionId.hasPrefix("s:") else { return nil }
+        return Int(optionId.dropFirst(2))
     }
 
     private static func isoDateString(from date: Date) -> String {
@@ -207,5 +460,37 @@ struct AddTransactionSheet: View {
         formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.dateFormat = "HH:mm:ss"
         return formatter.string(from: date)
+    }
+}
+
+private enum TransactionType: String, CaseIterable, Sendable {
+    case expense
+    case income
+
+    var direction: TransactionDirection {
+        switch self {
+        case .expense:
+            return .outflow
+        case .income:
+            return .inflow
+        }
+    }
+
+    var classification: TransactionClassification {
+        switch self {
+        case .expense:
+            return .expense
+        case .income:
+            return .income
+        }
+    }
+
+    var label: String {
+        switch self {
+        case .expense:
+            return "Expense"
+        case .income:
+            return "Income"
+        }
     }
 }
