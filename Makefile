@@ -15,9 +15,15 @@ TAURI_DIR := $(FRONTEND_DIR)/src-tauri
 RESOURCES_DIR := $(TAURI_DIR)/resources/backend
 BACKEND_BINARY := $(BACKEND_DIR)/dist/expense-manager-backend
 APP_BUNDLE := $(TAURI_DIR)/target/release/bundle/macos/Slave of Capitalism.app
+SWIFTUI_DIR := SlaveOfCapitalism
+SWIFTUI_PROJECT_FILE := $(SWIFTUI_DIR)/SlaveOfCapitalism.xcodeproj/project.pbxproj
+SWIFTUI_RESOURCES_DIR := $(SWIFTUI_DIR)/SlaveOfCapitalism/Resources
+SWIFTUI_BACKEND_BINARY := $(SWIFTUI_RESOURCES_DIR)/expense-manager-backend
+SWIFTUI_DERIVED_DATA := $(SWIFTUI_DIR)/build
+SWIFTUI_APP_BUNDLE := $(SWIFTUI_DERIVED_DATA)/Build/Products/Release/SlaveOfCapitalism.app
 
 # Phony targets (not actual files)
-.PHONY: all build clean dev backend frontend swiftui-verify install-deps help test
+.PHONY: all build clean dev backend frontend swiftui swiftui-run swiftui-project swiftui-verify install-deps help test
 
 # Default target
 all: build
@@ -31,6 +37,7 @@ help:
 	@echo "  $(GREEN)make dev$(NC)           - Run in development mode"
 	@echo "  $(GREEN)make backend$(NC)       - Build only the backend binary"
 	@echo "  $(GREEN)make frontend$(NC)      - Build only the frontend/Tauri app"
+	@echo "  $(GREEN)make swiftui$(NC)       - Build SwiftUI app with embedded backend binary"
 	@echo "  $(GREEN)make install-deps$(NC)  - Install all dependencies"
 	@echo "  $(GREEN)make test$(NC)          - Run all tests"
 	@echo "  $(GREEN)make clean$(NC)         - Clean all build artifacts"
@@ -95,11 +102,59 @@ build: frontend
 	@echo "To run the app:"
 	@echo "   open \"$(APP_BUNDLE)\""
 
+# Copy backend to SwiftUI app resources
+$(SWIFTUI_BACKEND_BINARY): $(BACKEND_BINARY)
+	@echo "$(BLUE)📋 Copying backend binary to SwiftUI resources...$(NC)"
+	@mkdir -p $(SWIFTUI_RESOURCES_DIR)
+	@cp $(BACKEND_BINARY) $(SWIFTUI_BACKEND_BINARY)
+	@chmod +x $(SWIFTUI_BACKEND_BINARY)
+	@echo "$(GREEN)✓ Backend binary copied to SwiftUI resources$(NC)"
+
+# Generate SwiftUI Xcode project from xcodegen spec
+$(SWIFTUI_PROJECT_FILE): $(SWIFTUI_DIR)/project.yml
+	@echo "$(BLUE)⚙️  Generating SwiftUI Xcode project...$(NC)"
+	cd $(SWIFTUI_DIR) && xcodegen generate
+	@echo "$(GREEN)✓ SwiftUI Xcode project generated$(NC)"
+
+# Always refresh project metadata before a SwiftUI build.
+swiftui-project: $(SWIFTUI_DIR)/project.yml
+	@echo "$(BLUE)⚙️  Refreshing SwiftUI Xcode project...$(NC)"
+	cd $(SWIFTUI_DIR) && xcodegen generate
+	@echo "$(GREEN)✓ SwiftUI Xcode project refreshed$(NC)"
+
+# Build SwiftUI app with embedded backend
+swiftui: swiftui-project $(SWIFTUI_APP_BUNDLE)
+	@echo "$(GREEN)✅ SwiftUI build complete!$(NC)"
+	@echo ""
+	@echo "$(GREEN)📱 SwiftUI app location:$(NC)"
+	@echo "   $(SWIFTUI_APP_BUNDLE)"
+	@echo ""
+	@echo "To run the app:"
+	@echo "   open -n \"$(SWIFTUI_APP_BUNDLE)\""
+
+# Build and launch a fresh process so LaunchServices doesn't reuse an old running app.
+swiftui-run: swiftui
+	open -n "$(SWIFTUI_APP_BUNDLE)"
+
+$(SWIFTUI_APP_BUNDLE): $(SWIFTUI_BACKEND_BINARY) $(SWIFTUI_PROJECT_FILE) $(shell find $(SWIFTUI_DIR)/SlaveOfCapitalism -name "*.swift" -type f) $(shell find $(SWIFTUI_DIR)/SlaveOfCapitalismTests -name "*.swift" -type f)
+	@echo "$(BLUE)🚀 Building SwiftUI app (Release)...$(NC)"
+	cd $(SWIFTUI_DIR) && xcodebuild \
+		-scheme SlaveOfCapitalism \
+		-configuration Release \
+		-destination 'platform=macOS' \
+		-derivedDataPath build \
+		CODE_SIGNING_ALLOWED=NO \
+		build
+	@if [ ! -d "$(SWIFTUI_APP_BUNDLE)" ]; then \
+		echo "$(RED)❌ SwiftUI build failed!$(NC)"; \
+		exit 1; \
+	fi
+
 # Run SwiftUI frontend verification gate
 swiftui-verify:
-	cd SlaveOfCapitalism && xcodegen generate
-	cd SlaveOfCapitalism && xcodebuild -project SlaveOfCapitalism.xcodeproj -scheme SlaveOfCapitalism -configuration Debug -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO test
-	cd SlaveOfCapitalism && xcodebuild -project SlaveOfCapitalism.xcodeproj -scheme SlaveOfCapitalism -configuration Debug -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO build
+	cd $(SWIFTUI_DIR) && xcodegen generate
+	cd $(SWIFTUI_DIR) && xcodebuild -project SlaveOfCapitalism.xcodeproj -scheme SlaveOfCapitalism -configuration Debug -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO test
+	cd $(SWIFTUI_DIR) && xcodebuild -project SlaveOfCapitalism.xcodeproj -scheme SlaveOfCapitalism -configuration Debug -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO build
 
 # Run in development mode
 dev:
@@ -127,6 +182,7 @@ clean:
 	@rm -rf $(RESOURCES_DIR)
 	@rm -rf $(TAURI_DIR)/target
 	@rm -rf $(FRONTEND_DIR)/build
+	@rm -rf $(SWIFTUI_DERIVED_DATA)
 	@echo "$(GREEN)✓ Clean complete$(NC)"
 
 # Deep clean (including dependencies)

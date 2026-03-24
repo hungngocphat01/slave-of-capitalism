@@ -142,7 +142,7 @@ The Summary screen depends on `GET /budgets/summary/{year}/{month}`. The `Monthl
 - Service: `backend/app/services/budget_service.py` — `calculate_monthly_summary(db, year, month, period_boundaries)`
 - Existing router: `backend/app/routers/budgets.py` — has `GET /daily-summary/{year}/{month}` as a pattern to follow
 
-- [ ] **Step 1: Write failing test for budget monthly summary endpoint**
+- [x] **Step 1: Write failing test for budget monthly summary endpoint**
 
 Create `backend/tests/test_budget_summary.py`:
 ```python
@@ -215,14 +215,14 @@ def test_monthly_summary_with_period_boundaries(client, sample_wallet, sample_ca
     assert cat["periods"][0] == 100.0  # day 5 falls in period 1 (1-7)
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 ```bash
 cd backend && python -m pytest tests/test_budget_summary.py -v
 ```
 Expected: 404 errors (endpoint doesn't exist yet).
 
-- [ ] **Step 3: Add the router endpoint**
+- [x] **Step 3: Add the router endpoint**
 
 In `backend/app/routers/budgets.py`, add this endpoint (follow the pattern of `get_daily_summary`):
 
@@ -243,21 +243,21 @@ Ensure imports include `Query` from fastapi and `MonthlySummaryResponse` from sc
 
 **Important:** This endpoint must be placed BEFORE the `/{budget_id}` route to avoid path parameter conflicts.
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 ```bash
 cd backend && python -m pytest tests/test_budget_summary.py -v
 ```
 Expected: All 3 tests PASS.
 
-- [ ] **Step 5: Run full test suite to check for regressions**
+- [x] **Step 5: Run full test suite to check for regressions**
 
 ```bash
 cd backend && python -m pytest -x -q
 ```
 Expected: All existing tests still pass.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add backend/app/routers/budgets.py backend/tests/test_budget_summary.py
@@ -279,7 +279,7 @@ The Pending screen and ReimbursementsSheet depend on looking up a linked entry b
 - Existing router: `backend/app/routers/linked_entries.py` — has `GET /{entry_id}` as a pattern
 - Service: `backend/app/services/linked_entry_service.py`
 
-- [ ] **Step 1: Write failing test**
+- [x] **Step 1: Write failing test**
 
 Create `backend/tests/test_linked_entry_by_transaction.py`:
 ```python
@@ -320,14 +320,14 @@ def test_get_linked_entry_by_transaction(client, sample_wallet, sample_category)
     assert data["counterparty_name"] == "Alice"
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 ```bash
 cd backend && python -m pytest tests/test_linked_entry_by_transaction.py -v
 ```
 Expected: 404/405 errors.
 
-- [ ] **Step 3: Add service method and router endpoint**
+- [x] **Step 3: Add service method and router endpoint**
 
 In `backend/app/services/linked_entry_service.py`, add:
 ```python
@@ -349,19 +349,19 @@ def get_linked_entry_by_transaction(transaction_id: int, db: Session = Depends(g
     return _entry_to_response(entry, db)
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 ```bash
 cd backend && python -m pytest tests/test_linked_entry_by_transaction.py -v
 ```
 
-- [ ] **Step 5: Run full test suite**
+- [x] **Step 5: Run full test suite**
 
 ```bash
 cd backend && python -m pytest -x -q
 ```
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add backend/app/routers/linked_entries.py backend/app/services/linked_entry_service.py backend/tests/test_linked_entry_by_transaction.py
@@ -380,7 +380,7 @@ Create the Xcode project with correct structure, entitlements, and build setting
 - Create: `SlaveOfCapitalism/SlaveOfCapitalism/ContentView.swift`
 - Create: `SlaveOfCapitalism/SlaveOfCapitalism/SlaveOfCapitalism.entitlements`
 
-- [ ] **Step 1: Create Xcode project via command line**
+- [x] **Step 1: Create Xcode project via command line**
 
 ```bash
 cd /Volumes/Documents/sources/slave-of-capitalism
@@ -388,7 +388,7 @@ mkdir -p SlaveOfCapitalism/SlaveOfCapitalism
 mkdir -p SlaveOfCapitalism/SlaveOfCapitalismTests
 ```
 
-- [ ] **Step 2: Create the app entry point**
+- [x] **Step 2: Create the app entry point**
 
 Create `SlaveOfCapitalism/SlaveOfCapitalism/SlaveOfCapitalismApp.swift`:
 ```swift
@@ -408,7 +408,7 @@ struct SlaveOfCapitalismApp: App {
 }
 ```
 
-- [ ] **Step 3: Create placeholder ContentView**
+- [x] **Step 3: Create placeholder ContentView**
 
 Create `SlaveOfCapitalism/SlaveOfCapitalism/ContentView.swift`:
 ```swift
@@ -443,7 +443,7 @@ struct ContentView: View {
 }
 ```
 
-- [ ] **Step 4: Create entitlements file**
+- [x] **Step 4: Create entitlements file**
 
 Create `SlaveOfCapitalism/SlaveOfCapitalism/SlaveOfCapitalism.entitlements`:
 ```xml
@@ -463,7 +463,7 @@ Create `SlaveOfCapitalism/SlaveOfCapitalism/SlaveOfCapitalism.entitlements`:
 
 Note: Sandbox is disabled because the app needs to launch a subprocess and access user-selected database paths. `disable-library-validation` is required for PyInstaller's extracted dylibs.
 
-- [ ] **Step 5: Create the Xcode project file**
+- [x] **Step 5: Create the Xcode project file**
 
 Use `xcodegen` or create manually. The project needs:
 - macOS 14.0 deployment target
@@ -504,7 +504,7 @@ xcodegen generate
 
 Otherwise, create the project in Xcode: File > New > Project > macOS App, SwiftUI, Swift, name "SlaveOfCapitalism", target macOS 14.0.
 
-- [ ] **Step 6: Create directory structure**
+- [x] **Step 6: Create directory structure**
 
 ```bash
 cd SlaveOfCapitalism/SlaveOfCapitalism
@@ -512,7 +512,7 @@ mkdir -p Backend Models Stores ViewModels Utilities Resources
 mkdir -p Views/{Sidebar,Transactions,Wallets,Summary,Pending,Categories,Data/PayPayImport,Audit,Settings,Shared/Sheets,Shared/Components}
 ```
 
-- [ ] **Step 7: Verify project compiles**
+- [x] **Step 7: Verify project compiles**
 
 ```bash
 cd SlaveOfCapitalism && xcodebuild -scheme SlaveOfCapitalism -destination 'platform=macOS' build 2>&1 | tail -5
@@ -545,7 +545,7 @@ All Swift types mirroring the backend Pydantic schemas. These compile independen
 - Backend schemas: `backend/app/schemas/` — all Pydantic models define the exact field names and types
 - The backend uses `snake_case` JSON keys. Swift models should use `CodingKeys` or a `keyDecodingStrategy = .convertFromSnakeCase` on the decoder.
 
-- [ ] **Step 1: Create Enums.swift**
+- [x] **Step 1: Create Enums.swift**
 
 ```swift
 import Foundation
@@ -578,7 +578,7 @@ enum LinkStatus: String, Codable, CaseIterable {
 }
 ```
 
-- [ ] **Step 2: Create Wallet.swift**
+- [x] **Step 2: Create Wallet.swift**
 
 ```swift
 import Foundation
@@ -635,7 +635,7 @@ struct WalletTransferResponse: Codable {
 }
 ```
 
-- [ ] **Step 3: Create Transaction.swift**
+- [x] **Step 3: Create Transaction.swift**
 
 ```swift
 import Foundation
@@ -797,7 +797,7 @@ struct BulkImportResponse: Codable {
 }
 ```
 
-- [ ] **Step 4: Create Category.swift**
+- [x] **Step 4: Create Category.swift**
 
 ```swift
 import Foundation
@@ -853,7 +853,7 @@ struct SubcategoryUpdate: Codable {
 }
 ```
 
-- [ ] **Step 5: Create LinkedEntry.swift**
+- [x] **Step 5: Create LinkedEntry.swift**
 
 ```swift
 import Foundation
@@ -946,7 +946,7 @@ struct DebtSummary: Codable {
 }
 ```
 
-- [ ] **Step 6: Create Budget.swift**
+- [x] **Step 6: Create Budget.swift**
 
 ```swift
 import Foundation
@@ -1044,7 +1044,7 @@ struct DailySummaryResponse: Codable {
 }
 ```
 
-- [ ] **Step 7: Create BalanceAudit.swift**
+- [x] **Step 7: Create BalanceAudit.swift**
 
 ```swift
 import Foundation
@@ -1069,13 +1069,13 @@ struct BalanceAuditCreate: Codable {
 }
 ```
 
-- [ ] **Step 8: Verify compilation**
+- [x] **Step 8: Verify compilation**
 
 ```bash
 cd SlaveOfCapitalism && xcodebuild -scheme SlaveOfCapitalism -destination 'platform=macOS' build 2>&1 | tail -5
 ```
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 git add SlaveOfCapitalism/SlaveOfCapitalism/Models/
@@ -1095,7 +1095,7 @@ The HTTP client that talks to the backend. Protocol-based for testability.
 - Spec section: "API Client" — lists all 54 methods grouped by endpoint
 - Backend routers: exact paths and HTTP methods
 
-- [ ] **Step 1: Create APIClient.swift with protocol and implementation**
+- [x] **Step 1: Create APIClient.swift with protocol and implementation**
 
 Create `SlaveOfCapitalism/SlaveOfCapitalism/Backend/APIClient.swift`:
 
@@ -1536,13 +1536,13 @@ final class APIClient: APIClientProtocol {
 }
 ```
 
-- [ ] **Step 2: Verify compilation**
+- [x] **Step 2: Verify compilation**
 
 ```bash
 cd SlaveOfCapitalism && xcodebuild -scheme SlaveOfCapitalism -destination 'platform=macOS' build 2>&1 | tail -5
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add SlaveOfCapitalism/SlaveOfCapitalism/Backend/APIClient.swift
@@ -1564,7 +1564,7 @@ Manages launching, health polling, crash recovery, and shutdown of the backend p
 - Spec section: "Backend Process Management"
 - Current Tauri pattern: `frontend/src/lib/api/client.ts` — `waitForBackend()` function
 
-- [ ] **Step 1: Create BackendManager.swift**
+- [x] **Step 1: Create BackendManager.swift**
 
 ```swift
 import Foundation
@@ -1695,7 +1695,7 @@ final class BackendManager {
 }
 ```
 
-- [ ] **Step 2: Create LoadingView.swift**
+- [x] **Step 2: Create LoadingView.swift**
 
 ```swift
 import SwiftUI
@@ -1714,7 +1714,7 @@ struct LoadingView: View {
 }
 ```
 
-- [ ] **Step 3: Create ErrorView.swift**
+- [x] **Step 3: Create ErrorView.swift**
 
 ```swift
 import SwiftUI
@@ -1750,7 +1750,7 @@ struct ErrorView: View {
 }
 ```
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add SlaveOfCapitalism/SlaveOfCapitalism/Backend/BackendManager.swift SlaveOfCapitalism/SlaveOfCapitalism/Views/LoadingView.swift SlaveOfCapitalism/SlaveOfCapitalism/Views/ErrorView.swift
@@ -1769,7 +1769,7 @@ Shared state objects injected via SwiftUI environment, plus formatters and setti
 - Create: `SlaveOfCapitalism/SlaveOfCapitalism/Stores/AppSettings.swift`
 - Create: `SlaveOfCapitalism/SlaveOfCapitalism/Utilities/Formatters.swift`
 
-- [ ] **Step 1: Create AppSettings.swift**
+- [x] **Step 1: Create AppSettings.swift**
 
 ```swift
 import Foundation
@@ -1799,7 +1799,7 @@ final class AppSettings {
 }
 ```
 
-- [ ] **Step 2: Create CategoryStore.swift**
+- [x] **Step 2: Create CategoryStore.swift**
 
 ```swift
 import Foundation
@@ -1836,7 +1836,7 @@ final class CategoryStore {
 }
 ```
 
-- [ ] **Step 3: Create WalletStore.swift**
+- [x] **Step 3: Create WalletStore.swift**
 
 ```swift
 import Foundation
@@ -1869,7 +1869,7 @@ final class WalletStore {
 }
 ```
 
-- [ ] **Step 4: Create Formatters.swift**
+- [x] **Step 4: Create Formatters.swift**
 
 ```swift
 import Foundation
@@ -1906,7 +1906,7 @@ enum Formatters {
 }
 ```
 
-- [ ] **Step 5: Update SlaveOfCapitalismApp.swift to inject stores**
+- [x] **Step 5: Update SlaveOfCapitalismApp.swift to inject stores**
 
 ```swift
 import SwiftUI
@@ -1944,7 +1944,7 @@ struct SlaveOfCapitalismApp: App {
 }
 ```
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add SlaveOfCapitalism/SlaveOfCapitalism/Stores/ SlaveOfCapitalism/SlaveOfCapitalism/Utilities/Formatters.swift SlaveOfCapitalism/SlaveOfCapitalism/SlaveOfCapitalismApp.swift
@@ -2752,7 +2752,7 @@ make swiftui-verify
 
 Expected: all tests pass + build succeeds.
 
-- [ ] **Step 3: Commit verification gate tooling**
+- [x] **Step 3: Commit verification gate tooling**
 
 ```bash
 git add Makefile docs/superpowers/plans/2026-03-22-swiftui-port.md
@@ -2889,17 +2889,17 @@ Import wizard with CSV parsing, wallet mapping, preview, and bulk import.
 **Reference:**
 - Frontend: `frontend/src/lib/paypay-importer/` — parser.ts, rule-compiler.ts, rule-executor.ts, transformer.ts, translator.ts, wallet-mapper.ts (~500 lines total)
 
-- [ ] **Step 1: Write PayPayParser tests**
+- [x] **Step 1: Write PayPayParser tests**
 
 Test CSV parsing with sample PayPay data. Verify column extraction, date parsing, amount parsing.
 
-- [ ] **Step 2: Port PayPay parsing logic to Swift**
+- [x] **Step 2: Port PayPay parsing logic to Swift**
 
 PayPayParser.swift: Parse CSV rows into structured `PayPayTransaction` structs.
 PayPayRuleEngine.swift: Compile JSON rules into matchers, execute against transactions for auto-categorization.
 PayPayTransformer.swift: Map PayPay payment methods to app wallets, transform rows into `TransactionCreate` or `WalletTransferRequest`.
 
-- [ ] **Step 3: Create the 4-step wizard views**
+- [x] **Step 3: Create the 4-step wizard views**
 
 PayPayWizardSheet: Tab-based container with step navigation (Back/Next/Import).
 Step 1 (File): `fileImporter()` for CSV + optional rules JSON. Validates CSV format.
@@ -2907,17 +2907,98 @@ Step 2 (Mapping): Maps PayPay payment methods to app wallets. Persists in UserDe
 Step 3 (Preview): Table of parsed transactions with rule-applied categories.
 Step 4 (Confirm): Summary + Import button. Calls `apiClient.bulkImport()`. Shows result.
 
-- [ ] **Step 4: Create DataManagementView.swift**
+- [x] **Step 4: Create DataManagementView.swift**
 
 List of import options. "Import from PayPay CSV" card opens wizard sheet.
 
-- [ ] **Step 5: Wire into ContentView**
+- [x] **Step 5: Wire into ContentView**
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add SlaveOfCapitalism/
 git commit -m "feat: add Data Management screen with PayPay import wizard"
+```
+
+---
+
+## Task 18A: Inline Editing in Transactions Table ✅
+
+**Status:** Complete. See detailed plan at `docs/superpowers/plans/2026-03-23-inline-editing.md`.
+
+Replaced click-to-open-detail editing with direct inline editing in the Transactions table. Click a cell to edit in place, commit on Enter/focus-out, cancel on Escape. Added `EditableTextCell`, `EditableCategoryPicker` components, `updateTransaction` on ViewModel, and wired all 5 editable columns (Date, Description, Wallet, Category, Amount). Direction remains read-only. Removed unused `TransactionRow`.
+
+---
+
+## Task 18B: Fix Category Pane Layout + Transaction Grouping + Category Inline Editor
+
+Address regressions found after Task 18A before moving to Task 19.
+
+**Files:**
+- Modify: `SlaveOfCapitalism/SlaveOfCapitalism/Views/Categories/CategoryManagementView.swift`
+- Modify: `SlaveOfCapitalism/SlaveOfCapitalism/Views/Transactions/TransactionListView.swift`
+- Modify: `SlaveOfCapitalism/SlaveOfCapitalism/Views/Transactions/EditableCategoryPicker.swift`
+- Modify: `SlaveOfCapitalism/SlaveOfCapitalism/ViewModels/TransactionViewModel.swift` (if grouping helpers are needed)
+- Test: `SlaveOfCapitalism/SlaveOfCapitalismTests/TransactionViewModelTests.swift` (if grouping logic is moved into VM)
+
+**Root causes from current code:**
+- Categories screen can render narrow on first open because "no selection" placeholder panes are not forced to fill available width.
+- Transaction UI currently uses `Table` (flat rows) which does not provide day-sectioned presentation in current implementation.
+- Category inline editor action controls are embedded in a selectable `Table` row and can lose click handling priority.
+- Category and subcategory are split across two pickers; subcategories only appear in the second picker after category selection.
+
+- [ ] **Step 1: Fix initial squeezed Categories layout**
+
+In `CategoryManagementView.swift`, ensure placeholder states in middle/right panes expand fully on first render:
+- Add `.frame(maxWidth: .infinity, maxHeight: .infinity)` to `ContentUnavailableView` branches in `CategoryEditPane` and `SubcategoryPane`.
+- Keep `HSplitView` pane sizing, but ensure each pane root view can consume available space without requiring a category click first.
+
+- [ ] **Step 2: Replace flat Transaction table with day-grouped ledger list**
+
+In `TransactionListView.swift`, replace the current `Table` block with a day-sectioned list structure:
+- Group transactions by `date` (descending days).
+- Render sections like:
+  - `Mon 2`
+  - rows for transactions in that day
+- Remove the Date column from row content (date is represented by section header).
+- Preserve existing inline editing for description/wallet/category/amount.
+- Preserve selection, context menu actions, bulk actions, and add-sheet behavior.
+
+If needed, add a small grouping helper in `TransactionViewModel` (or local helper in view) and cover with tests.
+
+- [ ] **Step 3: Make Category inline editor controls reliably clickable**
+
+In `EditableCategoryPicker.swift` and call site in `TransactionListView.swift`:
+- Ensure action buttons in edit mode use button styles appropriate for controls inside selectable rows (prioritize direct click handling over row selection gesture handling).
+- Keep Enter/Escape behavior and explicit OK/Cancel flow.
+- Verify commit/cancel works when entering edit mode by click or double-click.
+
+- [ ] **Step 4: Improve category/subcategory dropdown UX**
+
+Adjust category editor interaction so subcategories are clearly selectable instead of appearing as "categories only":
+- Keep two-level model (`category` then `subcategory`) but present it explicitly in the editing UI.
+- Show subcategory selector whenever the chosen category has subcategories.
+- If no subcategories exist for selected category, display a clear "No subcategories" state for that control.
+- Keep commit payload as `(categoryId, subcategoryId)` and preserve existing backend constraints.
+
+- [ ] **Step 5: Verify behavior and commit**
+
+Run:
+```bash
+cd /Volumes/Documents/sources/slave-of-capitalism/SlaveOfCapitalism && xcodegen generate
+cd /Volumes/Documents/sources/slave-of-capitalism && make swiftui-verify
+```
+
+Manual checks:
+- Open Categories from sidebar: pane uses full detail space immediately.
+- Transactions are rendered in day sections with no Date column.
+- Category editor OK/Cancel buttons work reliably.
+- Subcategory selection is visible and usable when available.
+
+Commit:
+```bash
+git add SlaveOfCapitalism/ docs/superpowers/plans/2026-03-22-swiftui-port.md
+git commit -m "fix: stabilize category layout and improve grouped transaction editing UX"
 ```
 
 ---
