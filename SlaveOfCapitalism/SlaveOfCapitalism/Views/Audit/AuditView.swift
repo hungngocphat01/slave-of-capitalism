@@ -2,6 +2,7 @@ import SwiftUI
 
 struct AuditView: View {
     @Environment(APIClient.self) private var apiClient
+    @Environment(WalletStore.self) private var walletStore
 
     @State private var viewModel: AuditViewModel?
 
@@ -42,39 +43,33 @@ struct AuditView: View {
                     description: Text("Take a balance snapshot to start tracking net position over time.")
                 )
             } else {
-                List {
-                    if let error = viewModel.error {
-                        Section {
+                ScrollView {
+                    VStack(spacing: 0) {
+                        if let error = viewModel.error {
                             errorBanner(message: error.localizedDescription) {
-                                Task {
-                                    await viewModel.load()
-                                }
+                                Task { await viewModel.load() }
                             }
-                            .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
-                            .listRowBackground(Color.clear)
+                            .padding(.horizontal, 20)
+                            .padding(.top, 12)
                         }
-                    }
 
-                    ForEach(viewModel.audits) { audit in
-                        Section(Formatters.date(audit.date)) {
-                            VStack(alignment: .leading, spacing: 12) {
-                                LabeledContent("Balances") {
-                                    Text(balanceSummary(for: audit))
-                                        .multilineTextAlignment(.trailing)
-                                        .foregroundStyle(.secondary)
-                                }
+                        // Table header
+                        auditHeaderRow
+                            .padding(.horizontal, 20)
+                            .padding(.top, 16)
+                            .padding(.bottom, 8)
 
-                                HStack(spacing: 24) {
-                                    metric(title: "Debts", value: Formatters.currency(audit.debts))
-                                    metric(title: "Owed", value: Formatters.currency(audit.owed))
-                                    metric(title: "Net", value: Formatters.currency(audit.netPosition))
-                                }
-                            }
-                            .padding(.vertical, 4)
+                        Divider().padding(.horizontal, 20)
+
+                        // Snapshot rows
+                        ForEach(viewModel.audits) { audit in
+                            auditRow(for: audit)
+                                .padding(.horizontal, 20)
+                                .padding(.vertical, 10)
+                            Divider().padding(.horizontal, 20)
                         }
                     }
                 }
-                .listStyle(.inset)
             }
         }
         .toolbar {
@@ -105,27 +100,67 @@ struct AuditView: View {
         viewModel = AuditViewModel(apiClient: apiClient)
     }
 
-    private func balanceSummary(for audit: BalanceAuditResponse) -> String {
-        let items = audit.balances
-            .sorted { $0.key.localizedCaseInsensitiveCompare($1.key) == .orderedAscending }
-            .map { key, value in
-                "\(key): \(Formatters.currency(Decimal(value ?? 0), symbol: "¥", decimals: 0))"
-            }
-
-        if items.isEmpty {
-            return "No balances recorded"
+    private func walletName(for key: String) -> String {
+        if let id = Int(key), let wallet = walletStore.wallet(for: id) {
+            return wallet.name
         }
-
-        return items.joined(separator: "\n")
+        return key
     }
 
-    private func metric(title: String, value: String) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(title)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            Text(value)
-                .font(.headline)
+    private var auditHeaderRow: some View {
+        HStack(spacing: 0) {
+            Text("Date")
+                .frame(width: 100, alignment: .leading)
+
+            ForEach(walletColumns, id: \.self) { name in
+                Text(name)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+            }
+
+            Text("Debts")
+                .frame(width: 80, alignment: .trailing)
+            Text("Owed")
+                .frame(width: 80, alignment: .trailing)
+            Text("Net")
+                .frame(width: 90, alignment: .trailing)
+        }
+        .font(.caption.weight(.medium))
+        .foregroundStyle(.secondary)
+    }
+
+    private var walletColumns: [String] {
+        guard let first = viewModel?.audits.first else { return [] }
+        return first.balances.keys
+            .sorted { $0.localizedCaseInsensitiveCompare($1) == .orderedAscending }
+            .map { walletName(for: $0) }
+    }
+
+    private func auditRow(for audit: BalanceAuditResponse) -> some View {
+        let sorted = audit.balances
+            .sorted { $0.key.localizedCaseInsensitiveCompare($1.key) == .orderedAscending }
+
+        return HStack(spacing: 0) {
+            Text(Formatters.date(audit.date))
+                .font(.subheadline.weight(.medium))
+                .frame(width: 100, alignment: .leading)
+
+            ForEach(sorted, id: \.key) { _, value in
+                Text(Formatters.currency(Decimal(value ?? 0), symbol: "\u{00A5}", decimals: 0))
+                    .font(.subheadline.monospacedDigit())
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+            }
+
+            Text(Formatters.currency(audit.debts))
+                .font(.subheadline.monospacedDigit())
+                .foregroundStyle(audit.debts > 0 ? .red : .secondary)
+                .frame(width: 80, alignment: .trailing)
+            Text(Formatters.currency(audit.owed))
+                .font(.subheadline.monospacedDigit())
+                .foregroundStyle(audit.owed > 0 ? .green : .secondary)
+                .frame(width: 80, alignment: .trailing)
+            Text(Formatters.currency(audit.netPosition))
+                .font(.subheadline.weight(.semibold).monospacedDigit())
+                .frame(width: 90, alignment: .trailing)
         }
     }
 

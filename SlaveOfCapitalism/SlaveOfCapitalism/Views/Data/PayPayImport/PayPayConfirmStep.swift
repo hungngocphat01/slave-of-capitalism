@@ -9,52 +9,68 @@ struct PayPayConfirmStep: View {
     let isImporting: Bool
 
     var body: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 16) {
+            Spacer()
+
             if let result {
                 Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 48))
+                    .font(.system(size: 52, weight: .light))
                     .foregroundStyle(.green)
+                    .padding(.bottom, 4)
                 Text("Import Complete")
-                    .font(.title2)
-                Text("\(result.importedCount) transactions imported")
-                    .foregroundStyle(.secondary)
-                if transfersImported > 0 {
-                    Text("\(transfersImported) wallet transfers created")
-                        .foregroundStyle(.secondary)
+                    .font(.title2.weight(.semibold))
+                VStack(spacing: 4) {
+                    Text("\(result.importedCount) transactions imported")
+                    if transfersImported > 0 {
+                        Text("\(transfersImported) wallet transfers created")
+                    }
                 }
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
             } else if let error {
                 Image(systemName: "xmark.circle.fill")
-                    .font(.system(size: 48))
+                    .font(.system(size: 52, weight: .light))
                     .foregroundStyle(.red)
+                    .padding(.bottom, 4)
                 Text("Import Failed")
-                    .font(.title2)
+                    .font(.title2.weight(.semibold))
                 Text(error)
+                    .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
+                    .frame(maxWidth: 400)
             } else if isImporting {
                 ProgressView()
-                    .scaleEffect(1.5)
-                Text("Importing...")
-                    .font(.title2)
+                    .controlSize(.large)
+                    .padding(.bottom, 4)
+                Text("Importing\u{2026}")
+                    .font(.title2.weight(.semibold))
+                Text("Please wait while your data is uploaded.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
             } else {
-                Image(systemName: "arrow.down.doc.fill")
-                    .font(.system(size: 48))
-                    .foregroundStyle(.blue)
+                Image(systemName: "square.and.arrow.down")
+                    .font(.system(size: 52, weight: .light))
+                    .foregroundStyle(.tint)
+                    .padding(.bottom, 4)
                 Text("Ready to Import")
-                    .font(.title2)
-                if transactionCount > 0 {
-                    Text("\(transactionCount) transactions will be imported")
-                        .foregroundStyle(.secondary)
+                    .font(.title2.weight(.semibold))
+                VStack(spacing: 4) {
+                    if transactionCount > 0 {
+                        Text("\(transactionCount) transactions will be imported")
+                    }
+                    if transferCount > 0 {
+                        Text("\(transferCount) wallet transfers will be created")
+                    }
+                    if transactionCount == 0 && transferCount == 0 {
+                        Text("No items to import")
+                    }
                 }
-                if transferCount > 0 {
-                    Text("\(transferCount) wallet transfers will be created")
-                        .foregroundStyle(.secondary)
-                }
-                if transactionCount == 0 && transferCount == 0 {
-                    Text("No items to import")
-                        .foregroundStyle(.secondary)
-                }
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
             }
+
+            Spacer()
         }
     }
 }

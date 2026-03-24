@@ -288,6 +288,7 @@ private struct CategoryEditPane: View {
                     systemImage: "tag",
                     description: Text("Select a category from the list to edit it.")
                 )
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
             }
         }
     }
@@ -438,6 +439,7 @@ private struct SubcategoryPane: View {
                     systemImage: "square.stack",
                     description: Text("Select a category to manage its subcategories.")
                 )
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
             }
         }
         .sheet(item: $deletingSubcategory) { subcategory in

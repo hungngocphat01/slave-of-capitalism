@@ -24,7 +24,7 @@ struct SettingsView: View {
     private func settingsForm(_ vm: SettingsViewModel) -> some View {
         Form {
             // Currency section
-            Section("Currency") {
+            Section("Localization") {
                 @Bindable var settings = vm.settings
                 TextField("Symbol", text: $settings.currency)
                     .frame(width: 100)
@@ -35,11 +35,7 @@ struct SettingsView: View {
                     }
                 }
                 Stepper("Decimal places: \(settings.decimals)", value: $settings.decimals, in: 0...4)
-            }
-
-            // Language section
-            Section("Language") {
-                @Bindable var settings = vm.settings
+                
                 Picker("Language", selection: $settings.language) {
                     Text("English").tag("en")
                     Text("Vietnamese").tag("vi")

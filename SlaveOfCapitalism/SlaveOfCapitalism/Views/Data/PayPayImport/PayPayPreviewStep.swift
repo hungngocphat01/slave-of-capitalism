@@ -6,9 +6,20 @@ struct PayPayPreviewStep: View {
     let categories: [CategoryWithSubcategories]
 
     var body: some View {
-        VStack(spacing: 16) {
-            Text("Preview (\(rows.count) transactions)")
-                .font(.title2)
+        VStack(spacing: 0) {
+            // Header
+            VStack(spacing: 4) {
+                Image(systemName: "tablecells")
+                    .font(.system(size: 32, weight: .light))
+                    .foregroundStyle(.secondary)
+                    .padding(.top, 16)
+                Text("Preview Transactions")
+                    .font(.title2.weight(.semibold))
+                Text("\(rows.count) transactions ready for review.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.bottom, 12)
 
             Table(rows) {
                 TableColumn("Date", value: \.date)
@@ -29,6 +40,6 @@ struct PayPayPreviewStep: View {
                 .width(min: 80, ideal: 120)
             }
         }
-        .padding()
+        .padding(.horizontal)
     }
 }

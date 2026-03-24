@@ -1,5 +1,13 @@
 import SwiftUI
 
+struct SummaryCellWidth {
+    static let categoryName: CGFloat = 260
+    static let budgetProgress: CGFloat = 80
+    static let budgetNumber: CGFloat = 120
+    static let actual: CGFloat = 120
+    static let percentage: CGFloat = 120
+}
+
 struct SummaryView: View {
     @Environment(APIClient.self) private var apiClient
     @Environment(AppSettings.self) private var appSettings
@@ -9,6 +17,7 @@ struct SummaryView: View {
     @State private var expandedCategoryIds: Set<Int> = []
     @State private var editingCategoryId: Int?
     @State private var editBudgetValue = ""
+    @State private var isCopyingBudget = false
 
     var body: some View {
         Group {
@@ -69,6 +78,17 @@ struct SummaryView: View {
                 }
                 .disabled(summaryViewModel.isLoading || budgetViewModel.isLoading || budgetViewModel.isMutating)
             }
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    Task {
+                        await copyLastMonthBudget(summaryViewModel: summaryViewModel, budgetViewModel: budgetViewModel)
+                    }
+                } label: {
+                    Label("Copy last month's budget", systemImage: "doc.on.doc")
+                }
+                .disabled(summaryViewModel.isLoading || budgetViewModel.isLoading || budgetViewModel.isMutating || isCopyingBudget)
+                .help("Copy last month's budget")
+            }
         }
         .task(id: summaryViewModel.monthKey) {
             await reload(summaryViewModel: summaryViewModel, budgetViewModel: budgetViewModel)
@@ -125,19 +145,23 @@ struct SummaryView: View {
             Text("Category")
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.secondary)
-                .frame(width: 280, alignment: .leading)
+                .frame(width: SummaryCellWidth.categoryName, alignment: .leading)
+            Text("")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+                .frame(width: SummaryCellWidth.budgetProgress, alignment: .leading)
             Text("Budget")
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.secondary)
-                .frame(width: 120, alignment: .trailing)
+                .frame(width: SummaryCellWidth.budgetNumber, alignment: .trailing)
             Text("Actual")
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.secondary)
-                .frame(width: 120, alignment: .trailing)
+                .frame(width: SummaryCellWidth.actual, alignment: .trailing)
             Text("%")
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.secondary)
-                .frame(width: 80, alignment: .trailing)
+                .frame(width: SummaryCellWidth.percentage, alignment: .trailing)
 
             ForEach(periodBoundaries, id: \.self) { boundary in
                 Text("\(boundary)")
@@ -156,16 +180,19 @@ struct SummaryView: View {
     ) -> some View {
         HStack(alignment: .center, spacing: 12) {
             categoryColumn(summaryViewModel: summaryViewModel, category: category)
-                .frame(width: 280, alignment: .leading)
+                .frame(width: SummaryCellWidth.categoryName, alignment: .leading)
+            
+            progressBarCell(summaryViewModel: summaryViewModel, category: category)
+                .frame(width: SummaryCellWidth.budgetProgress, alignment: .leading)
 
             budgetCell(budgetViewModel: budgetViewModel, category: category)
-                .frame(width: 120, alignment: .trailing)
+                .frame(width: SummaryCellWidth.budgetNumber, alignment: .trailing)
 
             Text(formatAmount(category.actual))
-                .frame(width: 120, alignment: .trailing)
+                .frame(width: SummaryCellWidth.actual, alignment: .trailing)
 
             percentageCell(summaryViewModel: summaryViewModel, percentage: category.percentage)
-                .frame(width: 80, alignment: .trailing)
+                .frame(width: SummaryCellWidth.percentage, alignment: .trailing)
 
             ForEach(Array(category.periods.enumerated()), id: \.offset) { _, value in
                 periodCell(value)
@@ -179,18 +206,22 @@ struct SummaryView: View {
             Text(subcategory.subcategoryName)
                 .foregroundStyle(.secondary)
                 .padding(.leading, 28)
-                .frame(width: 280, alignment: .leading)
+                .frame(width: SummaryCellWidth.categoryName, alignment: .leading)
+            
+            Text("-")
+                .foregroundStyle(.secondary)
+                .frame(width: SummaryCellWidth.budgetProgress, alignment: .trailing)
 
             Text("-")
                 .foregroundStyle(.secondary)
-                .frame(width: 120, alignment: .trailing)
+                .frame(width: SummaryCellWidth.budgetNumber, alignment: .trailing)
 
             Text(formatAmount(subcategory.actual))
-                .frame(width: 120, alignment: .trailing)
+                .frame(width: SummaryCellWidth.actual, alignment: .trailing)
 
             Text("-")
                 .foregroundStyle(.secondary)
-                .frame(width: 80, alignment: .trailing)
+                .frame(width: SummaryCellWidth.percentage, alignment: .trailing)
 
             ForEach(Array(periods.enumerated()), id: \.offset) { _, value in
                 periodCell(value)
@@ -208,26 +239,30 @@ struct SummaryView: View {
         return HStack(spacing: 12) {
             Text("Total")
                 .fontWeight(.semibold)
-                .frame(width: 280, alignment: .leading)
+                .frame(width: SummaryCellWidth.categoryName, alignment: .leading)
+            
+            Text("")
+                .fontWeight(.semibold)
+                .frame(width: SummaryCellWidth.budgetProgress, alignment: .leading)
 
             Text(formatAmount(totalBudgetValue))
                 .fontWeight(.semibold)
-                .frame(width: 120, alignment: .trailing)
+                .frame(width: SummaryCellWidth.budgetNumber, alignment: .trailing)
 
             Text(formatAmount(totalActualValue))
                 .fontWeight(.semibold)
-                .frame(width: 120, alignment: .trailing)
+                .frame(width: SummaryCellWidth.actual, alignment: .trailing)
 
             Text(percentage > 0 ? Formatters.percentage(percentage) : "-")
                 .fontWeight(.semibold)
                 .foregroundStyle(threshold)
-                .frame(width: 80, alignment: .trailing)
+                .frame(width: SummaryCellWidth.percentage, alignment: .trailing)
         }
         .padding(.vertical, 10)
     }
 
     private func categoryColumn(summaryViewModel: SummaryViewModel, category: CategorySummary) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
+        HStack(spacing: 6) {
             HStack(spacing: 8) {
                 if !category.subcategories.isEmpty {
                     Button {
@@ -247,11 +282,13 @@ struct SummaryView: View {
                     .lineLimit(1)
                     .truncationMode(.tail)
             }
-
-            ProgressView(value: min(category.percentage, 100), total: 100)
-                .tint(thresholdColor(for: summaryViewModel.threshold(for: category.percentage)))
-                .progressViewStyle(.linear)
         }
+    }
+    
+    private func progressBarCell(summaryViewModel: SummaryViewModel, category: CategorySummary) -> some View {
+        ProgressView(value: min(category.percentage, 100), total: 100)
+            .tint(thresholdColor(for: summaryViewModel.threshold(for: category.percentage)))
+            .progressViewStyle(.linear)
     }
 
     private func budgetCell(budgetViewModel: BudgetViewModel, category: CategorySummary) -> some View {
@@ -332,6 +369,45 @@ struct SummaryView: View {
         guard summaryViewModel == nil, budgetViewModel == nil else { return }
         summaryViewModel = SummaryViewModel(apiClient: apiClient)
         budgetViewModel = BudgetViewModel(apiClient: apiClient)
+    }
+
+    private func copyLastMonthBudget(summaryViewModel: SummaryViewModel, budgetViewModel: BudgetViewModel) async {
+        isCopyingBudget = true
+        defer { isCopyingBudget = false }
+
+        // Calculate previous month
+        var prevMonth = summaryViewModel.month - 1
+        var prevYear = summaryViewModel.year
+        if prevMonth < 1 {
+            prevMonth = 12
+            prevYear -= 1
+        }
+
+        do {
+            let lastMonthBudgets = try await apiClient.listBudgets(year: prevYear, month: prevMonth, categoryId: nil)
+            guard !lastMonthBudgets.isEmpty else { return }
+
+            let currentBudgets = budgetViewModel.budgets
+
+            for prevBudget in lastMonthBudgets {
+                if let existing = currentBudgets.first(where: { $0.categoryId == prevBudget.categoryId }) {
+                    _ = try await apiClient.updateBudget(id: existing.id, BudgetUpdate(amount: prevBudget.amount))
+                } else {
+                    _ = try await apiClient.createBudget(
+                        BudgetCreate(
+                            categoryId: prevBudget.categoryId,
+                            year: summaryViewModel.year,
+                            month: summaryViewModel.month,
+                            amount: prevBudget.amount
+                        )
+                    )
+                }
+            }
+
+            await reload(summaryViewModel: summaryViewModel, budgetViewModel: budgetViewModel)
+        } catch {
+            // Silently fail — the reload will show current state
+        }
     }
 
     private func reload(summaryViewModel: SummaryViewModel, budgetViewModel: BudgetViewModel) async {

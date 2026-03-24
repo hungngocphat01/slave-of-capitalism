@@ -18,18 +18,65 @@ struct PayPayWizardSheet: View {
     @State private var importError: String?
     @State private var isImporting = false
 
+    private let stepLabels = ["File", "Map", "Preview", "Import"]
+
     var body: some View {
         VStack(spacing: 0) {
             // Step indicator
-            HStack {
-                ForEach(1...4, id: \.self) { s in
-                    Text("Step \(s)")
-                        .font(s == step ? .headline : .subheadline)
-                        .foregroundStyle(s == step ? .primary : .secondary)
-                    if s < 4 { Spacer() }
+            VStack(spacing: 4) {
+                // Circles and connecting lines
+                HStack(spacing: 0) {
+                    ForEach(Array(stepLabels.enumerated()), id: \.offset) { index, _ in
+                        let stepNum = index + 1
+                        let isActive = stepNum == step
+                        let isComplete = stepNum < step
+
+                        if index > 0 {
+                            Rectangle()
+                                .fill(isComplete ? Color.accentColor : Color.secondary.opacity(0.25))
+                                .frame(height: 2)
+                        }
+
+                        ZStack {
+                            Circle()
+                                .fill(isActive ? Color.accentColor : isComplete ? Color.accentColor : Color.secondary.opacity(0.2))
+                                .frame(width: 28, height: 28)
+                            if isComplete {
+                                Image(systemName: "checkmark")
+                                    .font(.system(size: 12, weight: .bold))
+                                    .foregroundStyle(.white)
+                            } else {
+                                Text("\(stepNum)")
+                                    .font(.system(size: 13, weight: .semibold))
+                                    .foregroundStyle(isActive ? .white : .secondary)
+                            }
+                        }
+                    }
+                }
+
+                // Labels row
+                HStack(spacing: 0) {
+                    ForEach(Array(stepLabels.enumerated()), id: \.offset) { index, label in
+                        let stepNum = index + 1
+                        let isActive = stepNum == step
+
+                        if index > 0 {
+                            Spacer()
+                        }
+
+                        Text(label)
+                            .font(.caption)
+                            .foregroundStyle(isActive ? .primary : .secondary)
+                            .frame(width: 28)
+
+                        if index < stepLabels.count - 1 {
+                            Spacer()
+                        }
+                    }
                 }
             }
-            .padding()
+            .padding(.horizontal, 40)
+            .padding(.vertical, 16)
 
             Divider()
 
@@ -61,10 +108,13 @@ struct PayPayWizardSheet: View {
 
             // Navigation buttons
             HStack {
+                Button("Cancel") {
+                    dismiss()
+                }
+                Spacer()
                 if step > 1 && importResult == nil {
                     Button("Back") { step -= 1 }
                 }
-                Spacer()
                 if step < 4 {
                     Button("Next") { advanceStep() }
                         .buttonStyle(.borderedProminent)
